@@ -1,4 +1,4 @@
-import { parseRegex, parseNumberLiteral, ParsingState } from "./parser";
+import { ParsingState, parseRegex, parseWhitespace, parseEndOfLine, parseNumberLiteral } from "./parser";
 
 test("parseRegex: simple match", () => {
   const state: ParsingState = { str: "aaaaa", n: 0 };
@@ -18,7 +18,7 @@ test("parseRegex: simple non-match", () => {
 
 test("parseRegex: substring", () => {
   const state: ParsingState = { str: "hello world!", n: 6 };
-  const re = /[a-z]+/g;
+  const re = /[a-z]+/y;
   const found = parseRegex(state, re);
   expect(found).toBe(true);
   expect(state.n).toBe(11);
@@ -38,6 +38,53 @@ test("parseRegex: multiple matches", () => {
   expect(parseRegex(state, digits)).toBe(false);
   expect(state.n).toBe(12);
 });
+
+test("parseWhitespace: simple", () => {
+  const state: ParsingState = { str: "  \t  hello", n: 0 };
+  parseWhitespace(state);
+  expect(state.n).toBe(5);
+});
+
+test("parseWhitespace: doesn't skip over non-whitespace", () => {
+  const state: ParsingState = { str: "hello       world", n: 0 };
+  parseWhitespace(state);
+  expect(state.n).toBe(0);
+});
+
+test("parseWhitespace: stops before EOL", () => {
+  const state: ParsingState = { str: "   \t   \n    next line", n: 0 };
+  parseWhitespace(state);
+  expect(state.n).toBe(7);
+});
+
+test("parseEndOfLine: accepts all EOL markers (\\r, \\n, or both)", () => {
+  const state: ParsingState = { str: "\r\r\n\n\r\n\n" /* 5 lines with mixed markers */, n: 0 };
+  expect(parseEndOfLine(state)).toBe(true); // \r
+  expect(state.n).toBe(1);
+  expect(parseEndOfLine(state)).toBe(true); // \r\n
+  expect(state.n).toBe(3);
+  expect(parseEndOfLine(state)).toBe(true); // \n
+  expect(state.n).toBe(4);
+  expect(parseEndOfLine(state)).toBe(true); // \r\n
+  expect(state.n).toBe(6);
+  expect(parseEndOfLine(state)).toBe(true); // \n
+  expect(state.n).toBe(7);
+  expect(parseEndOfLine(state)).toBe(false); // no newlines left
+  expect(state.n).toBe(7);
+});
+
+test("parseEndOfLine: doesn't consume regular whitespace", () => {
+  const state: ParsingState = { str: "   \t   \n    next line", n: 0 };
+  expect(parseEndOfLine(state)).toBe(false);
+  expect(state.n).toBe(0);
+});
+
+test("parseEndOfLine: substring", () => {
+  const state: ParsingState = { str: "first line   \t   \r\n    next line", n: 17 };
+  expect(parseEndOfLine(state)).toBe(true);
+  expect(state.n).toBe(19);
+});
+
 
 test("parseNumberLiteral: single number", () => {
   const state: ParsingState = { str: "125", n: 0 };

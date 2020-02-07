@@ -1,10 +1,10 @@
 import { NumberLiteral } from "./ast";
 
 // terminals
-const lineEnd = /^(\r\n|\r|\n)/g;
-const whitespace = /^[ \t]*/g;
-const number = /\b-?(([1-9]+[0-9]*)|([0-9]*\.[0-9]+)|(0b[01]+)|(0o[0-7]+)|(0x[0-9a-fA-F]+))\b/g;
-const identifier = /^[_a-zA-Z][_0-9a-zA-Z]*/g;
+const lineEnd = /(\r\n|\r|\n)/y;
+const whitespace = /[ \t]*/y;
+const number = /-?(([1-9]+[0-9]*)|([0-9]*\.[0-9]+)|(0b[01]+)|(0o[0-7]+)|(0x[0-9a-fA-F]+))\b/y;
+const identifier = /[_a-zA-Z][_0-9a-zA-Z]*\b/y;
 
 export type ParsingState = {
   str: string;
@@ -24,10 +24,17 @@ export function parseRegex(state: ParsingState, regex: RegExp) {
   return found;
 }
 
-export function skipWhitespace(state: ParsingState) {
-  while (state.n < state.str.length && /[ \t\r\n]/.test(state.str[state.n])) {
-    state.n++;
+export function parseWhitespace(state: ParsingState) {
+  parseRegex(state, whitespace);
+}
+
+export function parseEndOfLine(state: ParsingState) {
+  const found = parseRegex(state, lineEnd);
+  if (found) {
+    // update state to next line
   }
+
+  return found;
 }
 
 export function parseNumberLiteral(state: ParsingState) {
