@@ -7,7 +7,7 @@ test("parseNumberLiteral: single number", () => {
   expect(state.n).toBe(3);
 });
 
-test("parseNumberLiteral: expression", () => {
+test("parseNumberLiteral: followed by operator", () => {
   let state: ParsingState = { str: "87456+12", n: 0 };
   const literal = parseNumberLiteral(state);
   expect(literal.value).toBe(87456);
