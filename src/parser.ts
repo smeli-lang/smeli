@@ -1,5 +1,4 @@
 import { NumberLiteral } from "./ast";
-import { cpus } from "os";
 
 export type ParsingState = {
   str: string;
