@@ -6,12 +6,34 @@ const whitespace = /[ \t]*/y;
 const number = /-?(([1-9]+[0-9]*)|([0-9]*\.[0-9]+)|(0b[01]+)|(0o[0-7]+)|(0x[0-9a-fA-F]+))\b/y;
 const identifier = /[_a-zA-Z][_0-9a-zA-Z]*\b/y;
 
-export type ParsingState = {
+export class ParserState {
   str: string;
   n: number;
-};
 
-export function parseRegex(state: ParsingState, regex: RegExp) {
+  currentLine: number;
+  currentLineStartIndex: number;
+
+  fileName: string;
+  messages: string[];
+
+  constructor(inputString: string, startIndex: number = 0, fileName: string = "") {
+    this.str = inputString;
+    this.n = startIndex;
+
+    this.currentLine = 0;
+    this.currentLineStartIndex = startIndex;
+
+    this.fileName = fileName;
+    this.messages = [];
+  }
+
+  reportError(message: string) {
+    const line = this.currentLine;
+    const column = this.n - this.currentLineStartIndex;
+  }
+}
+
+export function parseRegex(state: ParserState, regex: RegExp) {
   // setup parser to read from the current string location
   regex.lastIndex = state.n;
 
@@ -24,11 +46,11 @@ export function parseRegex(state: ParsingState, regex: RegExp) {
   return found;
 }
 
-export function parseWhitespace(state: ParsingState) {
+export function parseWhitespace(state: ParserState) {
   parseRegex(state, whitespace);
 }
 
-export function parseEndOfLine(state: ParsingState) {
+export function parseEndOfLine(state: ParserState) {
   const found = parseRegex(state, lineEnd);
   if (found) {
     // update state to next line
@@ -37,7 +59,7 @@ export function parseEndOfLine(state: ParsingState) {
   return found;
 }
 
-export function parseNumberLiteral(state: ParsingState) {
+export function parseNumberLiteral(state: ParserState) {
   let start = state.n;
   if (!parseRegex(state, number)) {
     return null;
@@ -57,7 +79,7 @@ export function parseNumberLiteral(state: ParsingState) {
   return new NumberLiteral(negative ? -value : value);
 }
 
-export function parseIdentifier(state: ParsingState) {
+export function parseIdentifier(state: ParserState) {
   let start = state.n;
   if (!parseRegex(state, identifier)) {
     return null;

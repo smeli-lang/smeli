@@ -1,10 +1,11 @@
 import { NumberLiteral } from "./ast";
-import { parseNumberLiteral } from "./parser";
+import { parseNumberLiteral, ParserState } from "./parser";
 
 export default class Smeli {
-  program: NumberLiteral;
+  program: NumberLiteral | null;
 
   constructor(code: string) {
-    this.program = parseNumberLiteral({ str: code, n: 0 });
+    const state = new ParserState(code);
+    this.program = parseNumberLiteral(state);
   }
 }

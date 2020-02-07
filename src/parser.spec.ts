@@ -1,11 +1,11 @@
-import { ParsingState, parseRegex, parseWhitespace, parseEndOfLine, parseNumberLiteral, parseIdentifier } from "./parser";
+import { ParserState, parseRegex, parseWhitespace, parseEndOfLine, parseNumberLiteral, parseIdentifier } from "./parser";
 
 /**
  * Regex
  */
 
 test("parseRegex: simple match", () => {
-  const state: ParsingState = { str: "aaaaa", n: 0 };
+  const state = new ParserState("aaaaa");
   const re = /a+/g;
   const found = parseRegex(state, re);
   expect(found).toBe(true);
@@ -13,7 +13,7 @@ test("parseRegex: simple match", () => {
 });
 
 test("parseRegex: simple non-match", () => {
-  const state: ParsingState = { str: "bbbbbb", n: 0 };
+  const state = new ParserState("bbbbbb");
   const re = /a+/g;
   const found = parseRegex(state, re);
   expect(found).toBe(false);
@@ -21,7 +21,7 @@ test("parseRegex: simple non-match", () => {
 });
 
 test("parseRegex: substring", () => {
-  const state: ParsingState = { str: "hello world!", n: 6 };
+  const state = new ParserState("hello world!", 6);
   const re = /[a-z]+/y;
   const found = parseRegex(state, re);
   expect(found).toBe(true);
@@ -30,7 +30,7 @@ test("parseRegex: substring", () => {
 });
 
 test("parseRegex: multiple matches", () => {
-  const state: ParsingState = { str: "hello72world!", n: 0 };
+  const state = new ParserState("hello72world!");
   const letters = /[a-z]+/g;
   const digits = /[0-9]+/g;
   expect(parseRegex(state, letters)).toBe(true);
@@ -48,19 +48,19 @@ test("parseRegex: multiple matches", () => {
  */
 
 test("parseWhitespace: simple", () => {
-  const state: ParsingState = { str: "  \t  hello", n: 0 };
+  const state = new ParserState("  \t  hello!");
   parseWhitespace(state);
   expect(state.n).toBe(5);
 });
 
 test("parseWhitespace: doesn't skip over non-whitespace", () => {
-  const state: ParsingState = { str: "hello       world", n: 0 };
+  const state = new ParserState("hello       world");
   parseWhitespace(state);
   expect(state.n).toBe(0);
 });
 
 test("parseWhitespace: stops before EOL", () => {
-  const state: ParsingState = { str: "   \t   \n    next line", n: 0 };
+  const state = new ParserState("   \t   \n    next line");
   parseWhitespace(state);
   expect(state.n).toBe(7);
 });
@@ -70,7 +70,7 @@ test("parseWhitespace: stops before EOL", () => {
  */
 
 test("parseEndOfLine: accepts all EOL markers (\\r, \\n, or both)", () => {
-  const state: ParsingState = { str: "\r\r\n\n\r\n\n" /* 5 lines with mixed markers */, n: 0 };
+  const state = new ParserState("\r\r\n\n\r\n\n"); // 5 lines with mixed markers
   expect(parseEndOfLine(state)).toBe(true); // \r
   expect(state.n).toBe(1);
   expect(parseEndOfLine(state)).toBe(true); // \r\n
@@ -86,13 +86,13 @@ test("parseEndOfLine: accepts all EOL markers (\\r, \\n, or both)", () => {
 });
 
 test("parseEndOfLine: doesn't consume regular whitespace", () => {
-  const state: ParsingState = { str: "   \t   \n    next line", n: 0 };
+  const state = new ParserState("   \t   \n    next line");
   expect(parseEndOfLine(state)).toBe(false);
   expect(state.n).toBe(0);
 });
 
 test("parseEndOfLine: substring", () => {
-  const state: ParsingState = { str: "first line   \t   \r\n    next line", n: 17 };
+  const state = new ParserState("first line   \t   \r\n    next line", 17);
   expect(parseEndOfLine(state)).toBe(true);
   expect(state.n).toBe(19);
 });
@@ -102,7 +102,7 @@ test("parseEndOfLine: substring", () => {
  */
 
 test("parseNumberLiteral: single number", () => {
-  const state: ParsingState = { str: "125", n: 0 };
+  const state = new ParserState("125");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(125);
@@ -110,7 +110,7 @@ test("parseNumberLiteral: single number", () => {
 });
 
 test("parseNumberLiteral: negative number", () => {
-  const state: ParsingState = { str: "-125", n: 0 };
+  const state = new ParserState("-125");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(-125);
@@ -118,7 +118,7 @@ test("parseNumberLiteral: negative number", () => {
 });
 
 test("parseNumberLiteral: decimal number", () => {
-  const state: ParsingState = { str: "0.4", n: 0 };
+  const state = new ParserState("0.4");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(0.4);
@@ -126,7 +126,7 @@ test("parseNumberLiteral: decimal number", () => {
 });
 
 test("parseNumberLiteral: decimal-only number", () => {
-  const state: ParsingState = { str: ".2", n: 0 };
+  const state = new ParserState(".2");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(0.2);
@@ -134,7 +134,7 @@ test("parseNumberLiteral: decimal-only number", () => {
 });
 
 test("parseNumberLiteral: negative decimal-only number", () => {
-  const state: ParsingState = { str: "-.2", n: 0 };
+  const state = new ParserState("-.2");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(-.2);
@@ -142,7 +142,7 @@ test("parseNumberLiteral: negative decimal-only number", () => {
 });
 
 test("parseNumberLiteral: binary", () => {
-  const state: ParsingState = { str: "0b101010", n: 0 };
+  const state = new ParserState("0b101010");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(42);
@@ -150,7 +150,7 @@ test("parseNumberLiteral: binary", () => {
 });
 
 test("parseNumberLiteral: binary (negative)", () => {
-  const state: ParsingState = { str: "-0b101010", n: 0 };
+  const state = new ParserState("-0b101010");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(-42);
@@ -158,14 +158,14 @@ test("parseNumberLiteral: binary (negative)", () => {
 });
 
 test("parseNumberLiteral: binary (invalid)", () => {
-  const state: ParsingState = { str: "0b141090", n: 0 };
+  const state = new ParserState("0b141090");
   const literal = parseNumberLiteral(state);
   expect(literal).toBeNull();
   expect(state.n).toBe(0);
 });
 
 test("parseNumberLiteral: octal", () => {
-  const state: ParsingState = { str: "0o123", n: 0 };
+  const state = new ParserState("0o123");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(83);
@@ -173,7 +173,7 @@ test("parseNumberLiteral: octal", () => {
 });
 
 test("parseNumberLiteral: octal (negative)", () => {
-  const state: ParsingState = { str: "-0o123", n: 0 };
+  const state = new ParserState("-0o123");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(-83);
@@ -181,14 +181,14 @@ test("parseNumberLiteral: octal (negative)", () => {
 });
 
 test("parseNumberLiteral: octal (invalid)", () => {
-  const state: ParsingState = { str: "0o749", n: 0 };
+  const state = new ParserState("0o749");
   const literal = parseNumberLiteral(state);
   expect(literal).toBeNull();
   expect(state.n).toBe(0);
 });
 
 test("parseNumberLiteral: hex", () => {
-  const state: ParsingState = { str: "0x32", n: 0 };
+  const state = new ParserState("0x32");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(50);
@@ -196,7 +196,7 @@ test("parseNumberLiteral: hex", () => {
 });
 
 test("parseNumberLiteral: hex (negative)", () => {
-  const state: ParsingState = { str: "-0x32", n: 0 };
+  const state = new ParserState("-0x32");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(-50);
@@ -204,14 +204,14 @@ test("parseNumberLiteral: hex (negative)", () => {
 });
 
 test("parseNumberLiteral: hex (invalid)", () => {
-  const state: ParsingState = { str: "0xabfgz", n: 0 };
+  const state = new ParserState("0xabfgz");
   const literal = parseNumberLiteral(state);
   expect(literal).toBeNull();
   expect(state.n).toBe(0);
 });
 
 test("parseNumberLiteral: followed by operator", () => {
-  const state: ParsingState = { str: "87456+12", n: 0 };
+  const state = new ParserState("87456+12");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(87456);
@@ -219,7 +219,7 @@ test("parseNumberLiteral: followed by operator", () => {
 });
 
 test("parseNumberLiteral: inside substring", () => {
-  const state: ParsingState = { str: "123 + 0xff + 987", n: 6 };
+  const state = new ParserState("123 + 0xff + 987", 6);
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(255);
@@ -231,7 +231,7 @@ test("parseNumberLiteral: inside substring", () => {
  */
 
 test("parseIdentifier: valid", () => {
-  const state: ParsingState = { str: "hello_Variable123", n: 0 };
+  const state = new ParserState("hello_Variable123");
   const id = parseIdentifier(state);
   expect(id).not.toBeNull();
   expect(id!.name).toBe("hello_Variable123");
@@ -239,7 +239,7 @@ test("parseIdentifier: valid", () => {
 });
 
 test("parseIdentifier: invalid", () => {
-  const state: ParsingState = { str: "5name", n: 0 };
+  const state = new ParserState("5name");
   const id = parseIdentifier(state);
   expect(id).toBeNull();
   expect(state.n).toBe(0);
