@@ -28,8 +28,12 @@ export class ParserState {
   }
 
   reportError(message: string) {
-    const line = this.currentLine;
-    const column = this.n - this.currentLineStartIndex;
+    // convert from 0-based to 1-based for output log
+    const line = this.currentLine + 1;
+    const column = this.n - this.currentLineStartIndex + 1;
+
+    const text = `${this.fileName}:${line}:${column}: ${message}`;
+    this.messages.push(text);
   }
 }
 
@@ -54,6 +58,8 @@ export function parseEndOfLine(state: ParserState) {
   const found = parseRegex(state, lineEnd);
   if (found) {
     // update state to next line
+    state.currentLine++;
+    state.currentLineStartIndex = state.n;
   }
 
   return found;

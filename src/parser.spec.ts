@@ -1,6 +1,34 @@
 import { ParserState, parseRegex, parseWhitespace, parseEndOfLine, parseNumberLiteral, parseIdentifier } from "./parser";
 
 /**
+ * Parser state
+ */
+
+ test("ParserState: line counting in error reports", () => {
+  const state = new ParserState("hello world\n42 abc", 0, "src/test.smeli");
+  parseIdentifier(state); // hello
+  state.reportError("Something is broken!");
+  parseWhitespace(state);
+  parseIdentifier(state); // world
+  parseEndOfLine(state);
+  state.reportError("Something else is broken!");
+  parseNumberLiteral(state); // 42
+  parseWhitespace(state);
+  state.reportError("Nothing works.");
+  parseIdentifier(state); // abc
+
+  // we should have read the whole string now
+  expect(state.n).toBe(state.str.length);
+
+  // check error messages
+  expect(state.messages).toEqual([
+    "src/test.smeli:1:6: Something is broken!",
+    "src/test.smeli:2:1: Something else is broken!",
+    "src/test.smeli:2:4: Nothing works.",
+  ]);
+ });
+
+/**
  * Regex
  */
 
