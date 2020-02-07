@@ -99,18 +99,31 @@ test("parseWhitespace: stops before EOL", () => {
 
 test("parseEndOfLine: accepts all EOL markers (\\r, \\n, or both)", () => {
   const state = new ParserState("\r\r\n\n\r\n\n"); // 5 lines with mixed markers
+  expect(state.currentLine).toBe(0);
   expect(parseEndOfLine(state)).toBe(true); // \r
   expect(state.n).toBe(1);
+  expect(state.currentLine).toBe(1);
+  expect(state.currentLineStartIndex).toBe(state.n);
   expect(parseEndOfLine(state)).toBe(true); // \r\n
   expect(state.n).toBe(3);
+  expect(state.currentLine).toBe(2);
+  expect(state.currentLineStartIndex).toBe(state.n);
   expect(parseEndOfLine(state)).toBe(true); // \n
   expect(state.n).toBe(4);
+  expect(state.currentLine).toBe(3);
+  expect(state.currentLineStartIndex).toBe(state.n);
   expect(parseEndOfLine(state)).toBe(true); // \r\n
   expect(state.n).toBe(6);
+  expect(state.currentLine).toBe(4);
+  expect(state.currentLineStartIndex).toBe(state.n);
   expect(parseEndOfLine(state)).toBe(true); // \n
   expect(state.n).toBe(7);
+  expect(state.currentLine).toBe(5);
+  expect(state.currentLineStartIndex).toBe(state.n);
   expect(parseEndOfLine(state)).toBe(false); // no newlines left
   expect(state.n).toBe(7);
+  expect(state.currentLine).toBe(5);
+  expect(state.currentLineStartIndex).toBe(state.n);
 });
 
 test("parseEndOfLine: doesn't consume regular whitespace", () => {
