@@ -11,3 +11,11 @@ export class NumberLiteral {
     this.value = value;
   }
 }
+
+export class Identifier {
+  name: string;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+}

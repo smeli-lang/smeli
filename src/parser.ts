@@ -1,4 +1,4 @@
-import { NumberLiteral } from "./ast";
+import { Identifier, NumberLiteral } from "./ast";
 
 // terminals
 const lineEnd = /(\r\n|\r|\n)/y;
@@ -55,4 +55,14 @@ export function parseNumberLiteral(state: ParsingState) {
   const value = Number(stringValue);
 
   return new NumberLiteral(negative ? -value : value);
+}
+
+export function parseIdentifier(state: ParsingState) {
+  let start = state.n;
+  if (!parseRegex(state, identifier)) {
+    return null;
+  }
+
+  const name = state.str.substring(start, state.n);
+  return new Identifier(name);
 }

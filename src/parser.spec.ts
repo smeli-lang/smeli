@@ -1,4 +1,8 @@
-import { ParsingState, parseRegex, parseWhitespace, parseEndOfLine, parseNumberLiteral } from "./parser";
+import { ParsingState, parseRegex, parseWhitespace, parseEndOfLine, parseNumberLiteral, parseIdentifier } from "./parser";
+
+/**
+ * Regex
+ */
 
 test("parseRegex: simple match", () => {
   const state: ParsingState = { str: "aaaaa", n: 0 };
@@ -39,6 +43,10 @@ test("parseRegex: multiple matches", () => {
   expect(state.n).toBe(12);
 });
 
+/**
+ * Whitespace
+ */
+
 test("parseWhitespace: simple", () => {
   const state: ParsingState = { str: "  \t  hello", n: 0 };
   parseWhitespace(state);
@@ -56,6 +64,10 @@ test("parseWhitespace: stops before EOL", () => {
   parseWhitespace(state);
   expect(state.n).toBe(7);
 });
+
+/**
+ * End of line
+ */
 
 test("parseEndOfLine: accepts all EOL markers (\\r, \\n, or both)", () => {
   const state: ParsingState = { str: "\r\r\n\n\r\n\n" /* 5 lines with mixed markers */, n: 0 };
@@ -85,6 +97,9 @@ test("parseEndOfLine: substring", () => {
   expect(state.n).toBe(19);
 });
 
+/**
+ * Number literal
+ */
 
 test("parseNumberLiteral: single number", () => {
   const state: ParsingState = { str: "125", n: 0 };
@@ -209,4 +224,23 @@ test("parseNumberLiteral: inside substring", () => {
   expect(literal).not.toBeNull();
   expect(literal!.value).toBe(255);
   expect(state.n).toBe(10);
+});
+
+/**
+ * Identifier
+ */
+
+test("parseIdentifier: valid", () => {
+  const state: ParsingState = { str: "hello_Variable123", n: 0 };
+  const id = parseIdentifier(state);
+  expect(id).not.toBeNull();
+  expect(id!.name).toBe("hello_Variable123");
+  expect(state.n).toBe(17);
+});
+
+test("parseIdentifier: invalid", () => {
+  const state: ParsingState = { str: "5name", n: 0 };
+  const id = parseIdentifier(state);
+  expect(id).toBeNull();
+  expect(state.n).toBe(0);
 });
