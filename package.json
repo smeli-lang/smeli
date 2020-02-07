@@ -1,0 +1,19 @@
+{
+  "name": "smeli",
+  "version": "0.0.1",
+  "description": "Self-Modifying Expression Language for Interactivity",
+  "main": "index.js",
+  "author": "Remi Papillie (wsmind)",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^25.1.2",
+    "@types/node": "^13.7.0",
+    "jest": "^25.1.0",
+    "ts-jest": "^25.2.0",
+    "typescript": "^3.7.5"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  }
+}
