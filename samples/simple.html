@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello Smeli!</title>
+    <script src="../dist/smeli.min.js"></script>
+    <script>
+      window.onload = () => {
+        const code = `
+          # setup
+          a = 42
+          b = a - 30
+          
+          slider = Slider {
+            binding = "a"
+          }
+          
+          $page = VSplit {
+            top = slider
+            bottom = TextBox {
+              text = "b=" + str(b)
+            }
+          }
+          
+          # let's begin trigonometry
+          b = sin(a)
+          
+          # let's plot this
+        `;
+        const engine = new smeli.Smeli(code);
+      };
+    </script>
+  </head>
+  <body></body>
+</html>
