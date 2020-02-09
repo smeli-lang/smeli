@@ -5,6 +5,14 @@ test("NumberLiteral: stores number", () => {
   expect(number.value).toBe(42);
 });
 
+test("NumberLiteral: evaluates to its value", () => {
+  const number = new NumberLiteral(42);
+  expect(number.evaluate()).toEqual({
+    type: "number",
+    value: 42
+  });
+});
+
 test("Identifier: stores number", () => {
   const id = new Identifier("variableName");
   expect(id.name).toBe("variableName");

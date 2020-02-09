@@ -1,10 +1,18 @@
-import { ParserState, parseRegex, parseWhitespace, parseEndOfLine, parseNumberLiteral, parseIdentifier } from "./parser";
+import {
+  ParserState,
+  parseRegex,
+  parseWhitespace,
+  parseEndOfLine,
+  parseNumberLiteral,
+  parseIdentifier,
+  parseProgram
+} from "./parser";
 
 /**
  * Parser state
  */
 
- test("ParserState: line counting in error reports", () => {
+test("ParserState: line counting in error reports", () => {
   const state = new ParserState("hello world\n42 abc", 0, "src/test.smeli");
   parseIdentifier(state); // hello
   state.reportError("Something is broken!");
@@ -24,9 +32,9 @@ import { ParserState, parseRegex, parseWhitespace, parseEndOfLine, parseNumberLi
   expect(state.messages).toEqual([
     "src/test.smeli:1:6: Something is broken!",
     "src/test.smeli:2:1: Something else is broken!",
-    "src/test.smeli:2:4: Nothing works.",
+    "src/test.smeli:2:4: Nothing works."
   ]);
- });
+});
 
 /**
  * Regex
@@ -178,7 +186,7 @@ test("parseNumberLiteral: negative decimal-only number", () => {
   const state = new ParserState("-.2");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(-.2);
+  expect(literal!.value).toBe(-0.2);
   expect(state.n).toBe(3);
 });
 
@@ -284,4 +292,15 @@ test("parseIdentifier: invalid", () => {
   const id = parseIdentifier(state);
   expect(id).toBeNull();
   expect(state.n).toBe(0);
+});
+
+/**
+ * Program
+ */
+
+test("parseProgram: single line", () => {
+  const state = new ParserState("a = 12 + 15");
+  const program = parseProgram(state);
+  expect(program).not.toBeNull();
+  expect(state.n).toBe(state.str.length);
 });
