@@ -5,7 +5,8 @@ import {
   parseEndOfLine,
   parseNumberLiteral,
   parseIdentifier,
-  parseProgram
+  parseProgram,
+  parseBlockDelimiter
 } from "./parser";
 
 /**
@@ -291,6 +292,48 @@ test("parseIdentifier: invalid", () => {
   const state = new ParserState("5name");
   const id = parseIdentifier(state);
   expect(id).toBeNull();
+  expect(state.n).toBe(0);
+});
+
+/**
+ * Block delimiter
+ */
+
+test("parseBlockDelimiter: valid", () => {
+  const state = new ParserState(
+    '# some text with unicode éçà and some "special charaters"'
+  );
+  const block = parseBlockDelimiter(state);
+  expect(block).not.toBeNull();
+  expect(block!.line).toBe(state.currentLine);
+  expect(block!.text).toBe(
+    'some text with unicode éçà and some "special charaters"'
+  );
+  expect(state.n).toBe(state.str.length);
+});
+
+test("parseBlockDelimiter: trims whitespace at start and end", () => {
+  const state = new ParserState("#   \t block text here  \t  \t");
+  const block = parseBlockDelimiter(state);
+  expect(block).not.toBeNull();
+  expect(state.n).toBe(state.str.length);
+  expect(block!.line).toBe(state.currentLine);
+  expect(block!.text).toBe("block text here");
+});
+
+test("parseBlockDelimiter: stops before EOL", () => {
+  const state = new ParserState("# hello \n next line");
+  const block = parseBlockDelimiter(state);
+  expect(block).not.toBeNull();
+  expect(state.n).toBe(8);
+  expect(block!.line).toBe(state.currentLine);
+  expect(block!.text).toBe("hello");
+});
+
+test("parseBlockDelimiter: invalid (doesn't start with #)", () => {
+  const state = new ParserState("a = 12");
+  const block = parseBlockDelimiter(state);
+  expect(block).toBeNull();
   expect(state.n).toBe(0);
 });
 

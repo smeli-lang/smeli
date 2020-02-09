@@ -102,6 +102,16 @@ export class Assignment implements Statement {
   }
 }
 
+export class BlockDelimiter implements Statement {
+  line: number;
+  text: string;
+
+  constructor(line: number, text: string) {
+    this.line = line;
+    this.text = text;
+  }
+}
+
 export class Program {
   statements: Statement[];
 

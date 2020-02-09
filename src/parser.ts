@@ -6,7 +6,8 @@ import {
   Assignment,
   OperatorAdd,
   Expression,
-  OperatorSubtract
+  OperatorSubtract,
+  BlockDelimiter
 } from "./ast";
 
 // terminals
@@ -111,7 +112,7 @@ export function parseNumberLiteral(state: ParserState) {
 }
 
 export function parseIdentifier(state: ParserState) {
-  let start = state.n;
+  const start = state.n;
   if (!parseRegex(state, identifier)) {
     return null;
   }
@@ -161,6 +162,22 @@ export function parseExpression(state: ParserState) {
   return expr;
 }
 
+export function parseBlockDelimiter(state: ParserState) {
+  const currentLine = state.currentLine;
+
+  if (state.str[state.n] !== "#") {
+    state.reportError("Block delimiters must start with a '#'");
+    return null;
+  }
+  state.n++;
+
+  const start = state.n;
+  parseRegex(state, textLine);
+
+  const text = state.str.substring(start, state.n).trim();
+  return new BlockDelimiter(currentLine, text);
+}
+
 export function parseAssignment(state: ParserState) {
   const currentLine = state.currentLine;
 
@@ -194,7 +211,7 @@ export function parseAssignment(state: ParserState) {
 
 export function parseStatement(state: ParserState) {
   if (state.str[state.n] == "#") {
-    return null; //parseBlockDelimiter(state);
+    return parseBlockDelimiter(state);
   } else {
     return parseAssignment(state);
   }
