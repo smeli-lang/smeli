@@ -27,7 +27,7 @@
           # let's plot this
         `;
 
-        const testCode = "a = 21 + 12";
+        const testCode = "a = 21 + 12 - 57";
         const engine = new smeli.Smeli(testCode);
         console.log(engine);
         console.log(engine.program.statements[0].expression.evaluate());

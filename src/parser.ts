@@ -5,7 +5,8 @@ import {
   Statement,
   Assignment,
   OperatorAdd,
-  Expression
+  Expression,
+  OperatorSubtract
 } from "./ast";
 
 // terminals
@@ -150,6 +151,8 @@ export function parseExpression(state: ParserState) {
 
     if (operator == "+") {
       expr = new OperatorAdd(expr, term);
+    } else if (operator == "-") {
+      expr = new OperatorSubtract(expr, term);
     }
 
     parseWhitespace(state);

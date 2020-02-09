@@ -62,6 +62,30 @@ export class OperatorAdd implements Expression {
   }
 }
 
+export class OperatorSubtract implements Expression {
+  lhs: Expression;
+  rhs: Expression;
+
+  constructor(lhs: Expression, rhs: Expression) {
+    this.lhs = lhs;
+    this.rhs = rhs;
+  }
+
+  evaluate() {
+    const lvalue = this.lhs.evaluate();
+    const rvalue = this.rhs.evaluate();
+
+    if (lvalue.type !== rvalue.type) {
+      throw new Error("Operands must have the same type for operator '-'");
+    }
+
+    return {
+      type: lvalue.type,
+      value: lvalue.value - rvalue.value
+    };
+  }
+}
+
 export interface Statement {
   line: number;
 }
