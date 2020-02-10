@@ -27,7 +27,7 @@
           # let's plot this
         `;
 
-        const engine = new smeli.Smeli(code);
+        const engine = new smeli.Engine(code);
         console.log(engine);
         console.log(engine.program.statements[1].expression.evaluate());
       };

@@ -1,7 +1,7 @@
-import { NumberLiteral, Program } from "./ast";
-import { parseNumberLiteral, ParserState, parseProgram } from "./parser";
+import { Program } from "./ast";
+import { ParserState, parseProgram } from "./parser";
 
-export default class Smeli {
+export default class Engine {
   program: Program | null;
 
   constructor(code: string) {

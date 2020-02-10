@@ -1,6 +1,6 @@
-import Smeli from "./smeli";
+import Engine from "./engine";
 
-test("should parse numbers", () => {
-  const smeli = new Smeli("a = 42");
-  expect(smeli.program).not.toBeNull();
+test("should parse a basic statement", () => {
+  const engine = new Engine("a = 42");
+  expect(engine.program).not.toBeNull();
 });
