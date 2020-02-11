@@ -7,7 +7,7 @@ export type Value = {
 };
 
 export interface Expression {
-  evaluate(scope: Scope): Value;
+  evaluate(): Value;
 }
 
 export class NumberLiteral implements Expression {
@@ -17,7 +17,7 @@ export class NumberLiteral implements Expression {
     this.value = value;
   }
 
-  evaluate(scope: Scope) {
+  evaluate() {
     return {
       type: "number",
       value: this.value
@@ -27,13 +27,15 @@ export class NumberLiteral implements Expression {
 
 export class Identifier implements Expression {
   name: string;
+  scope: Scope;
 
-  constructor(name: string) {
+  constructor(name: string, scope: Scope) {
     this.name = name;
+    this.scope = scope;
   }
 
-  evaluate(scope: Scope) {
-    const binding = scope.lookup(this.name);
+  evaluate() {
+    const binding = this.scope.lookup(this.name);
     if (!binding) {
       throw new Error("Undefined symbol: " + this.name);
     }
@@ -51,9 +53,9 @@ export class OperatorAdd implements Expression {
     this.rhs = rhs;
   }
 
-  evaluate(scope: Scope) {
-    const lvalue = this.lhs.evaluate(scope);
-    const rvalue = this.rhs.evaluate(scope);
+  evaluate() {
+    const lvalue = this.lhs.evaluate();
+    const rvalue = this.rhs.evaluate();
 
     if (lvalue.type !== rvalue.type) {
       throw new Error("Operands must have the same type for operator '+'");
@@ -75,9 +77,9 @@ export class OperatorSubtract implements Expression {
     this.rhs = rhs;
   }
 
-  evaluate(scope: Scope) {
-    const lvalue = this.lhs.evaluate(scope);
-    const rvalue = this.rhs.evaluate(scope);
+  evaluate() {
+    const lvalue = this.lhs.evaluate();
+    const rvalue = this.rhs.evaluate();
 
     if (lvalue.type !== rvalue.type) {
       throw new Error("Operands must have the same type for operator '-'");
@@ -93,32 +95,45 @@ export class OperatorSubtract implements Expression {
 export interface Statement {
   line: number;
 
-  bind(scope: Scope): void;
-  unbind(scope: Scope): void;
+  bind(): void;
+  unbind(): void;
 }
 
 export class Assignment implements Statement {
   line: number;
   identifier: Identifier;
   expression: Expression;
+  scope: Scope;
+
   binding: Binding | null;
 
-  constructor(line: number, identifier: Identifier, expression: Expression) {
+  constructor(
+    line: number,
+    identifier: Identifier,
+    expression: Expression,
+    scope: Scope
+  ) {
     this.line = line;
     this.identifier = identifier;
     this.expression = expression;
+    this.scope = scope;
+
     this.binding = null;
   }
 
-  bind(scope: Scope) {
+  bind() {
     if (this.binding) {
       throw new Error("Assignment already bound");
     }
 
-    this.binding = new Binding(scope, this.identifier.name, this.expression);
+    this.binding = new Binding(
+      this.scope,
+      this.identifier.name,
+      this.expression
+    );
   }
 
-  unbind(scope: Scope) {
+  unbind() {
     if (!this.binding) {
       throw new Error("Assignment already unbound");
     }
@@ -131,27 +146,31 @@ export class Assignment implements Statement {
 export class BlockDelimiter implements Statement {
   line: number;
   text: string;
+  scope: Scope;
+
   binding: Binding | null;
 
-  constructor(line: number, text: string) {
+  constructor(line: number, text: string, scope: Scope) {
     this.line = line;
     this.text = text;
+    this.scope = scope;
+
     this.binding = null;
   }
 
-  bind(scope: Scope) {
+  bind() {
     if (this.binding) {
       throw new Error("Block delimiter already bound");
     }
 
     this.binding = new Binding(
-      scope,
+      this.scope,
       "blockLine",
       new NumberLiteral(this.line)
     );
   }
 
-  unbind(scope: Scope) {
+  unbind() {
     if (!this.binding) {
       throw new Error("Block delimiter already unbound");
     }

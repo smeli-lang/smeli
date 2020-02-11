@@ -22,6 +22,6 @@ export default class Binding {
   evaluate() {
     // caching will happen here
 
-    return this.expression.evaluate(this.scope);
+    return this.expression.evaluate();
   }
 }

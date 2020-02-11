@@ -8,14 +8,15 @@ test("NumberLiteral: stores number", () => {
 
 test("NumberLiteral: evaluates to its value", () => {
   const number = new NumberLiteral(42);
-  const scope = new Scope();
-  expect(number.evaluate(scope)).toEqual({
+  expect(number.evaluate()).toEqual({
     type: "number",
     value: 42
   });
 });
 
 test("Identifier: stores number", () => {
-  const id = new Identifier("variableName");
+  const scope = new Scope();
+  const id = new Identifier("variableName", scope);
   expect(id.name).toBe("variableName");
+  expect(id.scope).toBe(scope);
 });

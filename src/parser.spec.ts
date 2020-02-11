@@ -8,13 +8,19 @@ import {
   parseProgram,
   parseBlockDelimiter
 } from "./parser";
+import Scope from "./scope";
 
 /**
  * Parser state
  */
 
 test("ParserState: line counting in error reports", () => {
-  const state = new ParserState("hello world\n42 abc", 0, "src/test.smeli");
+  const state = new ParserState(
+    "hello world\n42 abc",
+    0,
+    new Scope(),
+    "src/test.smeli"
+  );
   parseIdentifier(state); // hello
   state.reportError("Something is broken!");
   parseWhitespace(state);
@@ -284,6 +290,7 @@ test("parseIdentifier: valid", () => {
   const state = new ParserState("hello_Variable123");
   const id = parseIdentifier(state);
   expect(id).not.toBeNull();
+  expect(id!.scope).toBe(state.scopes[0]);
   expect(id!.name).toBe("hello_Variable123");
   expect(state.n).toBe(17);
 });

@@ -9,6 +9,7 @@ import {
   OperatorSubtract,
   BlockDelimiter
 } from "./ast";
+import Scope from "./scope";
 
 // terminals
 const lineEnd = /(\r\n|\r|\n)/y;
@@ -27,6 +28,7 @@ const textLine = /[^\r\n]*/y;
 export class ParserState {
   str: string;
   n: number;
+  scopes: Scope[];
 
   currentLine: number;
   currentLineStartIndex: number;
@@ -37,10 +39,12 @@ export class ParserState {
   constructor(
     inputString: string,
     startIndex: number = 0,
+    parentScope: Scope | null = null,
     fileName: string = ""
   ) {
     this.str = inputString;
     this.n = startIndex;
+    this.scopes = [parentScope || new Scope()];
 
     this.currentLine = 0;
     this.currentLineStartIndex = startIndex;
@@ -117,8 +121,9 @@ export function parseIdentifier(state: ParserState) {
     return null;
   }
 
+  const scope = state.scopes[state.scopes.length - 1];
   const name = state.str.substring(start, state.n);
-  return new Identifier(name);
+  return new Identifier(name, scope);
 }
 
 export function parseTerm(state: ParserState) {
@@ -175,7 +180,8 @@ export function parseBlockDelimiter(state: ParserState) {
   parseRegex(state, textLine);
 
   const text = state.str.substring(start, state.n).trim();
-  return new BlockDelimiter(currentLine, text);
+  const scope = state.scopes[state.scopes.length - 1];
+  return new BlockDelimiter(currentLine, text, scope);
 }
 
 export function parseAssignment(state: ParserState) {
@@ -206,7 +212,8 @@ export function parseAssignment(state: ParserState) {
     return null;
   }
 
-  return new Assignment(currentLine, identifier, expression);
+  const scope = state.scopes[state.scopes.length - 1];
+  return new Assignment(currentLine, identifier, expression, scope);
 }
 
 export function parseStatement(state: ParserState) {

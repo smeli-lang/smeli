@@ -8,9 +8,9 @@ export default class Engine {
   globalScope: Scope;
 
   constructor(code: string) {
-    const state = new ParserState(code, 0, "smeli");
-    this.program = parseProgram(state);
     this.globalScope = new Scope();
+    const state = new ParserState(code, 0, this.globalScope, "smeli");
+    this.program = parseProgram(state);
     console.log(code);
     state.messages.forEach(message => console.error(message));
   }
@@ -18,13 +18,13 @@ export default class Engine {
   step(count: number) {
     while (count > 0 && this.nextStatement < this.program.statements.length) {
       const statement = this.program.statements[this.nextStatement++];
-      statement.bind(this.globalScope);
+      statement.bind();
       count--;
     }
 
     while (count < 0 && this.nextStatement > 0) {
       const statement = this.program.statements[--this.nextStatement];
-      statement.unbind(this.globalScope);
+      statement.unbind();
       count++;
     }
 
