@@ -1,12 +1,9 @@
 import Scope from "./scope";
 import { NumberLiteral } from "./ast";
+import Binding from "./binding";
 
 test("binds a symbol", () => {
   const scope = new Scope();
-  scope.bindSymbol("a", new NumberLiteral(42));
-  const value = scope.evaluate("a");
-  expect(value).toEqual({
-    type: "number",
-    value: 42
-  });
+  const binding = new Binding(scope, "a", new NumberLiteral(42));
+  expect(scope.lookup("a")).toBe(binding);
 });

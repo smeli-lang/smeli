@@ -122,7 +122,7 @@ export function parseIdentifier(state: ParserState) {
 }
 
 export function parseTerm(state: ParserState) {
-  return parseNumberLiteral(state);
+  return parseNumberLiteral(state) || parseIdentifier(state);
 }
 
 export function parseExpression(state: ParserState) {
@@ -217,7 +217,7 @@ export function parseStatement(state: ParserState) {
   }
 }
 
-export function parseProgram(state: ParserState) {
+export function parseProgram(state: ParserState): Program {
   const statements: Statement[] = [];
 
   while (!state.eof()) {

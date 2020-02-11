@@ -1,22 +1,32 @@
-import { Expression } from "./ast";
+import Binding from "./binding";
 
 export default class Scope {
-  bindings: Map<string, Expression>;
+  parent: Scope | null;
+  bindings: Map<string, Binding>;
 
-  constructor() {
+  constructor(parent: Scope | null = null) {
+    this.parent = parent;
     this.bindings = new Map();
   }
 
-  bindSymbol(name: string, expression: Expression) {
-    this.bindings.set(name, expression);
-  }
+  bind(name: string, binding: Binding | null) {
+    const previousBinding = this.bindings.get(name) || null;
 
-  evaluate(name: string) {
-    const expression = this.bindings.get(name);
-    if (!expression) {
-      throw new Error("Undefined symbol: " + name);
+    if (binding) {
+      this.bindings.set(name, binding);
+    } else {
+      this.bindings.delete(name);
     }
 
-    return expression.evaluate();
+    return previousBinding;
+  }
+
+  lookup(name: string): Binding | null {
+    const localBinding = this.bindings.get(name);
+    if (localBinding) {
+      return localBinding;
+    }
+
+    return this.parent?.lookup(name) || null;
   }
 }

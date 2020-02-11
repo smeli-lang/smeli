@@ -10,6 +10,7 @@
           a = 42
           b = a - 30
           
+          # wait here
           slider = Slider {
             binding = "a"
           }
@@ -29,7 +30,14 @@
 
         const engine = new smeli.Engine(code);
         console.log(engine);
-        console.log(engine.program.statements[1].expression.evaluate());
+
+        const globalScope = engine.step(3);
+        console.log(globalScope);
+        console.log(globalScope.lookup("b")?.evaluate());
+
+        engine.step(-1);
+        console.log(globalScope);
+        console.log(globalScope.lookup("b")?.evaluate());
       };
     </script>
   </head>

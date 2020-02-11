@@ -1,4 +1,5 @@
 import { Identifier, NumberLiteral } from "./ast";
+import Scope from "./scope";
 
 test("NumberLiteral: stores number", () => {
   const number = new NumberLiteral(42);
@@ -7,7 +8,8 @@ test("NumberLiteral: stores number", () => {
 
 test("NumberLiteral: evaluates to its value", () => {
   const number = new NumberLiteral(42);
-  expect(number.evaluate()).toEqual({
+  const scope = new Scope();
+  expect(number.evaluate(scope)).toEqual({
     type: "number",
     value: 42
   });
