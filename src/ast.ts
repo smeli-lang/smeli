@@ -44,6 +44,23 @@ export class Identifier implements Expression {
   }
 }
 
+export class ObjectExpression implements Expression {
+  program: Program;
+  scope: Scope;
+
+  constructor(program: Program, scope: Scope) {
+    this.program = program;
+    this.scope = scope;
+  }
+
+  evaluate() {
+    return {
+      type: "object",
+     value: this.scope
+    };
+  }
+}
+
 export class OperatorAdd implements Expression {
   lhs: Expression;
   rhs: Expression;

@@ -28,16 +28,34 @@
           # let's plot this
         `;
 
-        const engine = new smeli.Engine(code);
+        const scopeTest = `
+          plop = {
+            a = 42
+            b = a + 4
+          }
+
+          # same
+          plop.a = 42
+          plop.b = plop.a + 4
+
+          c = plop.a + plop.b
+
+          plop.a = 12
+
+          plop = {
+            a = -10
+            b = -20
+          }
+
+          plop.a = 120
+        `;
+
+        const engine = new smeli.Engine(scopeTest);
         console.log(engine);
 
-        const globalScope = engine.step(3);
+        const globalScope = engine.step(1);
         console.log(globalScope);
-        console.log(globalScope.lookup("b")?.evaluate());
-
-        engine.step(-1);
-        console.log(globalScope);
-        console.log(globalScope.lookup("b")?.evaluate());
+        console.log(globalScope.lookup("plop")?.evaluate());
       };
     </script>
   </head>

@@ -7,7 +7,8 @@ import {
   OperatorAdd,
   Expression,
   OperatorSubtract,
-  BlockDelimiter
+  BlockDelimiter,
+  ObjectExpression
 } from "./ast";
 import Scope from "./scope";
 
@@ -126,8 +127,28 @@ export function parseIdentifier(state: ParserState) {
   return new Identifier(name, scope);
 }
 
+export function parseObject(state: ParserState) {
+  if (state.str[state.n] !== "{") {
+    return null;
+  }
+  state.n++;
+
+  // create a child scope for this object expression
+  const parentScope = state.scopes[state.scopes.length - 1];
+  const scope = new Scope(parentScope);
+  state.scopes.push(scope);
+
+  // parse inside the block
+  const program = parseProgram(state);
+
+  // exit the scope
+  state.scopes.pop();
+
+  return new ObjectExpression(program, scope);
+}
+
 export function parseTerm(state: ParserState) {
-  return parseNumberLiteral(state) || parseIdentifier(state);
+  return parseNumberLiteral(state) || parseIdentifier(state) || parseObject(state);
 }
 
 export function parseExpression(state: ParserState) {
@@ -233,7 +254,8 @@ export function parseProgram(state: ParserState): Program {
       parseWhitespace(state);
     } while (parseEndOfLine(state));
 
-    if (state.eof()) {
+    // exit at end of file or end of object expression
+    if (state.eof() || state.str[state.n] === "}") {
       break;
     }
 
