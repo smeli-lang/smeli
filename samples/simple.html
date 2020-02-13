@@ -10,7 +10,7 @@
           a = 42
           b = a - 30
           
-          # wait here
+          #> wait here
           slider = Slider {
             binding = "a"
           }
@@ -22,10 +22,10 @@
             }
           }
           
-          # let's begin trigonometry
+          #> let's begin trigonometry
           b = sin(a)
           
-          # let's plot this
+          #>> let's plot this
         `;
 
         const scopeTest = `
@@ -34,7 +34,7 @@
             b = a + 4
           }
 
-          # same
+          #>> same
           plop.a = 42
           plop.b = plop.a + 4
 
@@ -53,9 +53,9 @@
         const engine = new smeli.Engine(scopeTest);
         console.log(engine);
 
-        const globalScope = engine.step(1);
+        const globalScope = engine.step(3);
         console.log(globalScope);
-        console.log(globalScope.lookup("plop")?.evaluate());
+        console.log(globalScope.lookup("plop")?.evaluate().value.lookup("b").evaluate());
       };
     </script>
   </head>

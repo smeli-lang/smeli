@@ -1,29 +1,35 @@
-import { Program } from "./ast";
-import { ParserState, parseProgram } from "./parser";
+import { Statement } from "./ast";
+import { ParserState, parseStatementList } from "./parser";
 import Scope from "./scope";
 
 export default class Engine {
-  program: Program;
-  nextStatement: number = 0;
   globalScope: Scope;
+  rootStatemeents: Statement[];
+
+  allStatements: Statement[];
+  nextStatement: number = 0;
 
   constructor(code: string) {
     this.globalScope = new Scope();
+    // add builtins here
+
     const state = new ParserState(code, 0, this.globalScope, "smeli");
-    this.program = parseProgram(state);
-    console.log(code);
+    this.rootStatemeents = parseStatementList(state);
+    this.allStatements = state.allStatements;
+
+    console.log(this.allStatements);
     state.messages.forEach(message => console.error(message));
   }
 
   step(count: number) {
-    while (count > 0 && this.nextStatement < this.program.statements.length) {
-      const statement = this.program.statements[this.nextStatement++];
+    while (count > 0 && this.nextStatement < this.allStatements.length) {
+      const statement = this.allStatements[this.nextStatement++];
       statement.bind();
       count--;
     }
 
     while (count < 0 && this.nextStatement > 0) {
-      const statement = this.program.statements[--this.nextStatement];
+      const statement = this.allStatements[--this.nextStatement];
       statement.unbind();
       count++;
     }

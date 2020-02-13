@@ -1,41 +1,51 @@
 import {
   Identifier,
   NumberLiteral,
-  Program,
   Statement,
   Assignment,
   OperatorAdd,
   Expression,
   OperatorSubtract,
-  BlockDelimiter,
-  ObjectExpression
+  Comment,
+  Block,
 } from "./ast";
 import Scope from "./scope";
 
-// terminals
-const lineEnd = /(\r\n|\r|\n)/y;
-const whitespace = /[ \t]*/y;
-const number = /-?(([1-9]+[0-9]*)|([0-9]*\.[0-9]+)|(0b[01]+)|(0o[0-7]+)|(0x[0-9a-fA-F]+))\b/y;
-const identifier = /[_a-zA-Z][_0-9a-zA-Z]*\b/y;
-const textLine = /[^\r\n]*/y;
-
 // grammar
-// program ::= [statement?, lineEnd], EOF
-// statement ::= assignment | blockDelimiter
-// assignment ::= identifier, "=", expression
-// blockDelimiter ::= "#", textLine
+// program ::= block EOF
+// block ::= (statement?, LINE_END)*
+// statement ::= comment | assignment
+// comment ::= COMMENT_PREFIX TEXT_LINE
+// assignment ::= identifier "=" expression
+// identifier ::= NAME ("." NAME)*
 // expression ::= ...
+
+// terminals
+const LINE_END = /(\r\n|\r|\n)/y;
+const WHITESPACE = /[ \t]*/y;
+const NUMBER = /-?(([1-9]+[0-9]*)|([0-9]*\.[0-9]+)|(0b[01]+)|(0o[0-7]+)|(0x[0-9a-fA-F]+))\b/y;
+const NAME = /[_a-zA-Z][_0-9a-zA-Z]*\b/y;
+const COMMENT_PREFIX = /#>*/y;
+const TEXT_LINE = /[^\r\n]*/y;
+
+export type ParserReport = {
+  file: string,
+  line: number,
+  column: number,
+  message: string,
+};
 
 export class ParserState {
   str: string;
   n: number;
   scopes: Scope[];
+  allStatements: Statement[];
 
   currentLine: number;
   currentLineStartIndex: number;
 
   fileName: string;
-  messages: string[];
+  messages: ParserReport[];
 
   constructor(
     inputString: string,
@@ -46,6 +56,7 @@ export class ParserState {
     this.str = inputString;
     this.n = startIndex;
     this.scopes = [parentScope || new Scope()];
+    this.allStatements = [];
 
     this.currentLine = 0;
     this.currentLineStartIndex = startIndex;
@@ -54,101 +65,152 @@ export class ParserState {
     this.messages = [];
   }
 
+  eof() {
+    return this.n === this.str.length;
+  }
+
+  peek() {
+    return this.eof() ? "" : this.str[this.n];
+  }
+
+  next() {
+    if (this.eof()) {
+      throw new Error("Cannot move past the end of input string");
+    }
+
+    this.n++;
+  }
+
+  match(pattern: string | RegExp) {
+    if (typeof pattern === "string") {
+      return this.matchExact(pattern);
+    } else {
+      return this.matchRegex(pattern);
+    }
+  }
+
+  appendStatement(statement: Statement) {
+    this.allStatements.push(statement);
+  }
+
   reportError(message: string) {
     // convert from 0-based to 1-based for output log
     const line = this.currentLine + 1;
     const column = this.n - this.currentLineStartIndex + 1;
 
-    const text = `${this.fileName}:${line}:${column}: ${message}`;
-    this.messages.push(text);
+    this.messages.push({
+      file: this.fileName,
+      line,
+      column,
+      message
+    });
   }
 
-  eof() {
-    return this.n === this.str.length;
+  private matchExact(pattern: string): string | null {
+    if (this.str.length - this.n < pattern.length) {
+      return null;
+    }
+
+    const slice = this.str.substr(this.n, pattern.length);
+    if (slice === pattern) {
+      this.n += pattern.length;
+      return slice;
+    }
+
+    return null;
   }
-}
 
-export function parseRegex(state: ParserState, regex: RegExp) {
-  // setup parser to read from the current string location
-  regex.lastIndex = state.n;
+  private matchRegex(pattern: RegExp) {
+    const start = this.n;
 
-  const found = regex.test(state.str);
-  if (found) {
-    // update the position only when found
-    state.n = regex.lastIndex;
+    // setup parser to read from the current string location
+    pattern.lastIndex = start;
+  
+    const found = pattern.test(this.str);
+    if (found) {
+      const end = pattern.lastIndex;
+  
+      // update the position only when found
+      this.n = end;
+  
+      // return the matched substring
+      return this.str.substring(start, end);
+    }
+  
+    return null;
   }
-
-  return found;
 }
 
 export function parseWhitespace(state: ParserState) {
-  parseRegex(state, whitespace);
+  state.match(WHITESPACE);
 }
 
 export function parseEndOfLine(state: ParserState) {
-  const found = parseRegex(state, lineEnd);
-  if (found) {
+  const match = state.match(LINE_END);
+  if (match) {
     // update state to next line
     state.currentLine++;
     state.currentLineStartIndex = state.n;
   }
 
-  return found;
+  return match;
 }
 
 export function parseNumberLiteral(state: ParserState) {
-  let start = state.n;
-  if (!parseRegex(state, number)) {
+  const stringValue = state.match(NUMBER);
+  if (!stringValue) {
     return null;
   }
 
   // skip the minus sign before parsing with the Number constructor
   // (some cases don't work with a string as input, such as negative binary)
-  let negative = false;
-  if (state.str[start] === "-") {
-    negative = true;
-    start++;
-  }
-
-  const stringValue = state.str.substring(start, state.n);
-  const value = Number(stringValue);
+  const negative = stringValue[0] === "-";
+  const value = Number(negative ? stringValue.substr(1) : stringValue);
 
   return new NumberLiteral(negative ? -value : value);
 }
 
 export function parseIdentifier(state: ParserState) {
-  const start = state.n;
-  if (!parseRegex(state, identifier)) {
-    return null;
-  }
+  const names: string[] = [];
+
+  do {
+    const name = state.match(NAME);
+    if (!name) {
+      return null;
+    }
+    names.push(name);
+  } while (state.match("."));
 
   const scope = state.scopes[state.scopes.length - 1];
-  const name = state.str.substring(start, state.n);
-  return new Identifier(name, scope);
+  return new Identifier(names[0], scope);
 }
 
-export function parseObject(state: ParserState) {
-  if (state.str[state.n] !== "{") {
+export function parseBlock(state: ParserState): Block | null {
+  if (!state.match("{")) {
     return null;
   }
-  state.n++;
 
-  // create a child scope for this object expression
+  // create a child scope for this block
   const parentScope = state.scopes[state.scopes.length - 1];
   const scope = new Scope(parentScope);
   state.scopes.push(scope);
 
   // parse inside the block
-  const program = parseProgram(state);
+  const statements = parseStatementList(state);
 
   // exit the scope
   state.scopes.pop();
 
-  return new ObjectExpression(program, scope);
+  if (!state.match("}")) {
+    state.reportError("Unterminated block, missing '}'");
+    return null;
+  }
+
+  return new Block(statements, scope);
 }
 
 export function parseTerm(state: ParserState) {
-  return parseNumberLiteral(state) || parseIdentifier(state) || parseObject(state);
+  return parseNumberLiteral(state) || parseIdentifier(state) || parseBlock(state);
 }
 
 export function parseExpression(state: ParserState) {
@@ -188,21 +250,24 @@ export function parseExpression(state: ParserState) {
   return expr;
 }
 
-export function parseBlockDelimiter(state: ParserState) {
+export function parseComment(state: ParserState) {
   const currentLine = state.currentLine;
 
-  if (state.str[state.n] !== "#") {
-    state.reportError("Block delimiters must start with a '#'");
+  const prefix = state.match(COMMENT_PREFIX);
+  if (!prefix) {
+    state.reportError("Invalid comment prefix");
     return null;
   }
-  state.n++;
+  const markerLevel = prefix.length - 1; // don't count the # in the marker level
 
-  const start = state.n;
-  parseRegex(state, textLine);
+  const text = state.match(TEXT_LINE) || "";
 
-  const text = state.str.substring(start, state.n).trim();
   const scope = state.scopes[state.scopes.length - 1];
-  return new BlockDelimiter(currentLine, text, scope);
+
+  const comment = new Comment(currentLine, text, markerLevel, scope);
+  state.appendStatement(comment);
+
+  return comment;
 }
 
 export function parseAssignment(state: ParserState) {
@@ -215,11 +280,10 @@ export function parseAssignment(state: ParserState) {
   }
 
   parseWhitespace(state);
-  if (state.eof() || state.str[state.n] !== "=") {
+  if (!state.match("=")) {
     state.reportError("Expected '=' here");
     return null;
   }
-  state.n++;
 
   parseWhitespace(state);
   if (state.eof()) {
@@ -227,25 +291,31 @@ export function parseAssignment(state: ParserState) {
     return null;
   }
 
+  const scope = state.scopes[state.scopes.length - 1];
+  const assignment = new Assignment(currentLine, identifier, scope);
+
+  // make sure the statement is registered before its child expression
+  state.appendStatement(assignment);
+
   const expression = parseExpression(state);
   if (!expression) {
     state.reportError("Invalid expression");
     return null;
   }
+  assignment.expression = expression;
 
-  const scope = state.scopes[state.scopes.length - 1];
-  return new Assignment(currentLine, identifier, expression, scope);
+  return assignment;
 }
 
 export function parseStatement(state: ParserState) {
-  if (state.str[state.n] == "#") {
-    return parseBlockDelimiter(state);
+  if (state.peek() == "#") {
+    return parseComment(state);
   } else {
     return parseAssignment(state);
   }
 }
 
-export function parseProgram(state: ParserState): Program {
+export function parseStatementList(state: ParserState): Statement[] {
   const statements: Statement[] = [];
 
   while (!state.eof()) {
@@ -254,8 +324,8 @@ export function parseProgram(state: ParserState): Program {
       parseWhitespace(state);
     } while (parseEndOfLine(state));
 
-    // exit at end of file or end of object expression
-    if (state.eof() || state.str[state.n] === "}") {
+    // exit at end of file or end of block
+    if (state.eof() || state.peek() === "}") {
       break;
     }
 
@@ -267,5 +337,5 @@ export function parseProgram(state: ParserState): Program {
     statements.push(statement);
   }
 
-  return new Program(statements);
+  return statements;
 }
