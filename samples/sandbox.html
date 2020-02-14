@@ -88,26 +88,9 @@ plop = {
 
 plop.a = 120
 
-# setup
+# other scope
 a = 42
 b = a - 30
-
-#> wait here
-slider = Slider {
-  binding = "a"
-}
-
-$page = VSplit {
-  top = slider
-  bottom = TextBox {
-    text = "b=" + str(b)
-  }
-}
-
-#> let's begin trigonometry
-b = sin(a)
-
-#>> let's plot this
 </textarea
       >
       <div
