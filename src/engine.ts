@@ -4,7 +4,7 @@ import Scope from "./scope";
 
 export default class Engine {
   globalScope: Scope;
-  rootStatemeents: Statement[];
+  rootStatements: Statement[];
   messages: ParserReport[];
 
   allStatements: Statement[];
@@ -15,7 +15,7 @@ export default class Engine {
     // add builtins here
 
     const state = new ParserState(code, 0, this.globalScope, "smeli");
-    this.rootStatemeents = parseStatementList(state);
+    this.rootStatements = parseStatementList(state);
     this.allStatements = state.allStatements;
     this.messages = state.messages;
   }
