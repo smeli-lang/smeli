@@ -175,6 +175,14 @@ test("parseNumberLiteral: single number", () => {
   expect(state.n).toBe(3);
 });
 
+test("parseNumberLiteral: zero", () => {
+  const state = new ParserState("0");
+  const literal = parseNumberLiteral(state);
+  expect(literal).not.toBeNull();
+  expect(literal!.value).toBe(0);
+  expect(state.n).toBe(1);
+});
+
 test("parseNumberLiteral: negative number", () => {
   const state = new ParserState("-125");
   const literal = parseNumberLiteral(state);
