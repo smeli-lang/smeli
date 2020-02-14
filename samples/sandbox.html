@@ -25,7 +25,9 @@
                 str += `${name} = ${value.value} [${value.type}] <br />`;
               }
             } catch (e) {
-              str += `<span style="color: #d44">${name} - ${e.message}</span><br />`;
+              str +=
+                "  ".repeat(indent) +
+                `<span style="color: #d44">${name} - ${e.message}</span><br />`;
             }
           });
 
@@ -42,9 +44,14 @@
           const code = textArea.value;
           const engine = new smeli.Engine(code);
 
-          const globalScope = engine.step(engine.allStatements.length);
-          scopeView.innerHTML = printScope(globalScope, 0);
-          messageView.innerHTML = printMessages(engine.messages);
+          try {
+            const globalScope = engine.step(engine.allStatements.length);
+            scopeView.innerHTML = printScope(globalScope, 0);
+            messageView.innerHTML = printMessages(engine.messages);
+          } catch (e) {
+            scopeView.innerHTML = "";
+            messageView.innerHTML = `Runtime error: ${e.message}`;
+          }
         }
 
         textArea.oninput = reload;
