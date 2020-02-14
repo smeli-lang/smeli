@@ -62,11 +62,12 @@
   <body
     style="margin: 0; padding: 0; display: flex; flex-direction: row; min-height: 100vh; align-items: stretch; font-family: Consolas;"
   >
-    <textarea
-      id="code"
-      wrap="off"
-      style="flex: 1; min-height: 100%; resize: none; overflow: auto; color: #fff; background-color: #444; border: none; border-left: 10px solid #4a4a5e; font-size: large; margin: 0;"
-    >
+    <div style="flex: 1; display: flex; flex-direction: column;">
+      <textarea
+        id="code"
+        wrap="off"
+        style="flex: 1; resize: none; overflow: auto; color: #fff; background-color: #444; border: none; border-left: 10px solid #4a4a5e; font-size: large; margin: 0;"
+      >
 plop = {
   a = 42
   b = a + 4
@@ -108,16 +109,15 @@ b = sin(a)
 
 #>> let's plot this
 </textarea
-    >
-    <div style="flex: 1; display: flex; flex-direction: column;">
-      <pre
-        id="scope"
-        style="flex: 1; background-color:#ddd; padding: 20px; margin: 0; font-family: Consolas"
-      ></pre>
+      >
       <div
         id="messages"
-        style="background-color: #444; color: #f55; padding: 20px;"
+        style="background-color: #222; color: #f55; padding: 20px;"
       ></div>
     </div>
+    <pre
+      id="scope"
+      style="flex: 1; background-color:#ddd; padding: 20px; margin: 0; font-family: Consolas"
+    ></pre>
   </body>
 </html>
