@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello Smeli!</title>
+    <script src="../dist/smeli.min.js"></script>
+    <script>
+      window.onload = () => {
+        const textArea = document.querySelector("#code");
+        const scopeView = document.querySelector("#scope");
+        const messageView = document.querySelector("#messages");
+
+        function printScope(scope, indent) {
+          let str = "";
+          scope.bindings.forEach((binding, name) => {
+            try {
+              const value = binding.evaluate();
+              str += "  ".repeat(indent);
+              if (value.type === "block") {
+                const childContent = printScope(value.value, indent + 1);
+                str +=
+                  `${name} = {<br />${childContent}` +
+                  "  ".repeat(indent) +
+                  "}<br />";
+              } else {
+                str += `${name} = ${value.value} [${value.type}] <br />`;
+              }
+            } catch (e) {
+              str += `<span style="color: #d44">${name} - ${e.message}</span><br />`;
+            }
+          });
+
+          return str;
+        }
+
+        function printMessages(messages) {
+          return messages
+            .map(message => `line ${message.line}: ${message.message}`)
+            .join("<br />");
+        }
+
+        function reload() {
+          const code = textArea.value;
+          const engine = new smeli.Engine(code);
+
+          const globalScope = engine.step(engine.allStatements.length);
+          scopeView.innerHTML = printScope(globalScope, 0);
+          messageView.innerHTML = printMessages(engine.messages);
+        }
+
+        textArea.oninput = reload;
+        reload();
+      };
+    </script>
+  </head>
+  <body
+    style="margin: 0; padding: 0; display: flex; flex-direction: row; min-height: 100vh; align-items: stretch; font-family: Consolas;"
+  >
+    <textarea
+      id="code"
+      wrap="off"
+      style="flex: 1; min-height: 100%; resize: none; overflow: auto; color: #fff; background-color: #444; border: none; border-left: 10px solid #4a4a5e; font-size: large; margin: 0;"
+    >
+plop = {
+  a = 42
+  b = a + 4
+}
+
+#>> same
+plop.a = 42
+plop.b = plop.a + 4
+
+c = plop.a + plop.b
+
+plop.a = 12
+
+plop = {
+  a = -10
+  b = -20
+}
+
+plop.a = 120
+
+# setup
+a = 42
+b = a - 30
+
+#> wait here
+slider = Slider {
+  binding = "a"
+}
+
+$page = VSplit {
+  top = slider
+  bottom = TextBox {
+    text = "b=" + str(b)
+  }
+}
+
+#> let's begin trigonometry
+b = sin(a)
+
+#>> let's plot this
+</textarea
+    >
+    <div style="flex: 1; display: flex; flex-direction: column;">
+      <pre
+        id="scope"
+        style="flex: 1; background-color:#ddd; padding: 20px; margin: 0; font-family: Consolas"
+      ></pre>
+      <div
+        id="messages"
+        style="background-color: #444; color: #f55; padding: 20px;"
+      ></div>
+    </div>
+  </body>
+</html>

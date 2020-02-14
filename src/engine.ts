@@ -1,10 +1,11 @@
 import { Statement } from "./ast";
-import { ParserState, parseStatementList } from "./parser";
+import { ParserState, parseStatementList, ParserReport } from "./parser";
 import Scope from "./scope";
 
 export default class Engine {
   globalScope: Scope;
   rootStatemeents: Statement[];
+  messages: ParserReport[];
 
   allStatements: Statement[];
   nextStatement: number = 0;
@@ -16,9 +17,7 @@ export default class Engine {
     const state = new ParserState(code, 0, this.globalScope, "smeli");
     this.rootStatemeents = parseStatementList(state);
     this.allStatements = state.allStatements;
-
-    console.log(this.allStatements);
-    state.messages.forEach(message => console.error(message));
+    this.messages = state.messages;
   }
 
   step(count: number) {
