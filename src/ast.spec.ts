@@ -16,7 +16,7 @@ test("NumberLiteral: evaluates to its value", () => {
 
 test("Identifier: stores number", () => {
   const scope = new Scope();
-  const id = new Identifier("variableName", scope);
+  const id = new Identifier(["variableName"], scope);
   expect(id.name).toBe("variableName");
   expect(id.scope).toBe(scope);
 });

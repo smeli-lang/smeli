@@ -182,7 +182,7 @@ export function parseIdentifier(state: ParserState) {
   } while (state.match("."));
 
   const scope = state.scopes[state.scopes.length - 1];
-  return new Identifier(names[0], scope);
+  return new Identifier(names, scope);
 }
 
 export function parseBlock(state: ParserState): Block | null {

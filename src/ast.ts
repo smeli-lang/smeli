@@ -1,5 +1,6 @@
 import Binding from "./binding";
 import Scope from "./scope";
+import { removeAllListeners } from "cluster";
 
 export type Value = {
   type: string;
@@ -26,16 +27,39 @@ export class NumberLiteral implements Expression {
 }
 
 export class Identifier implements Expression {
+  scopeNames: string[];
   name: string;
+
   scope: Scope;
 
-  constructor(name: string, scope: Scope) {
-    this.name = name;
+  constructor(names: string[], scope: Scope) {
+    this.scopeNames = names.slice(0, names.length - 1);
+    this.name = names[names.length - 1];
     this.scope = scope;
   }
 
+  resolveScope() {
+    let scope = this.scope;
+    this.scopeNames.forEach(scopeName => {
+      const binding = scope.lookup(scopeName);
+      if (!binding) {
+        throw new Error("Undefined symbol: " + scopeName);
+      }
+
+      const scopeValue = binding.evaluate();
+      if (scopeValue.type !== "block") {
+        throw new Error(`${scopeName} is not a block`);
+      }
+
+      scope = scopeValue.value;
+    });
+
+    return scope;
+  }
+
   evaluate() {
-    const binding = this.scope.lookup(this.name);
+    const scope = this.resolveScope();
+    const binding = scope.lookup(this.name);
     if (!binding) {
       throw new Error("Undefined symbol: " + this.name);
     }
@@ -56,7 +80,7 @@ export class Block implements Expression {
   evaluate() {
     return {
       type: "block",
-      value: this.scope,
+      value: this.scope
     };
   }
 }
@@ -126,11 +150,7 @@ export class Assignment implements Statement {
 
   binding: Binding | null;
 
-  constructor(
-    line: number,
-    identifier: Identifier,
-    scope: Scope
-  ) {
+  constructor(line: number, identifier: Identifier, scope: Scope) {
     this.line = line;
     this.identifier = identifier;
     this.scope = scope;
@@ -147,11 +167,9 @@ export class Assignment implements Statement {
       throw new Error("Cannot bind assignment: invalid expression");
     }
 
-    this.binding = new Binding(
-      this.scope,
-      this.identifier.name,
-      this.expression
-    );
+    const scope = this.identifier.resolveScope();
+
+    this.binding = new Binding(scope, this.identifier.name, this.expression);
   }
 
   unbind() {
