@@ -1,12 +1,12 @@
 import {
   ParserState,
-  parseRegex,
   parseWhitespace,
   parseEndOfLine,
   parseNumberLiteral,
   parseIdentifier,
-  parseProgram,
-  parseBlockDelimiter
+  parseBlock,
+  parseComment,
+  parseStatement
 } from "./parser";
 import Scope from "./scope";
 
@@ -36,53 +36,63 @@ test("ParserState: line counting in error reports", () => {
   expect(state.n).toBe(state.str.length);
 
   // check error messages
-  /*expect(state.messages).toEqual([
-    "src/test.smeli:1:6: Something is broken!",
-    "src/test.smeli:2:1: Something else is broken!",
-    "src/test.smeli:2:4: Nothing works."
-  ]);*/
+  expect(state.messages).toEqual([
+    {
+      file: "src/test.smeli",
+      line: 1,
+      column: 6,
+      message: "Something is broken!"
+    },
+    {
+      file: "src/test.smeli",
+      line: 2,
+      column: 1,
+      message: "Something else is broken!"
+    },
+    {
+      file: "src/test.smeli",
+      line: 2,
+      column: 4,
+      message: "Nothing works."
+    }
+  ]);
 });
 
-/**
- * Regex
- */
-
-test("parseRegex: simple match", () => {
+test("ParserState: simple match", () => {
   const state = new ParserState("aaaaa");
   const re = /a+/g;
-  const match = parseRegex(state, re);
+  const match = state.match(re);
   expect(match).toBe("aaaaa");
   expect(state.n).toBe(5);
 });
 
-test("parseRegex: simple non-match", () => {
+test("ParserState: simple non-match", () => {
   const state = new ParserState("bbbbbb");
   const re = /a+/g;
-  const found = parseRegex(state, re);
-  expect(found).toBeNull();
+  const match = state.match(re);
+  expect(match).toBeNull();
   expect(state.n).toBe(0);
 });
 
-test("parseRegex: substring", () => {
+test("ParserState: substring", () => {
   const state = new ParserState("hello world!", 6);
   const re = /[a-z]+/y;
-  const found = parseRegex(state, re);
-  expect(found).toBe(true);
+  const match = state.match(re);
+  expect(match).toBe("world");
   expect(state.n).toBe(11);
-  expect(state.str.substring(6, state.n)).toBe("world");
 });
 
-test("parseRegex: multiple matches", () => {
+test("ParserState: multiple matches", () => {
   const state = new ParserState("hello72world!");
   const letters = /[a-z]+/g;
   const digits = /[0-9]+/g;
-  expect(parseRegex(state, letters)).toBe(true);
+  expect(state.match(letters)).not.toBeNull();
   expect(state.n).toBe(5);
-  expect(parseRegex(state, digits)).toBe(true);
+  expect(state.match(digits)).not.toBeNull();
   expect(state.n).toBe(7);
-  expect(parseRegex(state, letters)).toBe(true);
+  expect(state.match(letters)).not.toBeNull();
   expect(state.n).toBe(12);
-  expect(parseRegex(state, digits)).toBe(false);
+  expect(state.match(digits)).toBeNull();
   expect(state.n).toBe(12);
 });
 
@@ -123,19 +133,19 @@ test("parseEndOfLine: accepts all EOL markers (\\r, \\n, or both)", () => {
   expect(state.n).toBe(3);
   expect(state.currentLine).toBe(2);
   expect(state.currentLineStartIndex).toBe(state.n);
-  expect(parseEndOfLine(state)).toBe(true); // \n
+  expect(parseEndOfLine(state)).toBe("\n");
   expect(state.n).toBe(4);
   expect(state.currentLine).toBe(3);
   expect(state.currentLineStartIndex).toBe(state.n);
-  expect(parseEndOfLine(state)).toBe(true); // \r\n
+  expect(parseEndOfLine(state)).toBe("\r\n");
   expect(state.n).toBe(6);
   expect(state.currentLine).toBe(4);
   expect(state.currentLineStartIndex).toBe(state.n);
-  expect(parseEndOfLine(state)).toBe(true); // \n
+  expect(parseEndOfLine(state)).toBe("\n");
   expect(state.n).toBe(7);
   expect(state.currentLine).toBe(5);
   expect(state.currentLineStartIndex).toBe(state.n);
-  expect(parseEndOfLine(state)).toBe(false); // no newlines left
+  expect(parseEndOfLine(state)).toBeNull(); // no newlines left
   expect(state.n).toBe(7);
   expect(state.currentLine).toBe(5);
   expect(state.currentLineStartIndex).toBe(state.n);
@@ -143,13 +153,13 @@ test("parseEndOfLine: accepts all EOL markers (\\r, \\n, or both)", () => {
 
 test("parseEndOfLine: doesn't consume regular whitespace", () => {
   const state = new ParserState("   \t   \n    next line");
-  expect(parseEndOfLine(state)).toBe(false);
+  expect(parseEndOfLine(state)).toBeNull();
   expect(state.n).toBe(0);
 });
 
 test("parseEndOfLine: substring", () => {
   const state = new ParserState("first line   \t   \r\n    next line", 17);
-  expect(parseEndOfLine(state)).toBe(true);
+  expect(parseEndOfLine(state)).toBe("\r\n");
   expect(state.n).toBe(19);
 });
 
@@ -303,54 +313,78 @@ test("parseIdentifier: invalid", () => {
 });
 
 /**
- * Block delimiter
+ * Comment
  */
 
-test("parseBlockDelimiter: valid", () => {
+test("parseComment: valid", () => {
   const state = new ParserState(
     '# some text with unicode éçà and some "special charaters"'
   );
-  const block = parseBlockDelimiter(state);
-  expect(block).not.toBeNull();
-  expect(block!.line).toBe(state.currentLine);
-  expect(block!.text).toBe(
+  const comment = parseComment(state);
+  expect(comment).not.toBeNull();
+  expect(comment!.line).toBe(state.currentLine);
+  expect(comment!.text).toBe(
     'some text with unicode éçà and some "special charaters"'
   );
   expect(state.n).toBe(state.str.length);
 });
 
-test("parseBlockDelimiter: trims whitespace at start and end", () => {
+test("parseComment: trims whitespace at start and end", () => {
   const state = new ParserState("#   \t block text here  \t  \t");
-  const block = parseBlockDelimiter(state);
-  expect(block).not.toBeNull();
+  const comment = parseComment(state);
+  expect(comment).not.toBeNull();
   expect(state.n).toBe(state.str.length);
-  expect(block!.line).toBe(state.currentLine);
-  expect(block!.text).toBe("block text here");
+  expect(comment!.line).toBe(state.currentLine);
+  expect(comment!.text).toBe("block text here");
 });
 
-test("parseBlockDelimiter: stops before EOL", () => {
+test("parseComment: stops before EOL", () => {
   const state = new ParserState("# hello \n next line");
-  const block = parseBlockDelimiter(state);
-  expect(block).not.toBeNull();
+  const comment = parseComment(state);
+  expect(comment).not.toBeNull();
   expect(state.n).toBe(8);
-  expect(block!.line).toBe(state.currentLine);
-  expect(block!.text).toBe("hello");
+  expect(comment!.line).toBe(state.currentLine);
+  expect(comment!.text).toBe("hello");
 });
 
-test("parseBlockDelimiter: invalid (doesn't start with #)", () => {
+test("parseComment: invalid (doesn't start with #)", () => {
   const state = new ParserState("a = 12");
-  const block = parseBlockDelimiter(state);
-  expect(block).toBeNull();
+  const comment = parseComment(state);
+  expect(comment).toBeNull();
   expect(state.n).toBe(0);
 });
 
+test("parseComment: marker level 0", () => {
+  const state = new ParserState("# just a plain comment");
+  const comment = parseComment(state);
+  expect(comment).not.toBeNull();
+  expect(comment!.text).toBe("just a plain comment");
+  expect(comment!.markerLevel).toBe(0);
+});
+
+test("parseComment: marker level 1", () => {
+  const state = new ParserState("#> first level");
+  const comment = parseComment(state);
+  expect(comment).not.toBeNull();
+  expect(comment!.text).toBe("first level");
+  expect(comment!.markerLevel).toBe(1);
+});
+
+test("parseComment: marker level 6", () => {
+  const state = new ParserState("#>>>>>> sixth level");
+  const comment = parseComment(state);
+  expect(comment).not.toBeNull();
+  expect(comment!.text).toBe("sixth level");
+  expect(comment!.markerLevel).toBe(6);
+});
+
 /**
- * Program
+ * Statement
  */
 
-test("parseProgram: single line", () => {
+test("parseStatement: single line", () => {
   const state = new ParserState("a = 12 + 15");
-  const program = parseProgram(state);
-  expect(program).not.toBeNull();
+  const statement = parseStatement(state);
+  expect(statement).not.toBeNull();
   expect(state.n).toBe(state.str.length);
 });

@@ -7,7 +7,7 @@ import {
   Expression,
   OperatorSubtract,
   Comment,
-  Block,
+  Block
 } from "./ast";
 import Scope from "./scope";
 
@@ -29,10 +29,10 @@ const COMMENT_PREFIX = /#>*/y;
 const TEXT_LINE = /[^\r\n]*/y;
 
 export type ParserReport = {
-  file: string,
-  line: number,
-  column: number,
-  message: string,
+  file: string;
+  line: number;
+  column: number;
+  message: string;
 };
 
 export class ParserState {
@@ -125,18 +125,18 @@ export class ParserState {
 
     // setup parser to read from the current string location
     pattern.lastIndex = start;
-  
+
     const found = pattern.test(this.str);
     if (found) {
       const end = pattern.lastIndex;
-  
+
       // update the position only when found
       this.n = end;
-  
+
       // return the matched substring
       return this.str.substring(start, end);
     }
-  
+
     return null;
   }
 }
@@ -210,7 +210,9 @@ export function parseBlock(state: ParserState): Block | null {
 }
 
 export function parseTerm(state: ParserState) {
-  return parseNumberLiteral(state) || parseIdentifier(state) || parseBlock(state);
+  return (
+    parseNumberLiteral(state) || parseIdentifier(state) || parseBlock(state)
+  );
 }
 
 export function parseExpression(state: ParserState) {
@@ -260,7 +262,7 @@ export function parseComment(state: ParserState) {
   }
   const markerLevel = prefix.length - 1; // don't count the # in the marker level
 
-  const text = state.match(TEXT_LINE) || "";
+  const text = state.match(TEXT_LINE)?.trim() || "";
 
   const scope = state.scopes[state.scopes.length - 1];
 
