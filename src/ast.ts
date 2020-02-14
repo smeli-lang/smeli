@@ -1,6 +1,5 @@
 import Binding from "./binding";
 import Scope from "./scope";
-import { removeAllListeners } from "cluster";
 
 export type Value = {
   type: string;
