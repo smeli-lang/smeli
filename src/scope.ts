@@ -1,4 +1,10 @@
-import Binding from "./binding";
+import { Expression } from "./ast";
+
+export type Binding = {
+  name: string;
+  expression: Expression;
+  previousBinding: Binding | null;
+};
 
 export default class Scope {
   parent: Scope | null;
@@ -9,16 +15,27 @@ export default class Scope {
     this.bindings = new Map();
   }
 
-  bind(name: string, binding: Binding | null) {
+  bind(name: string, expression: Expression): Binding {
     const previousBinding = this.bindings.get(name) || null;
+    const binding = {
+      name,
+      expression,
+      previousBinding
+    };
 
-    if (binding) {
-      this.bindings.set(name, binding);
+    this.bindings.set(name, binding);
+
+    return binding;
+  }
+
+  unbind(binding: Binding) {
+    const previousBinding = binding.previousBinding;
+
+    if (previousBinding) {
+      this.bindings.set(binding.name, previousBinding);
     } else {
-      this.bindings.delete(name);
+      this.bindings.delete(binding.name);
     }
-
-    return previousBinding;
   }
 
   lookup(name: string): Binding | null {

@@ -55,7 +55,13 @@
 
         const globalScope = engine.step(3);
         console.log(globalScope);
-        console.log(globalScope.lookup("plop")?.evaluate().value.lookup("b").evaluate());
+        console.log(
+          globalScope
+            .lookup("plop")
+            ?.expression.evaluate()
+            .value.lookup("b")
+            .evaluate()
+        );
       };
     </script>
   </head>

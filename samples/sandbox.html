@@ -13,7 +13,7 @@
           let str = "";
           scope.bindings.forEach((binding, name) => {
             try {
-              const value = binding.evaluate();
+              const value = binding.expression.evaluate();
               str += "  ".repeat(indent);
               if (value.type === "block") {
                 const childContent = printScope(value.value, indent + 1);

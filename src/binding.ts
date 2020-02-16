@@ -1,7 +1,7 @@
 import Scope from "./scope";
 import { Expression } from "./ast";
 
-export default class Binding {
+/*export default class Binding {
   scope: Scope;
   name: string;
   expression: Expression;
@@ -25,3 +25,4 @@ export default class Binding {
     return this.expression.evaluate();
   }
 }
+*/

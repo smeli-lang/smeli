@@ -1,5 +1,4 @@
-import Binding from "./binding";
-import Scope from "./scope";
+import Scope, { Binding } from "./scope";
 
 export type Value = {
   type: string;
@@ -7,6 +6,9 @@ export type Value = {
 };
 
 export interface Expression {
+  // some expression have a child scope, like blocks
+  getChildScope(): Scope | null;
+
   evaluate(): Value;
 }
 
@@ -15,6 +17,10 @@ export class NumberLiteral implements Expression {
 
   constructor(value: number) {
     this.value = value;
+  }
+
+  getChildScope() {
+    return null;
   }
 
   evaluate() {
@@ -37,23 +43,10 @@ export class Identifier implements Expression {
     this.scope = scope;
   }
 
-  resolveScope() {
-    let scope = this.scope;
-    this.scopeNames.forEach(scopeName => {
-      const binding = scope.lookup(scopeName);
-      if (!binding) {
-        throw new Error("Undefined symbol: " + scopeName);
-      }
-
-      const scopeValue = binding.evaluate();
-      if (scopeValue.type !== "block") {
-        throw new Error(`${scopeName} is not a block`);
-      }
-
-      scope = scopeValue.value;
-    });
-
-    return scope;
+  getChildScope() {
+    // identifiers only reference their scope to resolve
+    // the names at evaluation time, but they don't own them
+    return null;
   }
 
   evaluate() {
@@ -63,7 +56,26 @@ export class Identifier implements Expression {
       throw new Error("Undefined symbol: " + this.name);
     }
 
-    return binding.evaluate();
+    return binding.expression.evaluate();
+  }
+
+  resolveScope() {
+    let scope = this.scope;
+    this.scopeNames.forEach(scopeName => {
+      const binding = scope.lookup(scopeName);
+      if (!binding) {
+        throw new Error("Undefined symbol: " + scopeName);
+      }
+
+      const childScope = binding.expression.getChildScope();
+      if (!childScope) {
+        throw new Error(`${scopeName} is not a block`);
+      }
+
+      scope = childScope;
+    });
+
+    return scope;
   }
 }
 
@@ -74,6 +86,10 @@ export class Block implements Expression {
   constructor(statements: Statement[], scope: Scope) {
     this.statements = statements;
     this.scope = scope;
+  }
+
+  getChildScope() {
+    return this.scope;
   }
 
   evaluate() {
@@ -91,6 +107,10 @@ export class OperatorAdd implements Expression {
   constructor(lhs: Expression, rhs: Expression) {
     this.lhs = lhs;
     this.rhs = rhs;
+  }
+
+  getChildScope() {
+    return null;
   }
 
   evaluate() {
@@ -115,6 +135,10 @@ export class OperatorSubtract implements Expression {
   constructor(lhs: Expression, rhs: Expression) {
     this.lhs = lhs;
     this.rhs = rhs;
+  }
+
+  getChildScope() {
+    return null;
   }
 
   evaluate() {
@@ -148,6 +172,7 @@ export class Assignment implements Statement {
   scope: Scope;
 
   binding: Binding | null;
+  bindingScope: Scope | null;
 
   constructor(line: number, identifier: Identifier, scope: Scope) {
     this.line = line;
@@ -155,6 +180,7 @@ export class Assignment implements Statement {
     this.scope = scope;
 
     this.binding = null;
+    this.bindingScope = null;
   }
 
   bind() {
@@ -166,9 +192,11 @@ export class Assignment implements Statement {
       throw new Error("Cannot bind assignment: invalid expression");
     }
 
-    const scope = this.identifier.resolveScope();
-
-    this.binding = new Binding(scope, this.identifier.name, this.expression);
+    this.bindingScope = this.identifier.resolveScope();
+    this.binding = this.bindingScope.bind(
+      this.identifier.name,
+      this.expression
+    );
   }
 
   unbind() {
@@ -176,8 +204,9 @@ export class Assignment implements Statement {
       throw new Error("Assignment already unbound");
     }
 
-    this.binding.dispose();
+    this.bindingScope?.unbind(this.binding);
     this.binding = null;
+    this.bindingScope = null;
   }
 }
 
@@ -187,15 +216,13 @@ export class Comment implements Statement {
   text: string;
   scope: Scope;
 
-  binding: Binding | null;
+  binding: Binding | null = null;
 
   constructor(line: number, text: string, markerLevel: number, scope: Scope) {
     this.line = line;
     this.markerLevel = markerLevel;
     this.text = text;
     this.scope = scope;
-
-    this.binding = null;
   }
 
   bind() {
@@ -203,11 +230,7 @@ export class Comment implements Statement {
       throw new Error("Comment already bound");
     }
 
-    this.binding = new Binding(
-      this.scope,
-      "commentLine",
-      new NumberLiteral(this.line)
-    );
+    this.binding = this.scope.bind("commentLine", new NumberLiteral(this.line));
   }
 
   unbind() {
@@ -215,7 +238,7 @@ export class Comment implements Statement {
       throw new Error("Comment already unbound");
     }
 
-    this.binding.dispose();
+    this.scope.unbind(this.binding);
     this.binding = null;
   }
 }
