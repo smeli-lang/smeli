@@ -15,7 +15,8 @@
             try {
               const value = binding.expression.evaluate();
               str += "  ".repeat(indent);
-              if (value.type === "block") {
+              const childScope = binding.expression.getChildScope();
+              if (childScope) {
                 const childContent = printScope(value.value, indent + 1);
                 str +=
                   `${name} = {<br />${childContent}` +

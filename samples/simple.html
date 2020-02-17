@@ -58,9 +58,9 @@
         console.log(
           globalScope
             .lookup("plop")
+            ?.expression.getChildScope()
+            .lookup("b")
             ?.expression.evaluate()
-            .value.lookup("b")
-            .evaluate()
         );
       };
     </script>
