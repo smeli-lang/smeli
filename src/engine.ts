@@ -10,7 +10,7 @@ export default class Engine {
   allStatements: Statement[];
   nextStatement: number = 0;
 
-  constructor(code: string) {
+  constructor(code: string, plugins: Plugin[] = []) {
     this.globalScope = new Scope();
     // add builtins here
 

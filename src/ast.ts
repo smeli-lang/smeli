@@ -1,4 +1,5 @@
 import Scope, { Binding } from "./scope";
+import {TypedValue, TypeDefinition} from './types';
 
 export type Value = {
   type: string;
@@ -9,7 +10,7 @@ export interface Expression {
   // some expression have a child scope, like blocks
   getChildScope(): Scope | null;
 
-  evaluate(): Value;
+  evaluate(): TypedValue;
 }
 
 export class NumberLiteral implements Expression {
@@ -24,10 +25,7 @@ export class NumberLiteral implements Expression {
   }
 
   evaluate() {
-    return {
-      type: "number",
-      value: this.value
-    };
+    return new Number(this.value);
   }
 }
 
@@ -93,10 +91,7 @@ export class Block implements Expression {
   }
 
   evaluate() {
-    return {
-      type: "block",
-      value: this.scope
-    };
+    return this.scope;
   }
 }
 
@@ -117,14 +112,18 @@ export class OperatorAdd implements Expression {
     const lvalue = this.lhs.evaluate();
     const rvalue = this.rhs.evaluate();
 
-    if (lvalue.type !== rvalue.type) {
+    if (Object.getPrototypeOf(lvalue) !== Object.getPrototypeOf(rvalue)) {
       throw new Error("Operands must have the same type for operator '+'");
     }
 
-    return {
-      type: lvalue.type,
-      value: lvalue.value + rvalue.value
-    };
+    const typeDefinition: TypeDefinition = lvalue.__smeli_type__;
+    const operator = typeDefinition.traits["operator_+"];
+
+    if (!operator) {
+      throw new Error("Operator + not defined for type " + Object.getPrototypeOf(lvalue).constructor.name);
+    }
+
+    return operator(lvalue, rvalue);
   }
 }
 
