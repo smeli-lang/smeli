@@ -1,59 +1,47 @@
-import { Engine, Plugin, Scope } from "../../";
-import { Value } from "../../ast";
+import { TypedScope } from "../../types";
 
-type BlockTypeDefinition = {
-  bindings?: {};
-};
-
-interface BlockType {
-  define(): BlockTypeDefinition;
-
-  evaluate(): Value;
-}
-
-class Hello implements BlockType {
+class Hello implements TypedScope {
   node: HTMLDivElement;
 
   constructor() {
     this.node = document.createElement("div") as HTMLDivElement;
   }
 
-  define() {
+  type() {
+    return Hello;
+  }
+
+  scope() {
     return {
       bindings: {
-        world: {
-          value: 42,
-          watch: ({ world }: any) => (this.node.innerText = world.value)
-        }
+        world: 42,
+        // world: {
+        //   value: 42,
+        //   watch: {( world }: any) => (this.node.innerText = world.value)
+        // }
       }
     };
   }
 
-  evaluate() {
-    return {
-      type: "dom.node",
-      value: this.node
-    };
+  static __new__() {
+    return new Hello();
   }
 }
 
-export default class DomPlugin implements Plugin {
-  define() {
+export default class DomPlugin implements TypedScope {
+  type() {
+    return DomPlugin;
+  }
+
+  scope() {
     return {
       bindings: {
-        number: {
-          immutable: true
-        }
-        /*Hello: {
-          literal: new TypeDefinition({
-            new: Hello
-          })
-        }*/
+        Hello
       }
     };
   }
 
-  bind(engine: Engine, scope: Scope) {}
-
-  unbind(engine: Engine, scope: Scope) {}
+  static __new__() {
+    return new DomPlugin();
+  }
 }
