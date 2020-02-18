@@ -1,10 +1,5 @@
 import Scope, { Binding } from "./scope";
-import {TypedValue, TypeDefinition} from './types';
-
-export type Value = {
-  type: string;
-  value: any;
-};
+import {TypedValue, NumberValue} from './types';
 
 export interface Expression {
   // some expression have a child scope, like blocks
@@ -13,10 +8,10 @@ export interface Expression {
   evaluate(): TypedValue;
 }
 
-export class NumberLiteral implements Expression {
-  value: number;
+export class Literal implements Expression {
+  value: TypedValue;
 
-  constructor(value: number) {
+  constructor(value: TypedValue) {
     this.value = value;
   }
 
@@ -25,7 +20,7 @@ export class NumberLiteral implements Expression {
   }
 
   evaluate() {
-    return new Number(this.value);
+    return this.value;
   }
 }
 
@@ -95,11 +90,13 @@ export class Block implements Expression {
   }
 }
 
-export class OperatorAdd implements Expression {
+export class BinaryOperator implements Expression {
+  operatorName: string;
   lhs: Expression;
   rhs: Expression;
 
-  constructor(lhs: Expression, rhs: Expression) {
+  constructor(operatorName: string, lhs: Expression, rhs: Expression) {
+    this.operatorName = operatorName;
     this.lhs = lhs;
     this.rhs = rhs;
   }
@@ -112,46 +109,20 @@ export class OperatorAdd implements Expression {
     const lvalue = this.lhs.evaluate();
     const rvalue = this.rhs.evaluate();
 
-    if (Object.getPrototypeOf(lvalue) !== Object.getPrototypeOf(rvalue)) {
-      throw new Error("Operands must have the same type for operator '+'");
+    const ltype = lvalue.type();
+    const rtype = rvalue.type();
+
+    if (ltype !== rtype) {
+      throw new Error(`Operands must have the same type for operator ${this.operatorName}`);
     }
 
-    const typeDefinition: TypeDefinition = lvalue.__smeli_type__;
-    const operator = typeDefinition.traits["operator_+"];
+    const operator = ltype.__add__;
 
     if (!operator) {
-      throw new Error("Operator + not defined for type " + Object.getPrototypeOf(lvalue).constructor.name);
+      throw new Error(`Operator ${this.operatorName} not defined for type ${ltype}`);
     }
 
     return operator(lvalue, rvalue);
-  }
-}
-
-export class OperatorSubtract implements Expression {
-  lhs: Expression;
-  rhs: Expression;
-
-  constructor(lhs: Expression, rhs: Expression) {
-    this.lhs = lhs;
-    this.rhs = rhs;
-  }
-
-  getChildScope() {
-    return null;
-  }
-
-  evaluate() {
-    const lvalue = this.lhs.evaluate();
-    const rvalue = this.rhs.evaluate();
-
-    if (lvalue.type !== rvalue.type) {
-      throw new Error("Operands must have the same type for operator '-'");
-    }
-
-    return {
-      type: lvalue.type,
-      value: lvalue.value - rvalue.value
-    };
   }
 }
 
@@ -229,7 +200,7 @@ export class Comment implements Statement {
       throw new Error("Comment already bound");
     }
 
-    this.binding = this.scope.bind("commentLine", new NumberLiteral(this.line));
+    this.binding = this.scope.bind("commentLine", new Literal(new NumberValue(this.line)));
   }
 
   unbind() {

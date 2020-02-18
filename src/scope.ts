@@ -1,4 +1,5 @@
 import { Expression } from "./ast";
+import { TypedValue } from "./types";
 
 export type Binding = {
   name: string;
@@ -6,13 +7,17 @@ export type Binding = {
   previousBinding: Binding | null;
 };
 
-export default class Scope {
+export default class Scope implements TypedValue {
   parent: Scope | null;
   bindings: Map<string, Binding>;
 
   constructor(parent: Scope | null = null) {
     this.parent = parent;
     this.bindings = new Map();
+  }
+
+  type() {
+    return Scope;
   }
 
   bind(name: string, expression: Expression): Binding {
@@ -45,5 +50,9 @@ export default class Scope {
     }
 
     return this.parent?.lookup(name) || null;
+  }
+
+  static __new__() {
+    return new Scope();
   }
 }

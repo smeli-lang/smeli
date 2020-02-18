@@ -1,20 +1,13 @@
-import { Identifier, NumberLiteral } from "./ast";
+import { Identifier, Literal } from "./ast";
 import Scope from "./scope";
-
-test("NumberLiteral: stores number", () => {
-  const number = new NumberLiteral(42);
-  expect(number.value).toBe(42);
-});
+import { NumberValue } from "./types";
 
 test("NumberLiteral: evaluates to its value", () => {
-  const number = new NumberLiteral(42);
-  expect(number.evaluate()).toEqual({
-    type: "number",
-    value: 42
-  });
+  const number = new Literal(new NumberValue(42));
+  expect(number.evaluate()).toEqual(new NumberValue(42));
 });
 
-test("Identifier: stores number", () => {
+test("Identifier: stores scope", () => {
   const scope = new Scope();
   const id = new Identifier(["variableName"], scope);
   expect(id.name).toBe("variableName");

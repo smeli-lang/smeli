@@ -1,8 +1,9 @@
 import Scope from "./scope";
-import { NumberLiteral } from "./ast";
+import { Literal } from "./ast";
+import { NumberValue } from "./types";
 
 test("binds a symbol", () => {
   const scope = new Scope();
-  const binding = scope.bind("a", new NumberLiteral(42));
+  const binding = scope.bind("a", new Literal(new NumberValue(42)));
   expect(scope.lookup("a")).toBe(binding);
 });

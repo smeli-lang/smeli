@@ -1,46 +1,60 @@
-export type TypeTraits = {
-  // typed scope constructor
-  constructor?: Function;
-
-  //
-  //"call"?: Function;
-
-  // binary operators
-  "operator_+"?: (lhs: any, rhs: any) => any;
-  "operator_-"?: (lhs: any, rhs: any) => any;
-};
-
-export type TypeDefinition = {
-  traits: TypeTraits;
-};
-
-export interface ScopeType {
-  define(): any;
+export interface TypedValue {
+  type(): TypeDefinition;
 }
 
-// extensions for built-in js types
-const numberType: TypeDefinition = {
-  traits: {
-    "operator_+": (lhs: number, rhs: number) => lhs + rhs,
-    "operator_-": (lhs: number, rhs: number) => lhs - rhs
+export interface TypedScope extends TypedValue {
+  scope(): ScopeDefinition;
+}
+
+export interface TypeDefinition {
+  __new__?(): TypedValue;
+
+  __add__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
+  __sub__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
+};
+
+export type ScopeDefinition = {
+  bindings: {
+    [name: string]: BindingDefinition
   }
 };
 
-export type TypedValue = {
-  type: TypeDefinition;
-  value: any;
-};
+export type LiteralType = number | string | Function;
 
-export interface Number extends TypedValue {}
+export type BindingDefinition = LiteralType;
 
-class Vec2 implements ScopeType {
+export class NumberValue implements TypedValue {
+  value: number;
+
+  constructor(value: number) {
+    this.value = value;
+  }
+
+  type() {
+    return NumberValue;
+  }
+
+  static __add__(lhs: NumberValue, rhs: NumberValue) {
+    return new NumberValue(lhs.value + rhs.value);
+  }
+
+  static __sub__(lhs: NumberValue, rhs: NumberValue) {
+    return new NumberValue(lhs.value + rhs.value);
+  }
+}
+
+/*class Vec2 implements TypedScope {
   values: [number, number];
 
   constructor() {
     this.values = [0, 0];
   }
 
-  define() {
+  type() {
+    return Vec2;
+  }
+
+  scope() {
     return {
       bindings: {
         x: 0,
@@ -48,10 +62,12 @@ class Vec2 implements ScopeType {
       }
     };
   }
-}
 
-const vec2Type: TypeDefinition = {
-  traits: {
-    constructor: Vec2
+  static __new__() {
+    return new Vec2();
   }
-};
+
+  static __add__(lhs: Vec2, rhs: Vec2) {
+    return new NumberValue(lhs.value + rhs.value);
+  }
+}*/

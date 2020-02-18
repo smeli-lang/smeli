@@ -1,33 +1,23 @@
-import Scope, {Binding} from './scope';
-import {ScopeType} from './types';
+// import Scope, {Binding} from './scope';
+// import {ScopeType} from './types';
 
-export type LiteralType = number | string | Function;
+// // manages automatic (un)binding of many names
+// // at once, plus the (un)registration of watch callbacks
+// export default class ScopeDefinitionBinder {
+//   definition: ScopeDefinition;
+//   bindings: Binding[] = [];
 
-export type BindingDefinition = LiteralType;
+//   constructor(definition: ScopeDefinition) {
+//     this.definition = definition;
+//   }
 
-export type ScopeDefinition = {
-  bindings: {
-    [name: string]: BindingDefinition
-  }
-};
-
-// manages automatic (un)binding of many names
-// at once, plus the (un)registration of watch callbacks
-export default class ScopeDefinitionBinder {
-  definition: ScopeDefinition;
-  bindings: Binding[] = [];
-
-  constructor(definition: ScopeDefinition) {
-    this.definition = definition;
-  }
-
-  bind(scope: Scope) {
-    /*this.definition.bindings.forEach((def, name) => {
+//   bind(scope: Scope) {
+//     /*this.definition.bindings.forEach((def, name) => {
       
-    });*/
-  }
+//     });*/
+//   }
 
-  unbind(scope: Scope) {
+//   unbind(scope: Scope) {
 
-  }
-}
+//   }
+// }

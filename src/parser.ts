@@ -1,15 +1,15 @@
 import {
   Identifier,
-  NumberLiteral,
+  Literal,
   Statement,
   Assignment,
-  OperatorAdd,
+  BinaryOperator,
   Expression,
-  OperatorSubtract,
   Comment,
-  Block
+  Block,
 } from "./ast";
 import Scope from "./scope";
+import {NumberValue} from './types';
 
 // grammar
 // program ::= block EOF
@@ -167,7 +167,7 @@ export function parseNumberLiteral(state: ParserState) {
   const negative = stringValue[0] === "-";
   const value = Number(negative ? stringValue.substr(1) : stringValue);
 
-  return new NumberLiteral(negative ? -value : value);
+  return new Literal(new NumberValue(negative ? -value : value));
 }
 
 export function parseIdentifier(state: ParserState) {
@@ -241,9 +241,9 @@ export function parseExpression(state: ParserState) {
     }
 
     if (operator == "+") {
-      expr = new OperatorAdd(expr, term);
+      expr = new BinaryOperator("__add__", expr, term);
     } else if (operator == "-") {
-      expr = new OperatorSubtract(expr, term);
+      expr = new BinaryOperator("__sub__", expr, term);
     }
 
     parseWhitespace(state);

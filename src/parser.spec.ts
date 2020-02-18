@@ -9,6 +9,7 @@ import {
   parseStatement
 } from "./parser";
 import Scope from "./scope";
+import { NumberValue } from "./types";
 
 /**
  * Parser state
@@ -171,7 +172,7 @@ test("parseNumberLiteral: single number", () => {
   const state = new ParserState("125");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(125);
+  expect(literal!.evaluate()).toEqual(new NumberValue(125));
   expect(state.n).toBe(3);
 });
 
@@ -179,7 +180,7 @@ test("parseNumberLiteral: zero", () => {
   const state = new ParserState("0");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(0);
+  expect(literal!.evaluate()).toEqual(new NumberValue(0));
   expect(state.n).toBe(1);
 });
 
@@ -187,7 +188,7 @@ test("parseNumberLiteral: negative number", () => {
   const state = new ParserState("-125");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(-125);
+  expect(literal!.evaluate()).toEqual(new NumberValue(-125));
   expect(state.n).toBe(4);
 });
 
@@ -195,7 +196,7 @@ test("parseNumberLiteral: decimal number", () => {
   const state = new ParserState("0.4");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(0.4);
+  expect(literal!.evaluate()).toEqual(new NumberValue(0.4));
   expect(state.n).toBe(3);
 });
 
@@ -203,7 +204,7 @@ test("parseNumberLiteral: decimal-only number", () => {
   const state = new ParserState(".2");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(0.2);
+  expect(literal!.evaluate()).toEqual(new NumberValue(0.2));
   expect(state.n).toBe(2);
 });
 
@@ -211,7 +212,7 @@ test("parseNumberLiteral: negative decimal-only number", () => {
   const state = new ParserState("-.2");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(-0.2);
+  expect(literal!.evaluate()).toEqual(new NumberValue(-0.2));
   expect(state.n).toBe(3);
 });
 
@@ -219,7 +220,7 @@ test("parseNumberLiteral: binary", () => {
   const state = new ParserState("0b101010");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(42);
+  expect(literal!.evaluate()).toEqual(new NumberValue(42));
   expect(state.n).toBe(8);
 });
 
@@ -227,7 +228,7 @@ test("parseNumberLiteral: binary (negative)", () => {
   const state = new ParserState("-0b101010");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(-42);
+  expect(literal!.evaluate()).toEqual(new NumberValue(-42));
   expect(state.n).toBe(9);
 });
 
@@ -242,7 +243,7 @@ test("parseNumberLiteral: octal", () => {
   const state = new ParserState("0o123");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(83);
+  expect(literal!.evaluate()).toEqual(new NumberValue(83));
   expect(state.n).toBe(5);
 });
 
@@ -250,7 +251,7 @@ test("parseNumberLiteral: octal (negative)", () => {
   const state = new ParserState("-0o123");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(-83);
+  expect(literal!.evaluate()).toEqual(new NumberValue(-83));
   expect(state.n).toBe(6);
 });
 
@@ -265,7 +266,7 @@ test("parseNumberLiteral: hex", () => {
   const state = new ParserState("0x32");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(50);
+  expect(literal!.evaluate()).toEqual(new NumberValue(50));
   expect(state.n).toBe(4);
 });
 
@@ -273,7 +274,7 @@ test("parseNumberLiteral: hex (negative)", () => {
   const state = new ParserState("-0x32");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(-50);
+  expect(literal!.evaluate()).toEqual(new NumberValue(-50));
   expect(state.n).toBe(5);
 });
 
@@ -288,7 +289,7 @@ test("parseNumberLiteral: followed by operator", () => {
   const state = new ParserState("87456+12");
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(87456);
+  expect(literal!.evaluate()).toEqual(new NumberValue(87456));
   expect(state.n).toBe(5);
 });
 
@@ -296,7 +297,7 @@ test("parseNumberLiteral: inside substring", () => {
   const state = new ParserState("123 + 0xff + 987", 6);
   const literal = parseNumberLiteral(state);
   expect(literal).not.toBeNull();
-  expect(literal!.value).toBe(255);
+  expect(literal!.evaluate()).toEqual(new NumberValue(255));
   expect(state.n).toBe(10);
 });
 
