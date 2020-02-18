@@ -1,3 +1,5 @@
+import {ScopeDefinition} from './scope'
+
 export interface TypedValue {
   type(): TypeDefinition;
 }
@@ -7,21 +9,13 @@ export interface TypedScope extends TypedValue {
 }
 
 export interface TypeDefinition {
+
   __new__?(): TypedValue;
+  __call__?(args: TypedValue[]): TypedValue;
 
   __add__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
   __sub__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
 };
-
-export type ScopeDefinition = {
-  bindings: {
-    [name: string]: BindingDefinition
-  }
-};
-
-export type LiteralType = number | string | Function;
-
-export type BindingDefinition = LiteralType;
 
 export class NumberValue implements TypedValue {
   value: number;
@@ -43,31 +37,12 @@ export class NumberValue implements TypedValue {
   }
 }
 
-/*class Vec2 implements TypedScope {
-  values: [number, number];
+export class TypeChecker {
+  static as<T>(value: TypedValue, type: TypeDefinition): T {
+    if (value.type() !== type) {
+      throw new Error(`Type mismatch: expected ${type} but found ${value.type()}`);
+    }
 
-  constructor() {
-    this.values = [0, 0];
+    return value as any as T;
   }
-
-  type() {
-    return Vec2;
-  }
-
-  scope() {
-    return {
-      bindings: {
-        x: 0,
-        y: 0
-      }
-    };
-  }
-
-  static __new__() {
-    return new Vec2();
-  }
-
-  static __add__(lhs: Vec2, rhs: Vec2) {
-    return new NumberValue(lhs.value + rhs.value);
-  }
-}*/
+}

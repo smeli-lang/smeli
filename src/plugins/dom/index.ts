@@ -1,26 +1,23 @@
-import { TypedScope } from "../../types";
+import { TypedScope, TypedValue } from "../../types";
+import Scope, {ScopeDefinition} from "../../scope";
 
-class Hello implements TypedScope {
+class Hello implements TypedValue {
   node: HTMLDivElement;
+  scope: Scope;
 
   constructor() {
     this.node = document.createElement("div") as HTMLDivElement;
+    this.scope = new Scope(null, {
+      world: 42,
+      // world: {
+      //   value: 42,
+      //   watch: {( world }: any) => (this.node.innerText = world.value)
+      // }
+    });
   }
 
   type() {
     return Hello;
-  }
-
-  scope() {
-    return {
-      bindings: {
-        world: 42,
-        // world: {
-        //   value: 42,
-        //   watch: {( world }: any) => (this.node.innerText = world.value)
-        // }
-      }
-    };
   }
 
   static __new__() {
@@ -35,9 +32,7 @@ export default class DomPlugin implements TypedScope {
 
   scope() {
     return {
-      bindings: {
-        Hello
-      }
+      Hello
     };
   }
 

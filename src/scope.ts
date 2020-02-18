@@ -1,5 +1,5 @@
-import { Expression } from "./ast";
-import { TypedValue } from "./types";
+import { Expression, Literal } from "./ast";
+import { TypedValue, TypeDefinition, NumberValue } from "./types";
 
 export type Binding = {
   name: string;
@@ -7,13 +7,29 @@ export type Binding = {
   previousBinding: Binding | null;
 };
 
+export type ScopeDefinition = {
+  [name: string]: BindingDefinition;
+};
+
+export type LiteralType = number;// | string | Function;
+
+export type BindingDefinition = LiteralType | TypedValue | TypeDefinition;
+
 export default class Scope implements TypedValue {
   parent: Scope | null;
   bindings: Map<string, Binding>;
 
-  constructor(parent: Scope | null = null) {
+  constructor(parent: Scope | null = null, definition: ScopeDefinition | null = null) {
     this.parent = parent;
     this.bindings = new Map();
+
+    if (definition !== null) {
+      for (const name in definition) {
+        const bindingDefinition = definition[name];
+        const expression = this.makeExpression(bindingDefinition);
+        this.bind(name, expression);
+      }
+    }
   }
 
   type() {
@@ -50,6 +66,25 @@ export default class Scope implements TypedValue {
     }
 
     return this.parent?.lookup(name) || null;
+  }
+
+  private makeExpression(definition: BindingDefinition): Expression {
+    const jsType = typeof definition;
+    switch (jsType) {
+      case "number":
+        return new Literal(new NumberValue(definition as number));
+      // case "string":
+      //   return new Literal(new StringValue(definition as string));
+      // case "function":
+      //   return new Literal(new FunctionValue(definition as function));
+      default:
+        const obj = definition as object;
+        if (obj.hasOwnProperty("type")) {
+          return new Literal(obj as TypedValue);
+        }
+        else
+          throw new Error("Unexpected binding type");
+      }
   }
 
   static __new__() {
