@@ -1,5 +1,11 @@
 import Scope, { Binding } from "./scope";
-import {TypedValue, NumberValue} from './types';
+import {
+  TypedValue,
+  NumberValue,
+  TypeTraits,
+  TypeChecker,
+  TypeDefinition
+} from "./types";
 
 export interface Expression {
   // some expression have a child scope, like blocks
@@ -74,10 +80,16 @@ export class Identifier implements Expression {
 
 export class Block implements Expression {
   statements: Statement[];
+  typeIdentifier: Identifier | null;
   scope: Scope;
 
-  constructor(statements: Statement[], scope: Scope) {
+  constructor(
+    statements: Statement[],
+    typeIdentifier: Identifier | null,
+    scope: Scope
+  ) {
     this.statements = statements;
+    this.typeIdentifier = typeIdentifier;
     this.scope = scope;
   }
 
@@ -86,16 +98,31 @@ export class Block implements Expression {
   }
 
   evaluate() {
+    if (this.typeIdentifier) {
+      const typeValue = this.typeIdentifier.evaluate();
+      const type = TypeChecker.as<TypeTraits>(typeValue, TypeDefinition);
+      if (!type.__new__) {
+        throw new Error(
+          `Type ${type.__name__()} doesn't have the __new__ trait`
+        );
+      }
+    }
     return this.scope;
   }
 }
 
+export type BinaryOperatorType = "__add__" | "__sub__";
+
 export class BinaryOperator implements Expression {
-  operatorName: string;
+  operatorName: BinaryOperatorType;
   lhs: Expression;
   rhs: Expression;
 
-  constructor(operatorName: string, lhs: Expression, rhs: Expression) {
+  constructor(
+    operatorName: BinaryOperatorType,
+    lhs: Expression,
+    rhs: Expression
+  ) {
     this.operatorName = operatorName;
     this.lhs = lhs;
     this.rhs = rhs;
@@ -113,13 +140,17 @@ export class BinaryOperator implements Expression {
     const rtype = rvalue.type();
 
     if (ltype !== rtype) {
-      throw new Error(`Operands must have the same type for operator ${this.operatorName}`);
+      throw new Error(
+        `Operands must have the same type for operator ${this.operatorName}`
+      );
     }
 
-    const operator = ltype.__add__;
+    const operator = ltype[this.operatorName];
 
     if (!operator) {
-      throw new Error(`Operator ${this.operatorName} not defined for type ${ltype}`);
+      throw new Error(
+        `Operator ${this.operatorName} not defined for type ${ltype}`
+      );
     }
 
     return operator(lvalue, rvalue);
@@ -200,7 +231,10 @@ export class Comment implements Statement {
       throw new Error("Comment already bound");
     }
 
-    this.binding = this.scope.bind("commentLine", new Literal(new NumberValue(this.line)));
+    this.binding = this.scope.bind(
+      "commentLine",
+      new Literal(new NumberValue(this.line))
+    );
   }
 
   unbind() {

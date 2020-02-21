@@ -1,5 +1,5 @@
 import { Expression, Literal } from "./ast";
-import { TypedValue, TypeDefinition, NumberValue } from "./types";
+import { TypedValue, TypeDefinition, NumberValue, TypeTraits } from "./types";
 
 export type Binding = {
   name: string;
@@ -13,13 +13,14 @@ export type ScopeDefinition = {
 
 export type LiteralType = number;// | string | Function;
 
-export type BindingDefinition = LiteralType | TypedValue | TypeDefinition;
+export type BindingDefinition = LiteralType | TypedValue;
 
 export default class Scope implements TypedValue {
   parent: Scope | null;
   bindings: Map<string, Binding>;
 
   constructor(parent: Scope | null = null, definition: ScopeDefinition | null = null) {
+
     this.parent = parent;
     this.bindings = new Map();
 
@@ -30,10 +31,6 @@ export default class Scope implements TypedValue {
         this.bind(name, expression);
       }
     }
-  }
-
-  type() {
-    return Scope;
   }
 
   bind(name: string, expression: Expression): Binding {
@@ -87,7 +84,14 @@ export default class Scope implements TypedValue {
       }
   }
 
-  static __new__() {
-    return new Scope();
+  type() {
+    return ScopeType;
   }
+}
+
+export const ScopeType: TypeTraits = {
+  __name__: () => "scope",
+  __new__: () => new Scope(),
+
+  type: () => TypeDefinition
 }

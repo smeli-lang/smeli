@@ -1,11 +1,18 @@
-import { TypedScope, TypedValue } from "../../types";
-import Scope, {ScopeDefinition} from "../../scope";
+import {
+  TypedScope,
+  TypedValue,
+  TypeDefinition,
+  TypeTraits
+} from "../../types";
+import Scope, { ScopeDefinition } from "../../scope";
+import { type } from "os";
 
-class Hello implements TypedValue {
+/*class Hello extends TypeDefinition {
   node: HTMLDivElement;
   scope: Scope;
 
   constructor() {
+    super();
     this.node = document.createElement("div") as HTMLDivElement;
     this.scope = new Scope(null, {
       world: 42,
@@ -16,27 +23,46 @@ class Hello implements TypedValue {
     });
   }
 
-  type() {
-    return Hello;
-  }
-
   static __new__() {
     return new Hello();
   }
+}*/
+
+interface DomNode extends TypedValue {
+  node: HTMLElement;
 }
 
-export default class DomPlugin implements TypedScope {
+class Slider implements DomNode {
+  node: HTMLElement;
+
+  constructor() {
+    this.node = new HTMLElement();
+  }
+
   type() {
-    return DomPlugin;
-  }
-
-  scope() {
-    return {
-      Hello
-    };
-  }
-
-  static __new__() {
-    return new DomPlugin();
+    return SliderType;
   }
 }
+
+const SliderType: TypeTraits = {
+  __name__: () => "slider",
+  type: () => TypeDefinition
+};
+
+export default class DomPlugin implements TypedValue {
+  container: HTMLElement;
+
+  constructor(container: HTMLElement) {
+    this.container = container;
+  }
+
+  type() {
+    return DomPluginType;
+  }
+}
+
+export const DomPluginType: TypeTraits = {
+  __name__: () => "dom",
+
+  type: () => TypeDefinition
+};

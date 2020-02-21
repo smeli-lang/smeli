@@ -6,10 +6,10 @@ import {
   BinaryOperator,
   Expression,
   Comment,
-  Block,
+  Block
 } from "./ast";
 import Scope from "./scope";
-import {NumberValue} from './types';
+import { NumberValue } from "./types";
 
 // grammar
 // program ::= block EOF
@@ -206,7 +206,7 @@ export function parseBlock(state: ParserState): Block | null {
     return null;
   }
 
-  return new Block(statements, scope);
+  return new Block(statements, null, scope);
 }
 
 export function parseTerm(state: ParserState) {
