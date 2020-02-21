@@ -20,6 +20,12 @@ export default class Engine {
     this.globalScope.bind("closure", new Literal(FunctionType));
     this.globalScope.bind("max", new Literal(new FunctionValue(max)));
 
+    // plugins
+    plugins.forEach(plugin => {
+      const pluginName = plugin.type().__name__();
+      this.globalScope.bind(pluginName, new Literal(plugin));
+    });
+
     const state = new ParserState(code, 0, this.globalScope, "smeli");
     this.rootStatements = parseStatementList(state);
     this.allStatements = state.allStatements;

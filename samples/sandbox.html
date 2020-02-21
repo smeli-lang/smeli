@@ -8,6 +8,7 @@
         const textArea = document.querySelector("#code");
         const scopeView = document.querySelector("#scope");
         const messageView = document.querySelector("#messages");
+        const previewContainer = document.querySelector("#preview");
 
         function printScope(scope, indent) {
           let str = "";
@@ -46,7 +47,9 @@
 
         function reload() {
           const code = textArea.value;
-          const engine = new smeli.Engine(code);
+          const engine = new smeli.Engine(code, [
+            new smeli.DomPlugin(previewContainer)
+          ]);
 
           try {
             const globalScope = engine.step(engine.allStatements.length);
@@ -102,9 +105,15 @@ b = a - 30
         style="background-color: #222; color: #f55; padding: 20px;"
       ></div>
     </div>
-    <pre
-      id="scope"
-      style="flex: 1; background-color:#ddd; padding: 20px; margin: 0; font-family: Consolas"
-    ></pre>
+    <div style="flex: 1; display: flex; flex-direction: column;">
+      <pre
+        id="scope"
+        style="flex: 1; background-color:#ddd; padding: 20px; margin: 0; font-family: Consolas"
+      ></pre>
+      <div
+        id="preview"
+        style="background-color: #fff; color: #222; flex: 1;"
+      ></div>
+    </div>
   </body>
 </html>
