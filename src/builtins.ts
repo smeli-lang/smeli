@@ -10,10 +10,12 @@ import {
 } from "./types";
 
 export function max(args: TypedValue[]): TypedValue {
-  const x = TypeChecker.as<NumberValue>(args[0], NumberType);
-  const y = TypeChecker.as<NumberValue>(args[1], NumberType);
-
-  const result = Math.max(x.value, y.value);
+  const result = Math.max(
+    ...args.map(arg => {
+      const numberValue = TypeChecker.as<NumberValue>(arg, NumberType);
+      return numberValue.value;
+    })
+  );
   return new NumberValue(result);
 }
 
