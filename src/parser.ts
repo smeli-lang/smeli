@@ -6,7 +6,8 @@ import {
   BinaryOperator,
   Expression,
   Comment,
-  Block
+  Block,
+  FunctionCall
 } from "./ast";
 import Scope from "./scope";
 import { NumberValue } from "./types";
@@ -185,7 +186,10 @@ export function parseIdentifier(state: ParserState) {
   return new Identifier(names, scope);
 }
 
-export function parseBlock(state: ParserState): Block | null {
+export function parseBlock(
+  state: ParserState,
+  typeIdentifier: Identifier | null
+): Block | null {
   if (!state.match("{")) {
     return null;
   }
@@ -206,13 +210,53 @@ export function parseBlock(state: ParserState): Block | null {
     return null;
   }
 
-  return new Block(statements, null, scope);
+  return new Block(statements, typeIdentifier, scope);
+}
+
+export function parseFunctionCall(state: ParserState, identifier: Identifier) {
+  if (!state.match("(")) {
+    return null;
+  }
+
+  const args: Expression[] = [];
+  do {
+    parseWhitespace(state);
+    const arg = parseExpression(state);
+    if (!arg) {
+      state.reportError("Invalid expression");
+      return null;
+    }
+    args.push(arg);
+
+    parseWhitespace(state);
+  } while (state.match(","));
+
+  if (!state.match(")")) {
+    state.reportError("Unterminated function call, missing ')'");
+    return null;
+  }
+
+  return new FunctionCall(identifier, args);
+}
+
+export function parseAtom(state: ParserState) {
+  const identifier = parseIdentifier(state);
+  if (identifier) {
+    parseWhitespace(state);
+    if (state.peek() == "{") {
+      return parseBlock(state, identifier);
+    } else if (state.peek() == "(") {
+      return parseFunctionCall(state, identifier);
+    } else {
+      return identifier;
+    }
+  }
+
+  return parseNumberLiteral(state) || parseBlock(state, null);
 }
 
 export function parseTerm(state: ParserState) {
-  return (
-    parseNumberLiteral(state) || parseIdentifier(state) || parseBlock(state)
-  );
+  return parseAtom(state);
 }
 
 export function parseExpression(state: ParserState) {

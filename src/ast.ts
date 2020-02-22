@@ -4,7 +4,9 @@ import {
   NumberValue,
   TypeTraits,
   TypeChecker,
-  TypeDefinition
+  TypeDefinition,
+  FunctionValue,
+  FunctionType
 } from "./types";
 
 export interface Expression {
@@ -108,6 +110,34 @@ export class Block implements Expression {
       }
     }
     return this.scope;
+  }
+}
+
+export class FunctionCall implements Expression {
+  identifier: Identifier;
+  args: Expression[];
+
+  constructor(identifier: Identifier, args: Expression[]) {
+    this.identifier = identifier;
+    this.args = args;
+  }
+
+  getChildScope() {
+    return null;
+  }
+
+  evaluate() {
+    const functionValue = this.identifier.evaluate();
+    const functionType = functionValue.type();
+
+    if (!functionType.__call__) {
+      throw new Error(`${this.identifier.name} is not a function`);
+    }
+
+    return functionType.__call__(
+      functionValue,
+      this.args.map(arg => arg.evaluate())
+    );
   }
 }
 
