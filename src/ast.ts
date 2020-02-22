@@ -179,7 +179,7 @@ export class BinaryOperator implements Expression {
 
     if (!operator) {
       throw new Error(
-        `Operator ${this.operatorName} not defined for type ${ltype}`
+        `Operator ${this.operatorName} not defined for type ${ltype.__name__()}`
       );
     }
 
