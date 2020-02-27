@@ -1,32 +1,5 @@
-import {
-  TypedScope,
-  TypedValue,
-  TypeDefinition,
-  TypeTraits
-} from "../../types";
-import Scope, { ScopeDefinition } from "../../scope";
-import { type } from "os";
-
-/*class Hello extends TypeDefinition {
-  node: HTMLDivElement;
-  scope: Scope;
-
-  constructor() {
-    super();
-    this.node = document.createElement("div") as HTMLDivElement;
-    this.scope = new Scope(null, {
-      world: 42,
-      // world: {
-      //   value: 42,
-      //   watch: {( world }: any) => (this.node.innerText = world.value)
-      // }
-    });
-  }
-
-  static __new__() {
-    return new Hello();
-  }
-}*/
+import { TypedValue, TypeDefinition, TypeTraits } from "../../types";
+import Scope from "../../scope";
 
 interface DomNode extends TypedValue {
   node: HTMLElement;
@@ -34,9 +7,11 @@ interface DomNode extends TypedValue {
 
 class Slider implements DomNode {
   node: HTMLElement;
+  scope: Scope;
 
-  constructor() {
+  constructor(scope: Scope) {
     this.node = new HTMLElement();
+    this.scope = scope;
   }
 
   type() {
@@ -46,6 +21,8 @@ class Slider implements DomNode {
 
 const SliderType: TypeTraits = {
   __name__: () => "slider",
+  __new__: (scope: Scope) => new Slider(scope),
+
   type: () => TypeDefinition
 };
 

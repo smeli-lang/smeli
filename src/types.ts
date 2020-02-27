@@ -1,18 +1,15 @@
-import { ScopeDefinition } from "./scope";
+import Scope, { ScopeDefinition } from "./scope";
 
 export interface TypedValue {
   type(): TypeTraits;
 }
 
-export interface TypedScope extends TypedValue {
-  scope(): ScopeDefinition;
-}
-
 export interface TypeTraits extends TypedValue {
   __name__(): string;
 
-  __new__?(): TypedValue;
+  __new__?(scope: Scope): TypedValue;
   __call__?(self: TypedValue, args: TypedValue[]): TypedValue;
+  __scope__?(self: TypedValue): Scope;
 
   __add__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
   __sub__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
