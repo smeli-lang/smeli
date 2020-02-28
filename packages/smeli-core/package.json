@@ -1,0 +1,13 @@
+{
+  "name": "@smeli/core",
+  "version": "0.0.0",
+  "description": "Self-Modifying Expression Language for Interactivity",
+  "main": "dist/smeli.min.js",
+  "module": "src/index.ts",
+  "author": "Remi Papillie (wsmind)",
+  "license": "MIT",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch"
+  }
+}

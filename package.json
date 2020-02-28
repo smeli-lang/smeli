@@ -1,15 +1,18 @@
 {
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "name": "smeli",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Self-Modifying Expression Language for Interactivity",
-  "main": "dist/smeli.min.js",
-  "module": "src/index.ts",
   "author": "Remi Papillie (wsmind)",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^25.1.2",
     "@types/node": "^13.7.0",
     "jest": "^25.1.0",
+    "lerna": "^3.20.2",
     "ts-jest": "^25.2.0",
     "ts-loader": "^6.2.1",
     "typescript": "^3.7.5",
@@ -17,8 +20,8 @@
     "webpack-cli": "^3.3.10"
   },
   "scripts": {
-    "build": "webpack",
-    "watch": "webpack --watch",
-    "test": "jest"
+    "build": "lerna run build",
+    "test": "jest",
+    "watch": "lerna run --parallel watch"
   }
 }

@@ -1,11 +1,11 @@
 import {
+  Scope,
+  ScopeDefinition,
   TypedScope,
   TypedValue,
   TypeDefinition,
   TypeTraits
-} from "../../types";
-import Scope, { ScopeDefinition } from "../../scope";
-import { type } from "os";
+} from "@smeli/core";
 
 /*class Hello extends TypeDefinition {
   node: HTMLDivElement;
