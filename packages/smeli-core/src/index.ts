@@ -1,3 +1,3 @@
 export { default as Engine } from "./engine";
-export * from "./scope";
-export { TypeDefinition } from "./types";
+export { default as Scope } from "./scope";
+export { TypedValue, TypeDefinition, TypeTraits } from "./types";
