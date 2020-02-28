@@ -4,7 +4,6 @@ import {
   parseEndOfLine,
   parseNumberLiteral,
   parseIdentifier,
-  parseBlock,
   parseComment,
   parseStatement
 } from "./parser";
@@ -392,7 +391,7 @@ test("parseComment: marker level 6", () => {
  */
 
 test("parseStatement: single line", () => {
-  const state = new ParserState("a = 12 + 15");
+  const state = new ParserState("a: 12 + 15");
   const statement = parseStatement(state);
   expect(statement).not.toBeNull();
   expect(state.n).toBe(state.str.length);

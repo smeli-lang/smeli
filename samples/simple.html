@@ -29,25 +29,25 @@
         `;
 
         const scopeTest = `
-          plop = {
-            a = 42
-            b = a + 4
+          plop: {
+            a: 42
+            b: a + 4
           }
 
           #>> same
-          plop.a = 42
-          plop.b = plop.a + 4
+          plop.a: 42
+          plop.b: plop.a + 4
 
-          c = plop.a + plop.b
+          c: plop.a + plop.b
 
-          plop.a = 12
+          plop.a: 12
 
-          plop = {
-            a = -10
-            b = -20
+          plop: {
+            a: -10
+            b: -20
           }
 
-          plop.a = 120
+          plop.a: 120
         `;
 
         const engine = new smeli.Engine(scopeTest);

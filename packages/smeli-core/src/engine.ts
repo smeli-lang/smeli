@@ -1,8 +1,8 @@
 import { Statement, Literal } from "./ast";
 import { ParserState, parseStatementList, ParserReport } from "./parser";
 import Scope from "./scope";
-import { TypedValue, NumberType, FunctionType, FunctionValue } from "./types";
-import { max } from "./builtins";
+import { TypedValue } from "./types";
+import Builtins from "./builtins";
 
 export default class Engine {
   globalScope: Scope;
@@ -16,9 +16,7 @@ export default class Engine {
     this.globalScope = new Scope();
 
     // add builtins here
-    this.globalScope.bind("number", new Literal(NumberType));
-    this.globalScope.bind("closure", new Literal(FunctionType));
-    this.globalScope.bind("max", new Literal(new FunctionValue(max)));
+    const builtins = new Builtins(this.globalScope);
 
     // plugins
     plugins.forEach(plugin => {

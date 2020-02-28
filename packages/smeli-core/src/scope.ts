@@ -11,16 +11,18 @@ export type ScopeDefinition = {
   [name: string]: BindingDefinition;
 };
 
-export type LiteralType = number;// | string | Function;
+export type LiteralType = number; // | string | Function;
 
-export type BindingDefinition = LiteralType | TypedValue;
+export type BindingDefinition = LiteralType | TypedValue | Expression;
 
 export default class Scope implements TypedValue {
   parent: Scope | null;
   bindings: Map<string, Binding>;
 
-  constructor(parent: Scope | null = null, definition: ScopeDefinition | null = null) {
-
+  constructor(
+    parent: Scope | null = null,
+    definition: ScopeDefinition | null = null
+  ) {
     this.parent = parent;
     this.bindings = new Map();
 
@@ -33,7 +35,8 @@ export default class Scope implements TypedValue {
     }
   }
 
-  bind(name: string, expression: Expression): Binding {
+  bind(name: string, definition: BindingDefinition): Binding {
+    const expression = this.makeExpression(definition);
     const previousBinding = this.bindings.get(name) || null;
     const binding = {
       name,
@@ -76,12 +79,12 @@ export default class Scope implements TypedValue {
       //   return new Literal(new FunctionValue(definition as function));
       default:
         const obj = definition as object;
-        if (obj.hasOwnProperty("type")) {
+        if ("type" in obj) {
           return new Literal(obj as TypedValue);
+        } else {
+          return definition as Expression;
         }
-        else
-          throw new Error("Unexpected binding type");
-      }
+    }
   }
 
   type() {
@@ -91,7 +94,7 @@ export default class Scope implements TypedValue {
 
 export const ScopeType: TypeTraits = {
   __name__: () => "scope",
-  __new__: () => new Scope(),
+  __scope__: (self: Scope) => self,
 
   type: () => TypeDefinition
-}
+};

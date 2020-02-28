@@ -6,7 +6,7 @@ import {
   BinaryOperator,
   Expression,
   Comment,
-  Block,
+  ScopeExpression,
   FunctionCall
 } from "./ast";
 import Scope from "./scope";
@@ -17,7 +17,7 @@ import { NumberValue } from "./types";
 // block ::= (statement?, LINE_END)*
 // statement ::= comment | assignment
 // comment ::= COMMENT_PREFIX TEXT_LINE
-// assignment ::= identifier "=" expression
+// assignment ::= identifier ":" expression
 // identifier ::= NAME ("." NAME)*
 // expression ::= ...
 
@@ -186,10 +186,10 @@ export function parseIdentifier(state: ParserState) {
   return new Identifier(names, scope);
 }
 
-export function parseBlock(
+export function parseScopeExpression(
   state: ParserState,
   typeIdentifier: Identifier | null
-): Block | null {
+): ScopeExpression | null {
   if (!state.match("{")) {
     return null;
   }
@@ -210,7 +210,7 @@ export function parseBlock(
     return null;
   }
 
-  return new Block(statements, typeIdentifier, scope);
+  return new ScopeExpression(statements, typeIdentifier, scope);
 }
 
 export function parseFunctionCall(state: ParserState, identifier: Identifier) {
@@ -244,7 +244,7 @@ export function parseAtom(state: ParserState) {
   if (identifier) {
     parseWhitespace(state);
     if (state.peek() == "{") {
-      return parseBlock(state, identifier);
+      return parseScopeExpression(state, identifier);
     } else if (state.peek() == "(") {
       return parseFunctionCall(state, identifier);
     } else {
@@ -252,7 +252,7 @@ export function parseAtom(state: ParserState) {
     }
   }
 
-  return parseNumberLiteral(state) || parseBlock(state, null);
+  return parseNumberLiteral(state) || parseScopeExpression(state, null);
 }
 
 export function parseTerm(state: ParserState) {
@@ -326,8 +326,8 @@ export function parseAssignment(state: ParserState) {
   }
 
   parseWhitespace(state);
-  if (!state.match("=")) {
-    state.reportError("Expected '=' here");
+  if (!state.match(":")) {
+    state.reportError("Expected ':' here");
     return null;
   }
 

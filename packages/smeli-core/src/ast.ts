@@ -4,9 +4,7 @@ import {
   NumberValue,
   TypeTraits,
   TypeChecker,
-  TypeDefinition,
-  FunctionValue,
-  FunctionType
+  TypeDefinition
 } from "./types";
 
 export interface Expression {
@@ -80,7 +78,7 @@ export class Identifier implements Expression {
   }
 }
 
-export class Block implements Expression {
+export class ScopeExpression implements Expression {
   statements: Statement[];
   typeIdentifier: Identifier | null;
   scope: Scope;
@@ -108,6 +106,9 @@ export class Block implements Expression {
           `Type ${type.__name__()} doesn't have the __new__ trait`
         );
       }
+
+      const value = type.__new__(this.scope);
+      return value;
     }
     return this.scope;
   }
