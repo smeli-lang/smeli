@@ -7,7 +7,7 @@ import {
   parseComment,
   parseStatement
 } from "./parser";
-import Scope from "./scope";
+import { Scope } from "./scope";
 import { NumberValue } from "./types";
 
 /**

@@ -15,7 +15,7 @@ export type LiteralType = number; // | string | Function;
 
 export type BindingDefinition = LiteralType | TypedValue | Expression;
 
-export default class Scope implements TypedValue {
+export class Scope implements TypedValue {
   parent: Scope | null;
   bindings: Map<string, Binding>;
 

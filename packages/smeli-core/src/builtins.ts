@@ -8,7 +8,7 @@ import {
   TypeTraits,
   FunctionType
 } from "./types";
-import Scope from "./scope";
+import { Scope } from "./scope";
 
 /*class Hello extends TypeDefinition {
   node: HTMLDivElement;
@@ -62,7 +62,7 @@ function max(args: TypedValue[]): TypedValue {
   return new NumberValue(result);
 }
 
-export default class Builtins implements TypedValue {
+export class Builtins implements TypedValue {
   scope: Scope;
 
   constructor(scope: Scope) {

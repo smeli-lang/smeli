@@ -1,10 +1,10 @@
 import { Statement, Literal } from "./ast";
 import { ParserState, parseStatementList, ParserReport } from "./parser";
-import Scope from "./scope";
+import { Scope } from "./scope";
 import { TypedValue } from "./types";
-import Builtins from "./builtins";
+import { Builtins } from "./builtins";
 
-export default class Engine {
+export class Engine {
   globalScope: Scope;
   rootStatements: Statement[];
   messages: ParserReport[];

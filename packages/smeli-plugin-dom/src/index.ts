@@ -25,7 +25,7 @@ const SliderType: TypeTraits = {
   type: () => TypeDefinition
 };
 
-export default class DomPlugin implements TypedValue {
+export class DomPlugin implements TypedValue {
   container: HTMLElement;
 
   constructor(container: HTMLElement) {

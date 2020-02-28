@@ -1,4 +1,4 @@
-import Scope, { ScopeDefinition } from "./scope";
+import { Scope, ScopeDefinition } from "./scope";
 
 export interface TypedValue {
   type(): TypeTraits;

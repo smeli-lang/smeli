@@ -1,4 +1,4 @@
-import Engine from "./engine";
+import { Engine } from "./engine";
 import { TypeChecker, NumberValue, NumberType } from "./types";
 
 test("should run a basic statement", () => {

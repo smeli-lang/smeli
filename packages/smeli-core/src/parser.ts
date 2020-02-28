@@ -9,7 +9,7 @@ import {
   ScopeExpression,
   FunctionCall
 } from "./ast";
-import Scope from "./scope";
+import { Scope } from "./scope";
 import { NumberValue } from "./types";
 
 // grammar

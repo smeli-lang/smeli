@@ -1,4 +1,4 @@
-import Scope, { Binding } from "./scope";
+import { Scope, Binding } from "./scope";
 import {
   TypedValue,
   NumberValue,
