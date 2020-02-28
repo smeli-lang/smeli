@@ -3,6 +3,7 @@
   <head>
     <title>Hello Smeli!</title>
     <script src="../packages/smeli-core/dist/smeli-core.min.js"></script>
+    <script src="../packages/smeli-plugin-dom/dist/smeli-plugin-dom.min.js"></script>
     <script>
       window.onload = () => {
         const textArea = document.querySelector("#code");
@@ -48,7 +49,7 @@
         function reload() {
           const code = textArea.value;
           const engine = smeli.compile(code, [
-            new smeli.DomPlugin(previewContainer)
+            new smeliPluginDom.DomPlugin(previewContainer)
           ]);
 
           try {

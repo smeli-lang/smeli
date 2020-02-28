@@ -4,8 +4,22 @@
   "description": "DOM plugin for smeli",
   "author": "Remi Papillie (wsmind)",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wsmind/smeli",
+    "directory": "packages/smeli-plugin-dom"
+  },
+  "main": "dist/smeli-plugin-dom.min.js",
+  "types": "dist/smeli-plugin-dom.min.d.ts",
+  "files": [
+    "dist"
+  ],
+  "module": "src/index.ts",
   "peerDependencies": {
     "@smeli/core": "*"
   },
-  "scripts": {}
+  "scripts": {
+    "build": "rimraf dist && webpack",
+    "watch": "webpack --watch"
+  }
 }
