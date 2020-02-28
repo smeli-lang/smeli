@@ -2,12 +2,21 @@
   "name": "@smeli/core",
   "version": "0.0.0",
   "description": "Self-Modifying Expression Language for Interactivity",
-  "main": "dist/smeli.min.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wsmind/smeli",
+    "directory": "packages/smeli-core"
+  },
+  "main": "dist/smeli-core.min.js",
+  "types": "dist/smeli-core.min.d.ts",
+  "files": [
+    "dist/*"
+  ],
   "module": "src/index.ts",
   "author": "Remi Papillie (wsmind)",
   "license": "MIT",
   "scripts": {
-    "build": "webpack",
+    "build": "rimraf dist && webpack",
     "watch": "webpack --watch"
   }
 }
