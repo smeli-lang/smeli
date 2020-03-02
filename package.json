@@ -25,6 +25,6 @@
     "build": "lerna run build",
     "test": "jest",
     "watch": "lerna run --parallel watch",
-    "bump": "lerna version"
+    "bump": "lerna version --no-push && echo Version updated, please remember to push with the --follow-tags option"
   }
 }
