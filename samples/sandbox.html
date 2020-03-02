@@ -48,9 +48,7 @@
 
         function reload() {
           const code = textArea.value;
-          const engine = smeli.compile(code, [
-            new smeliPluginDom.DomPlugin(previewContainer)
-          ]);
+          const engine = smeli(code, [smeliPluginDom(previewContainer)]);
 
           try {
             const globalScope = engine.step(engine.allStatements.length);

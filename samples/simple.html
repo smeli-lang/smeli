@@ -50,7 +50,7 @@
           plop.a: 120
         `;
 
-        const engine = smeli.compile(scopeTest);
+        const engine = smeli(scopeTest);
         console.log(engine);
 
         const globalScope = engine.step(3);
