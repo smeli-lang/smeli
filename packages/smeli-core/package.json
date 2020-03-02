@@ -1,6 +1,6 @@
 {
   "name": "@smeli/core",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Self-Modifying Expression Language for Interactivity",
   "author": "Remi Papillie (wsmind)",
   "license": "MIT",
