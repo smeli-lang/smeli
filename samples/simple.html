@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>Hello Smeli!</title>
-    <script src="../packages/smeli-core/dist/smeli-core.min.js"></script>
+    <script src="../packages/smeli-core/dist/smeli-core.umd.js"></script>
     <script>
       window.onload = () => {
         const code = `
@@ -50,7 +50,7 @@
           plop.a: 120
         `;
 
-        const engine = smeli(scopeTest);
+        const engine = smeli.smeli(scopeTest);
         console.log(engine);
 
         const globalScope = engine.step(3);

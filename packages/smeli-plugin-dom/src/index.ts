@@ -43,15 +43,8 @@ export const DomPluginType: TypeTraits = {
   type: () => TypeDefinition
 };
 
-const smeliPluginDom = (container: HTMLElement) => {
+const load = (container: HTMLElement) => {
   return new DomPlugin(container);
 };
 
-// following the same pattern as @smeli/core, see index file there
-// for more information
-const namedExports = module.exports;
-
-module.exports = smeliPluginDom;
-for (const name in namedExports) {
-  module.exports[name] = namedExports[name];
-}
+export { load };

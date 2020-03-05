@@ -4,19 +4,20 @@
   "description": "Self-Modifying Expression Language for Interactivity",
   "author": "Remi Papillie (wsmind)",
   "license": "MIT",
+  "main": "dist/smeli-core.umd.js",
+  "browser": "dist/smeli-core.umd.js",
+  "module": "dist/smeli-core.esm.js",
+  "types": "dist/smeli-core.esm.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/wsmind/smeli",
     "directory": "packages/smeli-core"
   },
-  "main": "dist/smeli-core.min.js",
-  "types": "dist/smeli-core.min.d.ts",
+  "scripts": {
+    "build": "rimraf dist && rollup -c",
+    "watch": "rollup -c -w"
+  },
   "files": [
     "dist"
-  ],
-  "module": "src/index.ts",
-  "scripts": {
-    "build": "rimraf dist && webpack",
-    "watch": "webpack --watch"
-  }
+  ]
 }
