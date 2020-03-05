@@ -1,10 +1,10 @@
 import { Engine } from "./engine";
-import { TypedValue } from "./types";
+import { TypeTraits } from "./types";
 
-export { Scope } from "./scope";
+export * from "./scope";
 export * from "./types";
 
-const load = (code: string, plugins: TypedValue[] = []) => {
+const load = (code: string, plugins: TypeTraits[] = []) => {
   return new Engine(code, plugins);
 };
 

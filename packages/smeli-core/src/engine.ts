@@ -1,7 +1,7 @@
-import { Statement, Literal } from "./ast";
+import { Statement, Literal, ScopeExpression, Identifier } from "./ast";
 import { ParserState, parseStatementList, ParserReport } from "./parser";
 import { Scope } from "./scope";
-import { TypedValue } from "./types";
+import { TypeTraits } from "./types";
 import { Builtins } from "./builtins";
 
 export class Engine {
@@ -12,7 +12,7 @@ export class Engine {
   allStatements: Statement[];
   nextStatement: number = 0;
 
-  constructor(code: string, plugins: TypedValue[] = []) {
+  constructor(code: string, plugins: TypeTraits[] = []) {
     this.globalScope = new Scope();
 
     // add builtins here
@@ -20,8 +20,20 @@ export class Engine {
 
     // plugins
     plugins.forEach(plugin => {
-      const pluginName = plugin.type().__name__();
-      this.globalScope.bind(pluginName, new Literal(plugin));
+      const pluginName = plugin.__name__();
+      const pluginTypeName = `__plugin_${pluginName}__`;
+
+      // bind type first
+      this.globalScope.bind(pluginTypeName, new Literal(plugin));
+
+      // create a dedicated scope for the plugin
+      const scope = new Scope(this.globalScope);
+      const expression = new ScopeExpression(
+        [],
+        new Identifier([pluginTypeName], this.globalScope),
+        scope
+      );
+      this.globalScope.bind(pluginName, expression);
     });
 
     const state = new ParserState(code, 0, this.globalScope, "smeli");

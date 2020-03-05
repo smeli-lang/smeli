@@ -101,13 +101,13 @@ export class ScopeExpression implements Expression {
     if (this.typeIdentifier) {
       const typeValue = this.typeIdentifier.evaluate();
       const type = TypeChecker.as<TypeTraits>(typeValue, TypeDefinition);
-      if (!type.__new__) {
+      if (!type.__bind__) {
         throw new Error(
-          `Type ${type.__name__()} doesn't have the __new__ trait`
+          `Type ${type.__name__()} doesn't have the __bind__ trait`
         );
       }
 
-      const value = type.__new__(this.scope);
+      const value = type.__bind__(this.scope);
       return value;
     }
     return this.scope;

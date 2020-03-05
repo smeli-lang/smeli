@@ -25,10 +25,6 @@ import { Scope } from "./scope";
       // }
     });
   }
-
-  static __new__() {
-    return new Hello();
-  }
 }*/
 
 class Hello implements TypedValue {
@@ -47,7 +43,6 @@ class Hello implements TypedValue {
 
 const HelloType: TypeTraits = {
   __name__: () => "hello",
-  __new__: (scope: Scope) => new Hello(scope),
 
   type: () => TypeDefinition
 };
@@ -81,9 +76,6 @@ export class Builtins implements TypedValue {
 
 export const BuiltinsType: TypeTraits = {
   __name__: () => "builtins",
-  __new__: (scope: Scope) => new Builtins(scope),
-
-  __scope__: (self: Builtins) => self.scope,
 
   type: () => TypeDefinition
 };

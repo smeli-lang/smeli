@@ -1,4 +1,10 @@
-import { Scope, TypedValue, TypeDefinition, TypeTraits } from "@smeli/core";
+import {
+  Scope,
+  Binding,
+  TypedValue,
+  TypeDefinition,
+  TypeTraits
+} from "@smeli/core";
 
 interface DomNode extends TypedValue {
   node: HTMLElement;
@@ -9,9 +15,13 @@ class Slider implements DomNode {
   scope: Scope;
 
   constructor(scope: Scope) {
-    this.node = new HTMLElement();
+    this.node = document.createElement("div");
     this.scope = scope;
+
+    this.scope.bind("value", 42);
   }
+
+  unbind() {}
 
   type() {
     return SliderType;
@@ -20,31 +30,54 @@ class Slider implements DomNode {
 
 const SliderType: TypeTraits = {
   __name__: () => "slider",
-  __new__: (scope: Scope) => new Slider(scope),
+
+  __bind__: (scope: Scope) => new Slider(scope),
+  __unbind__: (self: Slider) => self.unbind(),
 
   type: () => TypeDefinition
 };
 
 export class DomPlugin implements TypedValue {
   container: HTMLElement;
+  scope: Scope;
+  dynamicType: TypeTraits;
 
-  constructor(container: HTMLElement) {
+  plop: any;
+
+  constructor(container: HTMLElement, scope: Scope, dynamicType: TypeTraits) {
     this.container = container;
+    this.scope = scope;
+    this.dynamicType = dynamicType;
+
+    this.container.innerHTML = "Hello World!";
+
+    this.plop = this.scope.bind("hello", 42);
+    this.scope.bind("slider", SliderType);
+  }
+
+  unbind() {
+    this.scope.unbind(this.plop);
+    this.plop = null;
+
+    this.container.innerHTML = "DOM plugin unbound";
   }
 
   type() {
-    return DomPluginType;
+    return this.dynamicType;
   }
 }
 
-export const DomPluginType: TypeTraits = {
-  __name__: () => "dom",
-
-  type: () => TypeDefinition
-};
-
 const load = (container: HTMLElement) => {
-  return new DomPlugin(container);
+  const DomPluginType: TypeTraits = {
+    __name__: () => "dom",
+
+    __bind__: (scope: Scope) => new DomPlugin(container, scope, DomPluginType),
+    __unbind__: (self: DomPlugin) => self.unbind(),
+
+    type: () => TypeDefinition
+  };
+
+  return DomPluginType;
 };
 
 export { load };

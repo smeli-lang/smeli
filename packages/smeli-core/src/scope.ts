@@ -94,7 +94,6 @@ export class Scope implements TypedValue {
 
 export const ScopeType: TypeTraits = {
   __name__: () => "scope",
-  __scope__: (self: Scope) => self,
 
   type: () => TypeDefinition
 };

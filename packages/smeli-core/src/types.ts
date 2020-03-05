@@ -7,9 +7,10 @@ export interface TypedValue {
 export interface TypeTraits extends TypedValue {
   __name__(): string;
 
-  __new__?(scope: Scope): TypedValue;
   __call__?(self: TypedValue, args: TypedValue[]): TypedValue;
-  __scope__?(self: TypedValue): Scope;
+
+  __bind__?(scope: Scope): TypedValue;
+  __unbind__?(self: TypedValue): void;
 
   __add__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
   __sub__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
@@ -19,7 +20,7 @@ export interface TypeTraits extends TypedValue {
 
 export const TypeDefinition: TypeTraits = {
   __name__: () => "type",
-  __str__: (self: TypeTraits) => self.__name__(),
+  __str__: (self: TypeTraits) => `[${self.__name__()}]`,
 
   // this recursive definition is the root metatype of all other types
   type: () => TypeDefinition
