@@ -29,8 +29,7 @@ export class Scope implements TypedValue {
     if (definition !== null) {
       for (const name in definition) {
         const bindingDefinition = definition[name];
-        const expression = this.makeExpression(bindingDefinition);
-        this.bind(name, expression);
+        this.bind(name, bindingDefinition);
       }
     }
   }
