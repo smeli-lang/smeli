@@ -8,7 +8,8 @@ test("should run a basic statement", () => {
 
   engine.step(1);
 
-  const result = engine.globalScope.lookup("a")?.expression.evaluate() || null;
+  const result =
+    engine.globalScope.lookup("a")?.expression.evaluate({}) || null;
   expect(result).not.toBeNull();
 
   const numberValue = TypeChecker.as<NumberValue>(
