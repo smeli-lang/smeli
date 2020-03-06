@@ -4,14 +4,17 @@ import {
   NumberValue,
   TypeTraits,
   TypeChecker,
-  TypeDefinition
+  TypeDefinition,
+  FunctionValue
 } from "./types";
+
+export type ParameterList = { [key: string]: TypedValue };
 
 export interface Expression {
   // some expression have a child scope, like blocks
   getChildScope(): Scope | null;
 
-  evaluate(): TypedValue;
+  evaluate(params: ParameterList): TypedValue;
 }
 
 export class Literal implements Expression {
@@ -25,7 +28,7 @@ export class Literal implements Expression {
     return null;
   }
 
-  evaluate() {
+  evaluate(params: ParameterList) {
     return this.value;
   }
 }
@@ -48,14 +51,19 @@ export class Identifier implements Expression {
     return null;
   }
 
-  evaluate() {
+  evaluate(params: ParameterList) {
+    // basic, first test implementation (no scope support)
+    if (this.name in params) {
+      return params[this.name];
+    }
+
     const scope = this.resolveScope();
     const binding = scope.lookup(this.name);
     if (!binding) {
       throw new Error("Undefined symbol: " + this.name);
     }
 
-    return binding.expression.evaluate();
+    return binding.expression.evaluate(params);
   }
 
   resolveScope() {
@@ -97,9 +105,9 @@ export class ScopeExpression implements Expression {
     return this.scope;
   }
 
-  evaluate() {
+  evaluate(params: ParameterList) {
     if (this.typeIdentifier) {
-      const typeValue = this.typeIdentifier.evaluate();
+      const typeValue = this.typeIdentifier.evaluate(params);
       const type = TypeChecker.as<TypeTraits>(typeValue, TypeDefinition);
       if (!type.__bind__) {
         throw new Error(
@@ -111,6 +119,39 @@ export class ScopeExpression implements Expression {
       return value;
     }
     return this.scope;
+  }
+}
+
+export class LambdaExpression implements Expression {
+  args: Identifier[];
+  body: Expression;
+
+  constructor(args: Identifier[], body: Expression) {
+    this.args = args;
+    this.body = body;
+  }
+
+  getChildScope() {
+    return null;
+  }
+
+  evaluate(params: ParameterList) {
+    return new FunctionValue(args => {
+      if (args.length !== this.args.length) {
+        throw new Error(
+          `Argument mismatch: expected ${this.args.length} but got ${args.length}`
+        );
+      }
+
+      // remap positional arguments to names
+      const childParams: ParameterList = { ...params };
+      args.forEach((value, index) => {
+        const name = this.args[index].name;
+        childParams[name] = value;
+      });
+
+      return this.body.evaluate(childParams);
+    });
   }
 }
 
@@ -127,8 +168,8 @@ export class FunctionCall implements Expression {
     return null;
   }
 
-  evaluate() {
-    const functionValue = this.identifier.evaluate();
+  evaluate(params: ParameterList) {
+    const functionValue = this.identifier.evaluate(params);
     const functionType = functionValue.type();
 
     if (!functionType.__call__) {
@@ -137,7 +178,7 @@ export class FunctionCall implements Expression {
 
     return functionType.__call__(
       functionValue,
-      this.args.map(arg => arg.evaluate())
+      this.args.map(arg => arg.evaluate(params))
     );
   }
 }
@@ -163,9 +204,9 @@ export class BinaryOperator implements Expression {
     return null;
   }
 
-  evaluate() {
-    const lvalue = this.lhs.evaluate();
-    const rvalue = this.rhs.evaluate();
+  evaluate(params: ParameterList) {
+    const lvalue = this.lhs.evaluate(params);
+    const rvalue = this.rhs.evaluate(params);
 
     const ltype = lvalue.type();
     const rtype = rvalue.type();

@@ -7,7 +7,8 @@ import {
   Expression,
   Comment,
   ScopeExpression,
-  FunctionCall
+  FunctionCall,
+  LambdaExpression
 } from "./ast";
 import { Scope } from "./scope";
 import { NumberValue } from "./types";
@@ -213,6 +214,41 @@ export function parseScopeExpression(
   return new ScopeExpression(statements, typeIdentifier, scope);
 }
 
+export function parseLambdaExpression(
+  state: ParserState,
+  identifier: Identifier
+): LambdaExpression | null {
+  // argument list
+  const argNames: Identifier[] = [identifier];
+  while (state.match(",")) {
+    parseWhitespace(state);
+
+    const nextArgument = parseIdentifier(state);
+    if (!nextArgument) {
+      state.reportError("Expected identifier");
+      return null;
+    }
+    argNames.push(nextArgument);
+
+    parseWhitespace(state);
+  }
+
+  if (!state.match("=>")) {
+    state.reportError("Invalid lambda expression, expected '=>' here");
+    return null;
+  }
+
+  parseWhitespace(state);
+
+  const body = parseExpression(state);
+  if (!body) {
+    state.reportError("Invalid lambda body, expected expression");
+    return null;
+  }
+
+  return new LambdaExpression(argNames, body);
+}
+
 export function parseFunctionCall(state: ParserState, identifier: Identifier) {
   if (!state.match("(")) {
     return null;
@@ -243,12 +279,16 @@ export function parseAtom(state: ParserState) {
   const identifier = parseIdentifier(state);
   if (identifier) {
     parseWhitespace(state);
-    if (state.peek() == "{") {
-      return parseScopeExpression(state, identifier);
-    } else if (state.peek() == "(") {
-      return parseFunctionCall(state, identifier);
-    } else {
-      return identifier;
+    switch (state.peek()) {
+      case "{":
+        return parseScopeExpression(state, identifier);
+      case "(":
+        return parseFunctionCall(state, identifier);
+      case "=": // first character of the arrow "=>"
+      case ",":
+        return parseLambdaExpression(state, identifier);
+      default:
+        return identifier;
     }
   }
 

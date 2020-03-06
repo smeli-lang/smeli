@@ -15,7 +15,7 @@
           let str = "";
           scope.bindings.forEach((binding, name) => {
             try {
-              const value = binding.expression.evaluate();
+              const value = binding.expression.evaluate({});
               str += "  ".repeat(indent);
               const childScope = binding.expression.getChildScope();
               if (childScope) {
@@ -97,6 +97,22 @@ plop.a: 120
 # other scope
 a: 42
 b: a - 30
+
+# lambda function tests
+constant: 42
+
+# multiple args
+f: x, y => x + y + constant
+v: f(10, 20)
+
+# currying
+g: x => y => x + y + constant
+v2: g(10)
+v3: v2(20)
+
+# higher-order function
+h: fn => fn(constant)
+v4: h(x => x - 30)
 </textarea
       >
       <div
