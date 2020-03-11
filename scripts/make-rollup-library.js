@@ -1,9 +1,10 @@
+import pug from "rollup-plugin-pug";
 import ts from "@wessberg/rollup-plugin-ts";
 import { terser } from "rollup-plugin-terser";
 
 const makeRollupLibrary = (pkg, name) => ({
   input: "src/index.ts",
-  plugins: [ts(), terser()],
+  plugins: [pug(), ts(), terser()],
   output: [
     // UMD for browser and node
     {

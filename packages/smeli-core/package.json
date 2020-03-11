@@ -14,7 +14,8 @@
     "directory": "packages/smeli-core"
   },
   "scripts": {
-    "build": "rimraf dist && rollup -c",
+    "clean": "rimraf dist",
+    "build": "yarn clean && rollup -c",
     "watch": "rollup -c -w"
   },
   "files": [

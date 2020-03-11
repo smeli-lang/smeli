@@ -23,7 +23,11 @@
     "@smeli/core": "*"
   },
   "scripts": {
-    "build": "rimraf dist && rollup -c",
+    "clean": "rimraf dist",
+    "build": "yarn clean && rollup -c",
     "watch": "rollup -c -w"
+  },
+  "dependencies": {
+    "pug": "^2.0.4"
   }
 }

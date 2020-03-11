@@ -1,41 +1,5 @@
-import {
-  Scope,
-  Binding,
-  TypedValue,
-  TypeDefinition,
-  TypeTraits
-} from "@smeli/core";
-
-interface DomNode extends TypedValue {
-  node: HTMLElement;
-}
-
-class Slider implements DomNode {
-  node: HTMLElement;
-  scope: Scope;
-
-  constructor(scope: Scope) {
-    this.node = document.createElement("div");
-    this.scope = scope;
-
-    this.scope.bind("value", 42);
-  }
-
-  unbind() {}
-
-  type() {
-    return SliderType;
-  }
-}
-
-const SliderType: TypeTraits = {
-  __name__: () => "slider",
-
-  __bind__: (scope: Scope) => new Slider(scope),
-  __unbind__: (self: Slider) => self.unbind(),
-
-  type: () => TypeDefinition
-};
+import { Scope, TypedValue, TypeDefinition, TypeTraits } from "@smeli/core";
+import { SliderType } from "./slider";
 
 export class DomPlugin implements TypedValue {
   container: HTMLElement;
