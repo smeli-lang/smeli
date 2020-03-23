@@ -3,22 +3,79 @@
   "name": "Smeli",
   "patterns": [
     {
-      "include": "#keywords"
+      "include": "#comment"
     },
     {
-      "include": "#strings"
+      "include": "#statement"
     }
   ],
   "repository": {
-    "keywords": {
+    "comment": {
+      "patterns": [
+        {
+          "name": "markup.heading",
+          "match": "#>.*"
+        },
+        {
+          "name": "comment.line",
+          "match": "#.*"
+        }
+      ]
+    },
+    "statement": {
+      "patterns": [
+        {
+          "name": "variable.name.smeli",
+          "match": "[^:]+(?=:)"
+        },
+        {
+          "include": "#expression"
+        }
+      ]
+    },
+    "expression": {
+      "patterns": [
+        {
+          "include": "#number"
+        },
+        {
+          "include": "#keyword"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#scope_type"
+        },
+        {
+          "include": "#function_call"
+        },
+        {
+          "include": "#name"
+        }
+      ]
+    },
+    "number": {
+      "patterns": [
+        {
+          "name": "constant.numeric",
+          "match": "-?(([1-9]+[0-9]*)|([0-9]*\\.[0-9]+)|(0b[01]+)|(0o[0-7]+)|(0x[0-9a-fA-F]+)|0)\\b"
+        }
+      ]
+    },
+    "keyword": {
       "patterns": [
         {
           "name": "keyword.control.smeli",
           "match": "\\b(if|while|for|return)\\b"
+        },
+        {
+          "name": "keyword.operator.smeli",
+          "match": "\\b(\\+|-|\\.)\\b"
         }
       ]
     },
-    "strings": {
+    "string": {
       "name": "string.quoted.double.smeli",
       "begin": "\"",
       "end": "\"",
@@ -26,6 +83,30 @@
         {
           "name": "constant.character.escape.smeli",
           "match": "\\\\."
+        }
+      ]
+    },
+    "scope_type": {
+      "patterns": [
+        {
+          "name": "entity.name.type.smeli",
+          "match": "[_a-zA-Z][_.a-zA-Z0-9]*(?=\\s*{)"
+        }
+      ]
+    },
+    "function_call": {
+      "patterns": [
+        {
+          "name": "entity.name.function.smeli",
+          "match": "[_a-zA-Z][_.a-zA-Z0-9]*(?=\\s*\\()"
+        }
+      ]
+    },
+    "name": {
+      "patterns": [
+        {
+          "name": "variable.name.smeli",
+          "match": "\\b[_a-zA-Z][_a-zA-Z0-9]*\\b"
         }
       ]
     }
