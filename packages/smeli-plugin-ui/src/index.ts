@@ -2,12 +2,12 @@ import { Scope } from "@smeli/core";
 import { DomNode, DomNodeType } from "./types";
 import { slider } from "./slider";
 
-export type DomPluginOptions = {
+export type UiPluginOptions = {
   container: HTMLElement;
 };
 
-const load = ({ container }: DomPluginOptions) => ({
-  name: "dom",
+const load = ({ container }: UiPluginOptions) => ({
+  name: "ui",
   bindings: [
     {
       name: "page",
@@ -23,7 +23,7 @@ const load = ({ container }: DomPluginOptions) => ({
 
         return page;
       },
-      invalidate: () => (container.innerHTML = "DOM plugin unbound")
+      invalidate: () => (container.innerHTML = "UI plugin unbound")
     },
     slider
   ]

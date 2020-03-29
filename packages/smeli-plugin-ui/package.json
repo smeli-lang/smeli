@@ -1,17 +1,17 @@
 {
-  "name": "@smeli/plugin-dom",
+  "name": "@smeli/plugin-ui",
   "version": "0.0.1",
-  "description": "DOM plugin for smeli",
+  "description": "UI plugin for smeli",
   "author": "Remi Papillie (wsmind)",
   "license": "MIT",
-  "main": "dist/smeli-plugin-dom.umd.js",
-  "browser": "dist/smeli-plugin-dom.umd.js",
-  "module": "dist/smeli-plugin-dom.esm.js",
-  "types": "dist/smeli-plugin-dom.esm.d.ts",
+  "main": "dist/smeli-plugin-ui.umd.js",
+  "browser": "dist/smeli-plugin-ui.umd.js",
+  "module": "dist/smeli-plugin-ui.esm.js",
+  "types": "dist/smeli-plugin-ui.esm.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/wsmind/smeli",
-    "directory": "packages/smeli-plugin-dom"
+    "directory": "packages/smeli-plugin-ui"
   },
   "files": [
     "dist"
