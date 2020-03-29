@@ -1,20 +1,11 @@
-import { Scope, Binding } from "./scope";
-import {
-  TypedValue,
-  NumberValue,
-  TypeTraits,
-  TypeChecker,
-  TypeDefinition,
-  FunctionValue
-} from "./types";
+import { Binding, Scope, ScopeType } from "./scope";
+import { TypedValue, NumberValue, TypeChecker, FunctionValue } from "./types";
 
 export type ParameterList = { [key: string]: TypedValue };
 
 export interface Expression {
-  // some expression have a child scope, like blocks
-  getChildScope(): Scope | null;
-
-  evaluate(params: ParameterList): TypedValue;
+  evaluate(scope: Scope): TypedValue;
+  invalidate?(value: TypedValue): void;
 }
 
 export class Literal implements Expression {
@@ -24,11 +15,7 @@ export class Literal implements Expression {
     this.value = value;
   }
 
-  getChildScope() {
-    return null;
-  }
-
-  evaluate(params: ParameterList) {
+  evaluate(scope: Scope) {
     return this.value;
   }
 }
@@ -37,88 +24,35 @@ export class Identifier implements Expression {
   scopeNames: string[];
   name: string;
 
-  scope: Scope;
-
-  constructor(names: string[], scope: Scope) {
+  constructor(names: string[]) {
     this.scopeNames = names.slice(0, names.length - 1);
     this.name = names[names.length - 1];
-    this.scope = scope;
   }
 
-  getChildScope() {
-    // identifiers only reference their scope to resolve
-    // the names at evaluation time, but they don't own them
-    return null;
-  }
-
-  evaluate(params: ParameterList) {
-    // basic, first test implementation (no scope support)
-    if (this.name in params) {
-      return params[this.name];
+  evaluate(scope: Scope) {
+    for (let i = 0; i < this.scopeNames.length; i++) {
+      const next = scope.evaluate(this.scopeNames[i]);
+      scope = TypeChecker.as<Scope>(next, ScopeType);
     }
 
-    const scope = this.resolveScope();
-    const binding = scope.lookup(this.name);
-    if (!binding) {
-      throw new Error("Undefined symbol: " + this.name);
-    }
-
-    return binding.expression.evaluate(params);
-  }
-
-  resolveScope() {
-    let scope = this.scope;
-    this.scopeNames.forEach(scopeName => {
-      const binding = scope.lookup(scopeName);
-      if (!binding) {
-        throw new Error("Undefined symbol: " + scopeName);
-      }
-
-      const childScope = binding.expression.getChildScope();
-      if (!childScope) {
-        throw new Error(`${scopeName} is not a block`);
-      }
-
-      scope = childScope;
-    });
-
-    return scope;
+    return scope.evaluate(this.name);
   }
 }
 
 export class ScopeExpression implements Expression {
   statements: Statement[];
   typeIdentifier: Identifier | null;
-  scope: Scope;
 
-  constructor(
-    statements: Statement[],
-    typeIdentifier: Identifier | null,
-    scope: Scope
-  ) {
+  constructor(statements: Statement[], typeIdentifier: Identifier | null) {
     this.statements = statements;
     this.typeIdentifier = typeIdentifier;
-    this.scope = scope;
   }
 
-  getChildScope() {
-    return this.scope;
-  }
+  evaluate(parentScope: Scope) {
+    const scope = new Scope(parentScope);
+    this.statements.forEach(statement => scope.push(statement.binding));
 
-  evaluate(params: ParameterList) {
-    if (this.typeIdentifier) {
-      const typeValue = this.typeIdentifier.evaluate(params);
-      const type = TypeChecker.as<TypeTraits>(typeValue, TypeDefinition);
-      if (!type.__bind__) {
-        throw new Error(
-          `Type ${type.__name__()} doesn't have the __bind__ trait`
-        );
-      }
-
-      const value = type.__bind__(this.scope);
-      return value;
-    }
-    return this.scope;
+    return scope;
   }
 }
 
@@ -131,26 +65,24 @@ export class LambdaExpression implements Expression {
     this.body = body;
   }
 
-  getChildScope() {
-    return null;
-  }
-
-  evaluate(params: ParameterList) {
+  evaluate(scope: Scope) {
     return new FunctionValue(args => {
-      if (args.length !== this.args.length) {
-        throw new Error(
-          `Argument mismatch: expected ${this.args.length} but got ${args.length}`
-        );
-      }
+      return this.body.evaluate(scope);
 
-      // remap positional arguments to names
-      const childParams: ParameterList = { ...params };
-      args.forEach((value, index) => {
-        const name = this.args[index].name;
-        childParams[name] = value;
-      });
+      // if (args.length !== this.args.length) {
+      //   throw new Error(
+      //     `Argument mismatch: expected ${this.args.length} but got ${args.length}`
+      //   );
+      // }
 
-      return this.body.evaluate(childParams);
+      // // remap positional arguments to names
+      // const childParams: ParameterList = { ...params };
+      // args.forEach((value, index) => {
+      //   const name = this.args[index].name;
+      //   childParams[name] = value;
+      // });
+
+      // return this.body.evaluate(childParams);
     });
   }
 }
@@ -164,12 +96,8 @@ export class FunctionCall implements Expression {
     this.args = args;
   }
 
-  getChildScope() {
-    return null;
-  }
-
-  evaluate(params: ParameterList) {
-    const functionValue = this.identifier.evaluate(params);
+  evaluate(scope: Scope) {
+    const functionValue = this.identifier.evaluate(scope);
     const functionType = functionValue.type();
 
     if (!functionType.__call__) {
@@ -178,7 +106,7 @@ export class FunctionCall implements Expression {
 
     return functionType.__call__(
       functionValue,
-      this.args.map(arg => arg.evaluate(params))
+      this.args.map(arg => arg.evaluate(scope))
     );
   }
 }
@@ -200,13 +128,9 @@ export class BinaryOperator implements Expression {
     this.rhs = rhs;
   }
 
-  getChildScope() {
-    return null;
-  }
-
-  evaluate(params: ParameterList) {
-    const lvalue = this.lhs.evaluate(params);
-    const rvalue = this.rhs.evaluate(params);
+  evaluate(scope: Scope) {
+    const lvalue = this.lhs.evaluate(scope);
+    const rvalue = this.rhs.evaluate(scope);
 
     const ltype = lvalue.type();
     const rtype = rvalue.type();
@@ -232,54 +156,26 @@ export class BinaryOperator implements Expression {
 export interface Statement {
   line: number;
   markerLevel: number;
-
-  bind(): void;
-  unbind(): void;
+  binding: Binding | Binding[];
 }
 
-export class Assignment implements Statement {
+export class BindingDefinition implements Statement {
   line: number;
   markerLevel: number = 0;
+  binding: Binding;
+
   identifier: Identifier;
-  expression: Expression | null = null;
-  scope: Scope;
+  expression: Expression;
 
-  binding: Binding | null;
-  bindingScope: Scope | null;
-
-  constructor(line: number, identifier: Identifier, scope: Scope) {
+  constructor(line: number, identifier: Identifier, expression: Expression) {
     this.line = line;
     this.identifier = identifier;
-    this.scope = scope;
+    this.expression = expression;
 
-    this.binding = null;
-    this.bindingScope = null;
-  }
-
-  bind() {
-    if (this.binding) {
-      throw new Error("Assignment already bound");
-    }
-
-    if (!this.expression) {
-      throw new Error("Cannot bind assignment: invalid expression");
-    }
-
-    this.bindingScope = this.identifier.resolveScope();
-    this.binding = this.bindingScope.bind(
-      this.identifier.name,
-      this.expression
-    );
-  }
-
-  unbind() {
-    if (!this.binding) {
-      throw new Error("Assignment already unbound");
-    }
-
-    this.bindingScope?.unbind(this.binding);
-    this.binding = null;
-    this.bindingScope = null;
+    this.binding = {
+      name: identifier.name,
+      evaluate: scope => expression.evaluate(scope)
+    };
   }
 }
 
@@ -287,34 +183,17 @@ export class Comment implements Statement {
   line: number;
   markerLevel: number;
   text: string;
-  scope: Scope;
 
-  binding: Binding | null = null;
+  binding: Binding;
 
-  constructor(line: number, text: string, markerLevel: number, scope: Scope) {
+  constructor(line: number, text: string, markerLevel: number) {
     this.line = line;
-    this.markerLevel = markerLevel;
     this.text = text;
-    this.scope = scope;
-  }
+    this.markerLevel = markerLevel;
 
-  bind() {
-    if (this.binding) {
-      throw new Error("Comment already bound");
-    }
-
-    this.binding = this.scope.bind(
-      "commentLine",
-      new Literal(new NumberValue(this.line))
-    );
-  }
-
-  unbind() {
-    if (!this.binding) {
-      throw new Error("Comment already unbound");
-    }
-
-    this.scope.unbind(this.binding);
-    this.binding = null;
+    this.binding = {
+      name: "commentLine",
+      evaluate: () => new NumberValue(this.line)
+    };
   }
 }

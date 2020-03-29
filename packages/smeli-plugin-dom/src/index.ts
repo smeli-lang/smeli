@@ -1,47 +1,32 @@
-import { Scope, TypedValue, TypeDefinition, TypeTraits } from "@smeli/core";
-import { SliderType } from "./slider";
+import { Scope } from "@smeli/core";
+import { DomNode, DomNodeType } from "./types";
+import { slider } from "./slider";
 
-export class DomPlugin implements TypedValue {
+export type DomPluginOptions = {
   container: HTMLElement;
-  scope: Scope;
-  dynamicType: TypeTraits;
-
-  plop: any;
-
-  constructor(container: HTMLElement, scope: Scope, dynamicType: TypeTraits) {
-    this.container = container;
-    this.scope = scope;
-    this.dynamicType = dynamicType;
-
-    this.container.innerHTML = "Hello World!";
-
-    this.plop = this.scope.bind("hello", 42);
-    this.scope.bind("slider", SliderType);
-  }
-
-  unbind() {
-    this.scope.unbind(this.plop);
-    this.plop = null;
-
-    this.container.innerHTML = "DOM plugin unbound";
-  }
-
-  type() {
-    return this.dynamicType;
-  }
-}
-
-const load = (container: HTMLElement) => {
-  const DomPluginType: TypeTraits = {
-    __name__: () => "dom",
-
-    __bind__: (scope: Scope) => new DomPlugin(container, scope, DomPluginType),
-    __unbind__: (self: DomPlugin) => self.unbind(),
-
-    type: () => TypeDefinition
-  };
-
-  return DomPluginType;
 };
+
+const load = ({ container }: DomPluginOptions) => ({
+  name: "dom",
+  bindings: [
+    {
+      name: "page",
+      evaluate: () => new DomNode(document.createElement("div"))
+    },
+    {
+      name: "#update",
+      evaluate: (scope: Scope) => {
+        container.innerHTML = "Hello World!";
+
+        const page = scope.evaluate("page", DomNodeType) as DomNode;
+        container.appendChild(page.node);
+
+        return page;
+      },
+      invalidate: () => (container.innerHTML = "DOM plugin unbound")
+    },
+    slider
+  ]
+});
 
 export { load };

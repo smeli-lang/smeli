@@ -2,7 +2,7 @@ import {
   Identifier,
   Literal,
   Statement,
-  Assignment,
+  BindingDefinition,
   BinaryOperator,
   Expression,
   Comment,
@@ -40,8 +40,6 @@ export type ParserReport = {
 export class ParserState {
   str: string;
   n: number;
-  scopes: Scope[];
-  allStatements: Statement[];
 
   currentLine: number;
   currentLineStartIndex: number;
@@ -52,13 +50,10 @@ export class ParserState {
   constructor(
     inputString: string,
     startIndex: number = 0,
-    parentScope: Scope | null = null,
     fileName: string = ""
   ) {
     this.str = inputString;
     this.n = startIndex;
-    this.scopes = [parentScope || new Scope()];
-    this.allStatements = [];
 
     this.currentLine = 0;
     this.currentLineStartIndex = startIndex;
@@ -89,10 +84,6 @@ export class ParserState {
     } else {
       return this.matchRegex(pattern);
     }
-  }
-
-  appendStatement(statement: Statement) {
-    this.allStatements.push(statement);
   }
 
   reportError(message: string) {
@@ -183,8 +174,7 @@ export function parseIdentifier(state: ParserState) {
     names.push(name);
   } while (state.match("."));
 
-  const scope = state.scopes[state.scopes.length - 1];
-  return new Identifier(names, scope);
+  return new Identifier(names);
 }
 
 export function parseScopeExpression(
@@ -195,23 +185,15 @@ export function parseScopeExpression(
     return null;
   }
 
-  // create a child scope for this block
-  const parentScope = state.scopes[state.scopes.length - 1];
-  const scope = new Scope(parentScope);
-  state.scopes.push(scope);
-
   // parse inside the block
   const statements = parseStatementList(state);
-
-  // exit the scope
-  state.scopes.pop();
 
   if (!state.match("}")) {
     state.reportError("Unterminated block, missing '}'");
     return null;
   }
 
-  return new ScopeExpression(statements, typeIdentifier, scope);
+  return new ScopeExpression(statements, typeIdentifier);
 }
 
 export function parseLambdaExpression(
@@ -348,11 +330,7 @@ export function parseComment(state: ParserState) {
 
   const text = state.match(TEXT_LINE)?.trim() || "";
 
-  const scope = state.scopes[state.scopes.length - 1];
-
-  const comment = new Comment(currentLine, text, markerLevel, scope);
-  state.appendStatement(comment);
-
+  const comment = new Comment(currentLine, text, markerLevel);
   return comment;
 }
 
@@ -377,18 +355,13 @@ export function parseAssignment(state: ParserState) {
     return null;
   }
 
-  const scope = state.scopes[state.scopes.length - 1];
-  const assignment = new Assignment(currentLine, identifier, scope);
-
-  // make sure the statement is registered before its child expression
-  state.appendStatement(assignment);
-
   const expression = parseExpression(state);
   if (!expression) {
     state.reportError("Invalid expression");
     return null;
   }
-  assignment.expression = expression;
+
+  const assignment = new BindingDefinition(currentLine, identifier, expression);
 
   return assignment;
 }

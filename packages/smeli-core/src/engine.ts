@@ -1,57 +1,40 @@
 import { Statement, Literal, ScopeExpression, Identifier } from "./ast";
 import { ParserState, parseStatementList, ParserReport } from "./parser";
 import { Scope } from "./scope";
-import { TypeTraits } from "./types";
-import { Builtins } from "./builtins";
+import { builtins } from "./builtins";
+import { PluginDefinition, pushPlugin } from "./plugins";
 
 export class Engine {
   globalScope: Scope;
   rootStatements: Statement[];
   messages: ParserReport[];
 
-  allStatements: Statement[];
   nextStatement: number = 0;
 
-  constructor(code: string, plugins: TypeTraits[] = []) {
+  constructor(code: string, plugins: PluginDefinition[] = []) {
     this.globalScope = new Scope();
 
     // add builtins here
-    const builtins = new Builtins(this.globalScope);
+    this.globalScope.push(builtins);
 
     // plugins
-    plugins.forEach(plugin => {
-      const pluginName = plugin.__name__();
-      const pluginTypeName = `__plugin_${pluginName}__`;
+    plugins.forEach(plugin => pushPlugin(this.globalScope, plugin));
 
-      // bind type first
-      this.globalScope.bind(pluginTypeName, new Literal(plugin));
-
-      // create a dedicated scope for the plugin
-      const scope = new Scope(this.globalScope);
-      const expression = new ScopeExpression(
-        [],
-        new Identifier([pluginTypeName], this.globalScope),
-        scope
-      );
-      this.globalScope.bind(pluginName, expression);
-    });
-
-    const state = new ParserState(code, 0, this.globalScope, "smeli");
+    const state = new ParserState(code, 0, "smeli");
     this.rootStatements = parseStatementList(state);
-    this.allStatements = state.allStatements;
     this.messages = state.messages;
   }
 
   step(count: number) {
-    while (count > 0 && this.nextStatement < this.allStatements.length) {
-      const statement = this.allStatements[this.nextStatement++];
-      statement.bind();
+    while (count > 0 && this.nextStatement < this.rootStatements.length) {
+      const statement = this.rootStatements[this.nextStatement++];
+      this.globalScope.push(statement.binding);
       count--;
     }
 
     while (count < 0 && this.nextStatement > 0) {
-      const statement = this.allStatements[--this.nextStatement];
-      statement.unbind();
+      const statement = this.rootStatements[--this.nextStatement];
+      this.globalScope.pop(statement.binding);
       count++;
     }
 

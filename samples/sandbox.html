@@ -11,31 +11,34 @@
         const messageView = document.querySelector("#messages");
         const previewContainer = document.querySelector("#preview");
 
+        function escapeMarkup(str) {
+          return str.replace("<", "&lt;").replace(">", "&gt;");
+        }
+
         function printScope(scope, indent) {
           let str = "";
-          scope.bindings.forEach((binding, name) => {
+          for (let name of scope.bindings.keys()) {
             try {
-              const value = binding.expression.evaluate({});
+              const value = scope.evaluate(name);
               str += "  ".repeat(indent);
-              const childScope = binding.expression.getChildScope();
-              if (childScope) {
-                const childContent = printScope(childScope, indent + 1);
+              if (value.type() === smeli.ScopeType) {
+                const childContent = printScope(value, indent + 1);
                 str +=
                   `${name} = {<br />${childContent}` +
                   "  ".repeat(indent) +
                   "}<br />";
               } else {
-                const typeDef = value.type();
-                const valueString = typeDef.__str__(value);
-                const typeString = typeDef.type().__str__(typeDef);
-                str += `${name} = ${valueString} ${typeString} <br />`;
+                const type = value.type();
+                const valueString = escapeMarkup(type.__str__(value));
+                const typeString = escapeMarkup(type.__name__());
+                str += `${name} = ${valueString} [${typeString}] <br />`;
               }
             } catch (e) {
               str +=
                 "  ".repeat(indent) +
                 `<span style="color: #d44">${name} - ${e.message}</span><br />`;
             }
-          });
+          }
 
           return str;
         }
@@ -48,10 +51,12 @@
 
         function reload() {
           const code = textArea.value;
-          const engine = smeli.load(code, [smeliDom.load(previewContainer)]);
+          const engine = smeli.load(code, [
+            smeliDom.load({ container: previewContainer })
+          ]);
 
           try {
-            const globalScope = engine.step(engine.allStatements.length);
+            const globalScope = engine.step(engine.rootStatements.length);
             scopeView.innerHTML = printScope(globalScope, 0);
             messageView.innerHTML = printMessages(engine.messages);
           } catch (e) {

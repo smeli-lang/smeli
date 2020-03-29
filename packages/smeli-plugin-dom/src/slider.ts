@@ -1,54 +1,81 @@
-import { Scope, TypedValue, TypeDefinition, TypeTraits } from "@smeli/core";
 import template from "./slider.pug";
+import { Scope, NumberValue } from "@smeli/core";
+import { DomNode } from "./types";
 
-interface DomNode extends TypedValue {
-  node: HTMLElement;
-}
+export const slider = {
+  name: "slider",
+  evaluate: (parentScope: Scope) => {
+    return new Scope(parentScope, [
+      {
+        name: "min",
+        evaluate: () => new NumberValue(0)
+      },
+      {
+        name: "max",
+        evaluate: () => new NumberValue(100)
+      },
+      {
+        name: "value",
+        evaluate: () => new NumberValue(42)
+      },
+      {
+        name: "node",
+        //readOnly: true,
+        evaluate: (scope: Scope) => {
+          const node = document.createElement("div");
+          node.innerHTML = template({});
 
-class Slider implements DomNode {
-  node: HTMLElement;
-  scope: Scope;
+          const slider = node.querySelector(".slider") as HTMLInputElement;
 
-  constructor(scope: Scope) {
-    this.node = document.createElement("div");
-    this.scope = scope;
+          function handleInput() {
+            scope.push({
+              name: "value",
+              evaluate: () => new NumberValue(parseInt(slider.value))
+            });
+          }
 
-    this.scope.bind("value", 42);
-    this.update({ value: 42 });
+          slider.addEventListener("input", handleInput);
+
+          slider.min = (scope.evaluate("min") as NumberValue).value.toString();
+          slider.max = (scope.evaluate("max") as NumberValue).value.toString();
+          slider.value = (scope.evaluate(
+            "value"
+          ) as NumberValue).value.toString();
+
+          return new DomNode(node);
+        }
+      }
+    ]);
   }
-
-  update(evaluatedScope: any) {
-    // render with the updated values
-    this.node.innerHTML = template(evaluatedScope);
-
-    const slider = this.node.querySelector(".slider") as HTMLInputElement;
-    slider.addEventListener("input", () => {
-      this.scope.bind("value", parseInt(slider.value));
-    });
-
-    const root = document.querySelector("#preview") as HTMLElement;
-    root.appendChild(this.node);
-  }
-
-  unbind() {
-    // destroy the whole subtree and the associated callbacks
-    this.node.innerHTML = "";
-  }
-
-  type() {
-    return SliderType;
-  }
-}
-
-const SliderType: TypeTraits = {
-  __name__: () => "slider",
-  __str__: (self: Slider) =>
-    `slider(${(self.node.querySelector(".slider") as HTMLInputElement).value})`,
-
-  __bind__: (scope: Scope) => new Slider(scope),
-  __unbind__: (self: Slider) => self.unbind(),
-
-  type: () => TypeDefinition
+  //invalidate: (scope: Scope) => scope.dispose();
 };
 
-export { SliderType };
+// evaluate: (scope: Scope) => {
+//   const node = document.createElement("div");
+//   node.innerHTML = template();
+
+//   const slider = this.node.querySelector(".slider") as HTMLInputElement;
+
+//   function handleInput() {
+//     scope.bind("value", parseInt(slider.value));
+//   }
+
+//   return [
+//     () => {
+//       slider.addEventListener("input", handleInput);
+
+//       return () => {
+//         slider.min = scope.evaluate("min");
+//         slider.max = scope.evaluate("max");
+
+//         return () => {
+//           slider.value = scope.evaluate("value");
+//           return node;
+//         };
+//       };
+//     },
+//     () => {
+//       slider.removeEventListener("input", handleInput);
+//     }
+//   ];
+// }

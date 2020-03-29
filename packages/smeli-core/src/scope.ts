@@ -1,89 +1,93 @@
-import { Expression, Literal } from "./ast";
-import { TypedValue, TypeDefinition, NumberValue, TypeTraits } from "./types";
+import { TypeTraits, TypedValue } from "./types";
 
 export type Binding = {
   name: string;
-  expression: Expression;
-  previousBinding: Binding | null;
+  evaluate: (scope: Scope) => TypedValue;
+  invalidate?: () => void;
 };
-
-export type ScopeDefinition = {
-  [name: string]: BindingDefinition;
-};
-
-export type LiteralType = number; // | string | Function;
-
-export type BindingDefinition = LiteralType | TypedValue | Expression;
 
 export class Scope implements TypedValue {
   parent: Scope | null;
-  bindings: Map<string, Binding>;
+  bindings: Map<string, Binding[]>;
 
   constructor(
     parent: Scope | null = null,
-    definition: ScopeDefinition | null = null
+    initialBindings: Binding | Binding[] | null = null
   ) {
     this.parent = parent;
     this.bindings = new Map();
 
-    if (definition !== null) {
-      for (const name in definition) {
-        const bindingDefinition = definition[name];
-        this.bind(name, bindingDefinition);
-      }
+    if (initialBindings) {
+      this.push(initialBindings);
     }
   }
 
-  bind(name: string, definition: BindingDefinition): Binding {
-    const expression = this.makeExpression(definition);
-    const previousBinding = this.bindings.get(name) || null;
-    const binding = {
-      name,
-      expression,
-      previousBinding
-    };
+  push(binding: Binding | Binding[]) {
+    if (Array.isArray(binding)) {
+      binding.forEach(item => this.push(item));
+      return;
+    }
 
-    this.bindings.set(name, binding);
-
-    return binding;
+    let stack = this.bindings.get(binding.name);
+    if (!stack) {
+      stack = [];
+      this.bindings.set(binding.name, stack);
+    }
+    stack.push(binding);
   }
 
-  unbind(binding: Binding) {
-    const previousBinding = binding.previousBinding;
+  pop(binding: Binding | Binding[]) {
+    if (Array.isArray(binding)) {
+      // unbind in reverse order
+      for (let i = binding.length - 1; i >= 0; i--) {
+        this.pop(binding[i]);
+      }
+      return;
+    }
 
-    if (previousBinding) {
-      this.bindings.set(binding.name, previousBinding);
-    } else {
+    const stack = this.bindings.get(binding.name);
+    if (!stack) {
+      throw new Error(`No previous definition found for '${binding.name}'`);
+    }
+
+    const check = stack.pop();
+    if (binding !== check) {
+      throw new Error(`Wrong unbinding order for '${binding.name}'`);
+    }
+
+    if (stack.length === 0) {
       this.bindings.delete(binding.name);
     }
   }
 
-  lookup(name: string): Binding | null {
-    const localBinding = this.bindings.get(name);
-    if (localBinding) {
-      return localBinding;
+  evaluate(name: string, type?: TypeTraits): TypedValue {
+    const stack = this.bindings.get(name);
+    if (stack) {
+      const binding = stack.pop();
+      if (!binding) {
+        throw new Error(`Empty binding stack for ${name}`);
+      }
+
+      const result = binding.evaluate(this);
+      stack.push(binding);
+
+      // enforce type if provided
+      if (type && result.type() !== type) {
+        const typeName = result.type().__name__();
+        const expectedTypeName = type.__name__();
+        throw new Error(
+          `Type error: ${name} has type ${typeName} instead of ${expectedTypeName}`
+        );
+      }
+
+      return result;
     }
 
-    return this.parent?.lookup(name) || null;
-  }
-
-  private makeExpression(definition: BindingDefinition): Expression {
-    const jsType = typeof definition;
-    switch (jsType) {
-      case "number":
-        return new Literal(new NumberValue(definition as number));
-      // case "string":
-      //   return new Literal(new StringValue(definition as string));
-      // case "function":
-      //   return new Literal(new FunctionValue(definition as function));
-      default:
-        const obj = definition as object;
-        if ("type" in obj) {
-          return new Literal(obj as TypedValue);
-        } else {
-          return definition as Expression;
-        }
+    if (this.parent) {
+      return this.parent.evaluate(name);
     }
+
+    throw new Error(`No previous definition found for '${name}'`);
   }
 
   type() {
@@ -92,7 +96,5 @@ export class Scope implements TypedValue {
 }
 
 export const ScopeType: TypeTraits = {
-  __name__: () => "scope",
-
-  type: () => TypeDefinition
+  __name__: () => "scope"
 };

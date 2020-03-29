@@ -1,30 +1,17 @@
-import { Scope, ScopeDefinition } from "./scope";
-
 export interface TypedValue {
   type(): TypeTraits;
 }
 
-export interface TypeTraits extends TypedValue {
+export interface TypeTraits {
   __name__(): string;
 
   __call__?(self: TypedValue, args: TypedValue[]): TypedValue;
-
-  __bind__?(scope: Scope): TypedValue;
-  __unbind__?(self: TypedValue): void;
 
   __add__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
   __sub__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
 
   __str__?(self: TypedValue): string;
 }
-
-export const TypeDefinition: TypeTraits = {
-  __name__: () => "type",
-  __str__: (self: TypeTraits) => `[${self.__name__()}]`,
-
-  // this recursive definition is the root metatype of all other types
-  type: () => TypeDefinition
-};
 
 export class TypeChecker {
   static as<T extends TypedValue>(value: TypedValue, type: TypeTraits): T {
@@ -58,9 +45,7 @@ export const NumberType: TypeTraits = {
     new NumberValue(lhs.value + rhs.value),
   __sub__: (lhs: NumberValue, rhs: NumberValue) =>
     new NumberValue(lhs.value - rhs.value),
-  __str__: (self: NumberValue) => self.value.toString(),
-
-  type: () => TypeDefinition
+  __str__: (self: NumberValue) => self.value.toString()
 };
 
 type ClosureType = (args: TypedValue[]) => TypedValue;
@@ -80,7 +65,5 @@ export class FunctionValue implements TypedValue {
 export const FunctionType: TypeTraits = {
   __name__: () => "closure",
   __call__: (self: FunctionValue, args: TypedValue[]) => self.closure(args),
-  __str__: (self: FunctionValue) => "() => ()", // replace with signature when implemented
-
-  type: () => TypeDefinition
+  __str__: (self: FunctionValue) => "() => ()" // replace with signature when implemented
 };
