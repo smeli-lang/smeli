@@ -11,6 +11,8 @@ export interface TypeTraits {
 
   __add__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
   __sub__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
+  __mul__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
+  __div__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
 
   __str__?(self: TypedValue): string;
 }
@@ -47,6 +49,10 @@ export const NumberType: TypeTraits = {
     new NumberValue(lhs.value + rhs.value),
   __sub__: (lhs: NumberValue, rhs: NumberValue) =>
     new NumberValue(lhs.value - rhs.value),
+  __mul__: (lhs: NumberValue, rhs: NumberValue) =>
+    new NumberValue(lhs.value * rhs.value),
+  __div__: (lhs: NumberValue, rhs: NumberValue) =>
+    new NumberValue(lhs.value / rhs.value),
   __str__: (self: NumberValue) => self.value.toString()
 };
 

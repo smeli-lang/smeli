@@ -131,7 +131,7 @@ export class FunctionCall implements Expression {
   }
 }
 
-export type BinaryOperatorType = "__add__" | "__sub__";
+export type BinaryOperatorType = "__add__" | "__sub__" | "__mul__" | "__div__";
 
 export class BinaryOperator implements Expression {
   operatorName: BinaryOperatorType;

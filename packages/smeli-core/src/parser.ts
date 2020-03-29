@@ -276,8 +276,41 @@ export function parseAtom(state: ParserState) {
   return parseNumberLiteral(state) || parseScopeExpression(state, null);
 }
 
-export function parseTerm(state: ParserState) {
+export function parseFactor(state: ParserState) {
   return parseAtom(state);
+}
+
+export function parseTerm(state: ParserState) {
+  let expr: Expression | null = parseFactor(state);
+  if (!expr) {
+    return null;
+  }
+  parseWhitespace(state);
+  while (state.peek() == "*" || state.peek() == "/") {
+    const operator = state.peek();
+    state.next();
+
+    parseWhitespace(state);
+    if (state.eof()) {
+      state.reportError("Unexpected end of file");
+      return null;
+    }
+
+    const factor = parseFactor(state);
+    if (!factor) {
+      return null;
+    }
+
+    if (operator == "*") {
+      expr = new BinaryOperator("__mul__", expr, factor);
+    } else if (operator == "/") {
+      expr = new BinaryOperator("__div__", expr, factor);
+    }
+
+    parseWhitespace(state);
+  }
+
+  return expr;
 }
 
 export function parseExpression(state: ParserState) {
@@ -333,7 +366,7 @@ export function parseComment(state: ParserState) {
   return comment;
 }
 
-export function parseAssignment(state: ParserState) {
+export function parseBindingDefinition(state: ParserState) {
   const currentLine = state.currentLine;
 
   const identifier = parseIdentifier(state);
@@ -369,7 +402,7 @@ export function parseStatement(state: ParserState) {
   if (state.peek() == "#") {
     return parseComment(state);
   } else {
-    return parseAssignment(state);
+    return parseBindingDefinition(state);
   }
 }
 
