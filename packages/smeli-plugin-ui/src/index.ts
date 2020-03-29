@@ -19,6 +19,9 @@ const load = ({ container }: UiPluginOptions) => {
       {
         name: "#update",
         evaluate: (scope: Scope) => {
+          // guard against multiple evaluations
+          container.innerHTML = "";
+
           const page = scope.evaluate("page", ScopeType) as Scope;
           const node = page.evaluate("#node", DomNodeType) as DomNode;
           container.appendChild(node.node);

@@ -60,6 +60,11 @@ export class ScopeExpression implements Expression {
 
     return scope;
   }
+
+  invalidate(value: TypedValue) {
+    const scope = value as Scope;
+    scope.dispose();
+  }
 }
 
 export class LambdaExpression implements Expression {
@@ -110,10 +115,19 @@ export class FunctionCall implements Expression {
       throw new Error(`${this.identifier.name} is not a function`);
     }
 
-    return functionType.__call__(
-      functionValue,
-      this.args.map(arg => arg.evaluate(scope))
+    const evaluationScope = new Scope(scope);
+    this.args.map((arg, index) =>
+      evaluationScope.push({
+        name: index.toString(),
+        evaluate: () => arg.evaluate(scope)
+      })
     );
+
+    const result = functionType.__call__(functionValue, evaluationScope);
+
+    evaluationScope.dispose();
+
+    return result;
   }
 }
 
@@ -182,6 +196,11 @@ export class BindingDefinition implements Statement {
       name: identifier.name,
       evaluate: scope => expression.evaluate(scope)
     };
+
+    if (expression.invalidate) {
+      // somehow the compiler refused to acknoledge the check here
+      this.binding.invalidate = value => (expression.invalidate as any)(value);
+    }
   }
 }
 

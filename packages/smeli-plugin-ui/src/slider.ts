@@ -1,5 +1,5 @@
 import template from "./slider.pug";
-import { Scope, NumberValue } from "@smeli/core";
+import { Scope, NumberValue, TypedValue } from "@smeli/core";
 import { DomNode } from "./types";
 
 export const slider = {
@@ -21,7 +21,6 @@ export const slider = {
       },
       {
         name: "#node",
-        //readOnly: true,
         evaluate: (scope: Scope) => {
           const node = document.createElement("div");
           node.innerHTML = template({});
@@ -49,8 +48,8 @@ export const slider = {
     ]);
 
     return scope;
-  }
-  //invalidate: (scope: Scope) => scope.dispose();
+  },
+  invalidate: (value: TypedValue) => (value as Scope).dispose()
 };
 
 // evaluate: (scope: Scope) => {

@@ -25,6 +25,7 @@ export function pushPlugin(parentScope: Scope, definition: PluginDefinition) {
       }
 
       return scope;
-    }
+    },
+    invalidate: value => (value as Scope).dispose()
   });
 }

@@ -7,17 +7,34 @@ import {
 } from "./types";
 import { Binding, Scope } from "./scope";
 
-function max(args: TypedValue[]): TypedValue {
-  const result = Math.max(
-    ...args.map(arg => {
-      const numberValue = TypeChecker.as<NumberValue>(arg, NumberType);
-      return numberValue.value;
+const max: Binding = {
+  name: "max",
+  evaluate: () =>
+    new FunctionValue((scope: Scope) => {
+      const x = scope.evaluate("0", NumberType) as NumberValue;
+      const y = scope.evaluate("1", NumberType) as NumberValue;
+      const result = Math.max(x.value, y.value);
+      return new NumberValue(result);
     })
-  );
-  return new NumberValue(result);
-}
+};
 
-const timer = {
+const sin: Binding = {
+  name: "sin",
+  evaluate: () =>
+    new FunctionValue((scope: Scope) => {
+      const x = scope.evaluate("0", NumberType) as NumberValue;
+      const result = Math.sin(x.value);
+      return new NumberValue(result);
+    })
+};
+
+// this is a hack; it won't work once caching is fully implemented
+const time: Binding = {
+  name: "time",
+  evaluate: () => new NumberValue(Date.now() * 0.001)
+};
+
+/*const timer: Binding = {
   name: "timer",
   evaluate: (parentScope: Scope) => {
     const scope = new Scope(parentScope);
@@ -50,12 +67,6 @@ const timer = {
 
     return scope;
   }
-};
+};*/
 
-export const builtins: Binding[] = [
-  {
-    name: "max",
-    evaluate: () => new FunctionValue(max)
-  },
-  timer
-];
+export const builtins: Binding[] = [max, sin, time];

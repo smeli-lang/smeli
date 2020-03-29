@@ -3,7 +3,7 @@ import { TypeChecker, NumberValue, NumberType } from "./types";
 
 test("should run a basic statement", () => {
   const engine = new Engine("a: 42");
-  expect(engine.rootStatements.length).toBe(1);
+  expect(engine.statements.length).toBe(1);
 
   engine.step(1);
 

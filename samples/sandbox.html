@@ -15,22 +15,11 @@
           return str.replace("<", "&lt;").replace(">", "&gt;");
         }
 
-        function enumerateBindings(scope) {
-          const names = new Set();
-          while (scope) {
-            for (let name of scope.bindings.keys()) {
-              names.add(name);
-            }
-            scope = scope.prefix;
-          }
-          return [...names];
-        }
-
         function printScope(scope, indent) {
           let str = "";
-          for (let name of enumerateBindings(scope)) {
+          for (let [binding, value] of scope.cache) {
             try {
-              const value = scope.evaluate(name);
+              const name = binding.name;
               str += "  ".repeat(indent);
               if (value.type() === smeli.ScopeType) {
                 const childContent = printScope(value, indent + 1);
@@ -60,20 +49,34 @@
             .join("<br />");
         }
 
+        let rafId = null;
         function reload() {
+          if (rafId) {
+            cancelAnimationFrame(rafId);
+          }
+
           const code = textArea.value;
           const engine = smeli.load(code, [
             smeliUi.load({ container: previewContainer })
           ]);
 
-          try {
-            const globalScope = engine.step(engine.rootStatements.length);
-            scopeView.innerHTML = printScope(globalScope, 0);
-            messageView.innerHTML = printMessages(engine.messages);
-          } catch (e) {
-            scopeView.innerHTML = "";
-            messageView.innerHTML = `Runtime error: ${e.message}`;
+          messageView.innerHTML = printMessages(engine.messages);
+          const globalScope = engine.step(engine.statements.length);
+          console.log(globalScope);
+
+          function update() {
+            try {
+              engine.update();
+              scopeView.innerHTML = printScope(globalScope, 0);
+            } catch (e) {
+              scopeView.innerHTML = "";
+              messageView.innerHTML = `Runtime error: ${e.message}`;
+            }
+
+            rafId = requestAnimationFrame(update);
           }
+
+          rafId = requestAnimationFrame(update);
         }
 
         textArea.oninput = reload;
@@ -139,7 +142,7 @@ v4: h(x => x - 30)
     <div style="flex: 1; display: flex; flex-direction: column;">
       <pre
         id="scope"
-        style="flex: 1; background-color:#ddd; padding: 20px; margin: 0; font-family: Consolas"
+        style="flex: 1; background-color:#ddd; padding: 20px; margin: 0; font-family: Consolas; overflow: scroll"
       ></pre>
       <div
         id="preview"

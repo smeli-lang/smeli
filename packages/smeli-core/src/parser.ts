@@ -10,7 +10,6 @@ import {
   FunctionCall,
   LambdaExpression
 } from "./ast";
-import { Scope } from "./scope";
 import { NumberValue } from "./types";
 
 // grammar

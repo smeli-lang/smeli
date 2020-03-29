@@ -1,3 +1,5 @@
+import { Scope } from "./scope";
+
 export interface TypedValue {
   type(): TypeTraits;
 }
@@ -5,7 +7,7 @@ export interface TypedValue {
 export interface TypeTraits {
   __name__(): string;
 
-  __call__?(self: TypedValue, args: TypedValue[]): TypedValue;
+  __call__?(self: TypedValue, scope: Scope): TypedValue;
 
   __add__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
   __sub__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
@@ -48,7 +50,7 @@ export const NumberType: TypeTraits = {
   __str__: (self: NumberValue) => self.value.toString()
 };
 
-type ClosureType = (args: TypedValue[]) => TypedValue;
+type ClosureType = (scope: Scope) => TypedValue;
 
 export class FunctionValue implements TypedValue {
   closure: ClosureType;
@@ -64,6 +66,6 @@ export class FunctionValue implements TypedValue {
 
 export const FunctionType: TypeTraits = {
   __name__: () => "closure",
-  __call__: (self: FunctionValue, args: TypedValue[]) => self.closure(args),
+  __call__: (self: FunctionValue, scope: Scope) => self.closure(scope),
   __str__: (self: FunctionValue) => "() => ()" // replace with signature when implemented
 };

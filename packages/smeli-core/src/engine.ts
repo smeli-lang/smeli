@@ -6,7 +6,7 @@ import { PluginDefinition, pushPlugin } from "./plugins";
 
 export class Engine {
   globalScope: Scope;
-  rootStatements: Statement[];
+  statements: Statement[];
   messages: ParserReport[];
 
   nextStatement: number = 0;
@@ -21,23 +21,30 @@ export class Engine {
     plugins.forEach(plugin => pushPlugin(this.globalScope, plugin));
 
     const state = new ParserState(code, 0, "smeli");
-    this.rootStatements = parseStatementList(state);
+    this.statements = parseStatementList(state);
     this.messages = state.messages;
   }
 
   step(count: number) {
-    while (count > 0 && this.nextStatement < this.rootStatements.length) {
-      const statement = this.rootStatements[this.nextStatement++];
+    while (count > 0 && this.nextStatement < this.statements.length) {
+      const statement = this.statements[this.nextStatement++];
       this.globalScope.push(statement.binding);
       count--;
     }
 
     while (count < 0 && this.nextStatement > 0) {
-      const statement = this.rootStatements[--this.nextStatement];
+      const statement = this.statements[--this.nextStatement];
       this.globalScope.pop(statement.binding);
       count++;
     }
 
+    this.globalScope.clearCache();
+
     return this.globalScope;
+  }
+
+  update() {
+    this.globalScope.clearCache();
+    this.globalScope.populateCache();
   }
 }

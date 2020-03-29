@@ -1,5 +1,5 @@
 import { Scope } from "./scope";
-import { NumberValue } from "./types";
+import { NumberValue, NumberType } from "./types";
 
 test("push and pop a single binding", () => {
   const scope = new Scope();
@@ -12,6 +12,7 @@ test("push and pop a single binding", () => {
   expect(scope.evaluate("a")).toEqual(new NumberValue(42));
 
   scope.pop(binding);
+  scope.clearCache();
   expect(() => scope.evaluate("a")).toThrowError();
 });
 
@@ -24,7 +25,10 @@ test("evaluates binding history", () => {
     },
     {
       name: "a",
-      evaluate: scope => new NumberValue(scope.evaluate("a").value + 22)
+      evaluate: (scope: Scope) => {
+        const a = scope.evaluate("a", NumberType) as NumberValue;
+        return new NumberValue(a.value + 22);
+      }
     }
   ];
 
@@ -67,6 +71,7 @@ test("evaluates bindings from prefix against the derived scope", () => {
     }
   ]);
 
+  scope.clearCache();
   expect(scope.evaluate("x")).toEqual(new NumberValue(20));
   expect(scope.evaluate("y")).toEqual(new NumberValue(20));
 });

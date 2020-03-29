@@ -3,7 +3,7 @@ import { TypeTraits, TypedValue } from "./types";
 export type Binding = {
   name: string;
   evaluate: (scope: Scope) => TypedValue;
-  invalidate?: () => void;
+  invalidate?: (value: TypedValue) => void;
 };
 
 export class Scope implements TypedValue {
@@ -11,12 +11,28 @@ export class Scope implements TypedValue {
   prefix: Scope | null;
 
   bindings: Map<string, Binding[]>;
+  cache: Map<Binding, TypedValue>;
+  childScopes: Set<Scope>;
 
   constructor(parent: Scope | null = null, prefix: Scope | null = null) {
     this.parent = parent;
     this.prefix = prefix;
 
     this.bindings = new Map();
+    this.cache = new Map();
+    this.childScopes = new Set();
+
+    // register itself in parent scope
+    if (parent) {
+      parent.childScopes.add(this);
+    }
+  }
+
+  dispose() {
+    // unregister from parent scope
+    if (this.parent) {
+      this.parent.childScopes.delete(this);
+    }
   }
 
   push(binding: Binding | Binding[]) {
@@ -83,12 +99,61 @@ export class Scope implements TypedValue {
     const stack = this.bindings.get(name);
     if (stack && stack.length > 0) {
       const binding = stack.pop() as Binding;
-      const result = binding.evaluate(scope);
+
+      let value = scope.cache.get(binding);
+      if (!value) {
+        value = binding.evaluate(scope);
+        scope.cache.set(binding, value);
+      }
+
       stack.push(binding);
-      return result;
+
+      return value;
     }
 
     return this.prefix?.evaluateFrom(name, scope) || null;
+  }
+
+  clearCache() {
+    // clear child scopes first
+    for (let childScope of this.childScopes) {
+      childScope.clearCache();
+    }
+
+    // invalidate all cache entries
+    for (let [binding, value] of this.cache) {
+      if (binding.invalidate) {
+        binding.invalidate(value);
+      }
+    }
+    this.cache.clear();
+
+    // verify all child scopes have properly unregistered
+    if (this.childScopes.size > 0) {
+      throw new Error("Child scope was not unregistered after invalidation");
+    }
+  }
+
+  populateCache() {
+    // collect all binding names
+    const names = new Set<string>();
+    let scope: Scope | null = this;
+    while (scope) {
+      for (let name of scope.bindings.keys()) {
+        names.add(name);
+      }
+      scope = scope.prefix;
+    }
+
+    // evaluate all bindings
+    for (let name of names) {
+      this.evaluate(name);
+    }
+
+    // then child scopes
+    for (let childScope of this.childScopes) {
+      childScope.populateCache();
+    }
   }
 
   type() {
