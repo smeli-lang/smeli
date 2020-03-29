@@ -77,23 +77,15 @@ export class LambdaExpression implements Expression {
   }
 
   evaluate(scope: Scope) {
-    return new FunctionValue(args => {
+    return new FunctionValue(scope => {
+      // remap positional arguments to names
+      this.args.forEach((identifier, index) => {
+        scope.push({
+          name: identifier.name,
+          evaluate: scope => scope.evaluate(index.toString())
+        });
+      });
       return this.body.evaluate(scope);
-
-      // if (args.length !== this.args.length) {
-      //   throw new Error(
-      //     `Argument mismatch: expected ${this.args.length} but got ${args.length}`
-      //   );
-      // }
-
-      // // remap positional arguments to names
-      // const childParams: ParameterList = { ...params };
-      // args.forEach((value, index) => {
-      //   const name = this.args[index].name;
-      //   childParams[name] = value;
-      // });
-
-      // return this.body.evaluate(childParams);
     });
   }
 }
