@@ -15,9 +15,20 @@
           return str.replace("<", "&lt;").replace(">", "&gt;");
         }
 
+        function enumerateBindings(scope) {
+          const names = new Set();
+          while (scope) {
+            for (let name of scope.bindings.keys()) {
+              names.add(name);
+            }
+            scope = scope.prefix;
+          }
+          return [...names];
+        }
+
         function printScope(scope, indent) {
           let str = "";
-          for (let name of scope.bindings.keys()) {
+          for (let name of enumerateBindings(scope)) {
             try {
               const value = scope.evaluate(name);
               str += "  ".repeat(indent);

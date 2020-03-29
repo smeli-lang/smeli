@@ -179,7 +179,7 @@ export function parseIdentifier(state: ParserState) {
 
 export function parseScopeExpression(
   state: ParserState,
-  typeIdentifier: Identifier | null
+  prefixExpression: Identifier | null
 ): ScopeExpression | null {
   if (!state.match("{")) {
     return null;
@@ -193,7 +193,7 @@ export function parseScopeExpression(
     return null;
   }
 
-  return new ScopeExpression(statements, typeIdentifier);
+  return new ScopeExpression(statements, prefixExpression);
 }
 
 export function parseLambdaExpression(

@@ -5,7 +5,8 @@ import { DomNode } from "./types";
 export const slider = {
   name: "slider",
   evaluate: (parentScope: Scope) => {
-    return new Scope(parentScope, [
+    const scope = new Scope(parentScope);
+    scope.push([
       {
         name: "min",
         evaluate: () => new NumberValue(0)
@@ -46,6 +47,8 @@ export const slider = {
         }
       }
     ]);
+
+    return scope;
   }
   //invalidate: (scope: Scope) => scope.dispose();
 };

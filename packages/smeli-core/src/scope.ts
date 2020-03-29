@@ -8,18 +8,15 @@ export type Binding = {
 
 export class Scope implements TypedValue {
   parent: Scope | null;
+  prefix: Scope | null;
+
   bindings: Map<string, Binding[]>;
 
-  constructor(
-    parent: Scope | null = null,
-    initialBindings: Binding | Binding[] | null = null
-  ) {
+  constructor(parent: Scope | null = null, prefix: Scope | null = null) {
     this.parent = parent;
-    this.bindings = new Map();
+    this.prefix = prefix;
 
-    if (initialBindings) {
-      this.push(initialBindings);
-    }
+    this.bindings = new Map();
   }
 
   push(binding: Binding | Binding[]) {
@@ -61,16 +58,8 @@ export class Scope implements TypedValue {
   }
 
   evaluate(name: string, type?: TypeTraits): TypedValue {
-    const stack = this.bindings.get(name);
-    if (stack) {
-      const binding = stack.pop();
-      if (!binding) {
-        throw new Error(`Empty binding stack for ${name}`);
-      }
-
-      const result = binding.evaluate(this);
-      stack.push(binding);
-
+    const result = this.evaluateFrom(name, this);
+    if (result) {
       // enforce type if provided
       if (type && result.type() !== type) {
         const typeName = result.type().__name__();
@@ -88,6 +77,18 @@ export class Scope implements TypedValue {
     }
 
     throw new Error(`No previous definition found for '${name}'`);
+  }
+
+  evaluateFrom(name: string, scope: Scope): TypedValue | null {
+    const stack = this.bindings.get(name);
+    if (stack && stack.length > 0) {
+      const binding = stack.pop() as Binding;
+      const result = binding.evaluate(scope);
+      stack.push(binding);
+      return result;
+    }
+
+    return this.prefix?.evaluateFrom(name, scope) || null;
   }
 
   type() {

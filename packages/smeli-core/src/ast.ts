@@ -41,15 +41,21 @@ export class Identifier implements Expression {
 
 export class ScopeExpression implements Expression {
   statements: Statement[];
-  typeIdentifier: Identifier | null;
+  prefixExpression: Identifier | null;
 
   constructor(statements: Statement[], typeIdentifier: Identifier | null) {
     this.statements = statements;
-    this.typeIdentifier = typeIdentifier;
+    this.prefixExpression = typeIdentifier;
   }
 
   evaluate(parentScope: Scope) {
-    const scope = new Scope(parentScope);
+    let prefixScope = null;
+    if (this.prefixExpression) {
+      const prefix = this.prefixExpression.evaluate(parentScope);
+      prefixScope = TypeChecker.as<Scope>(prefix, ScopeType);
+    }
+
+    const scope = new Scope(parentScope, prefixScope);
     this.statements.forEach(statement => scope.push(statement.binding));
 
     return scope;
