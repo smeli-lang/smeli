@@ -65,7 +65,7 @@ export class Scope implements TypedValue {
         const typeName = result.type().__name__();
         const expectedTypeName = type.__name__();
         throw new Error(
-          `Type error: ${name} has type ${typeName} instead of ${expectedTypeName}`
+          `Type error: '${name}' has type '${typeName}' instead of '${expectedTypeName}'`
         );
       }
 

@@ -1,4 +1,4 @@
-import { Scope } from "@smeli/core";
+import { Scope, ScopeType } from "@smeli/core";
 import { DomNode, DomNodeType } from "./types";
 import { slider } from "./slider";
 
@@ -6,27 +6,30 @@ export type UiPluginOptions = {
   container: HTMLElement;
 };
 
-const load = ({ container }: UiPluginOptions) => ({
-  name: "ui",
-  bindings: [
-    {
-      name: "page",
-      evaluate: () => new DomNode(document.createElement("div"))
-    },
-    {
-      name: "#update",
-      evaluate: (scope: Scope) => {
-        container.innerHTML = "Hello World!";
+const load = ({ container }: UiPluginOptions) => {
+  container.innerHTML = "";
 
-        const page = scope.evaluate("page", DomNodeType) as DomNode;
-        container.appendChild(page.node);
-
-        return page;
+  return {
+    name: "ui",
+    bindings: [
+      {
+        name: "page",
+        evaluate: (scope: Scope) => scope.evaluate("slider")
       },
-      invalidate: () => (container.innerHTML = "UI plugin unbound")
-    },
-    slider
-  ]
-});
+      {
+        name: "#update",
+        evaluate: (scope: Scope) => {
+          const page = scope.evaluate("page", ScopeType) as Scope;
+          const node = page.evaluate("#node", DomNodeType) as DomNode;
+          container.appendChild(node.node);
+
+          return node;
+        },
+        invalidate: () => (container.innerHTML = "")
+      },
+      slider
+    ]
+  };
+};
 
 export { load };

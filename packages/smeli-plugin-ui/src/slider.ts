@@ -20,7 +20,7 @@ export const slider = {
         evaluate: () => new NumberValue(42)
       },
       {
-        name: "node",
+        name: "#node",
         //readOnly: true,
         evaluate: (scope: Scope) => {
           const node = document.createElement("div");
