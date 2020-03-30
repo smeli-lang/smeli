@@ -59,9 +59,11 @@ export const NumberType: TypeTraits = {
 type ClosureType = (scope: Scope) => TypedValue;
 
 export class FunctionValue implements TypedValue {
+  parentScope: Scope;
   closure: ClosureType;
 
-  constructor(closure: ClosureType) {
+  constructor(parentScope: Scope, closure: ClosureType) {
+    this.parentScope = parentScope;
     this.closure = closure;
   }
 

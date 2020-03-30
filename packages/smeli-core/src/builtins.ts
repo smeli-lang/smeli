@@ -9,8 +9,8 @@ import { Binding, Scope } from "./scope";
 
 const max: Binding = {
   name: "max",
-  evaluate: () =>
-    new FunctionValue((scope: Scope) => {
+  evaluate: (parentScope: Scope) =>
+    new FunctionValue(parentScope, (scope: Scope) => {
       const x = scope.evaluate("0", NumberType) as NumberValue;
       const y = scope.evaluate("1", NumberType) as NumberValue;
       const result = Math.max(x.value, y.value);
@@ -20,8 +20,8 @@ const max: Binding = {
 
 const sin: Binding = {
   name: "sin",
-  evaluate: () =>
-    new FunctionValue((scope: Scope) => {
+  evaluate: (parentScope: Scope) =>
+    new FunctionValue(parentScope, (scope: Scope) => {
       const x = scope.evaluate("0", NumberType) as NumberValue;
       const result = Math.sin(x.value);
       return new NumberValue(result);

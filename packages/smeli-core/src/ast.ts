@@ -76,8 +76,8 @@ export class LambdaExpression implements Expression {
     this.body = body;
   }
 
-  evaluate(scope: Scope) {
-    return new FunctionValue(scope => {
+  evaluate(parentScope: Scope) {
+    return new FunctionValue(parentScope, scope => {
       // remap positional arguments to names
       this.args.forEach((identifier, index) => {
         scope.push({
@@ -100,14 +100,14 @@ export class FunctionCall implements Expression {
   }
 
   evaluate(scope: Scope) {
-    const functionValue = this.identifier.evaluate(scope);
+    const functionValue = this.identifier.evaluate(scope) as FunctionValue;
     const functionType = functionValue.type();
 
     if (!functionType.__call__) {
       throw new Error(`${this.identifier.name} is not a function`);
     }
 
-    const evaluationScope = new Scope(scope);
+    const evaluationScope = new Scope(functionValue.parentScope);
     this.args.map((arg, index) =>
       evaluationScope.push({
         name: index.toString(),

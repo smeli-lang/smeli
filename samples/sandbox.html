@@ -93,36 +93,28 @@
         wrap="off"
         style="flex: 1; resize: none; overflow: auto; color: #fff; background-color: #444; border: none; border-left: 10px solid #4a4a5e; font-size: large; margin: 0;"
       >
-plop: {
-  a: 42
-  b: a + 4
+# harmonic slider
+f: x => sin(x)
+
+plop: ui.slider {
+  value: 50 + f(time) * 50
+  value: value / 2
 }
 
-#>> same
-plop.a: 42
-plop.b: plop.a + 4
-
-c: plop.a + plop.b
-
-plop.a: 12
-
-plop: {
-  a: -10
-  b: -20
+ui: ui {
+  page: plop {
+    value: value + 25
+  }
 }
 
-plop.a: 120
-
-# other scope
-a: 42
-b: a - 30
-
+f: x => sin(x) + sin(x * 12) * 0.2
+      
 # lambda function tests
 constant: 42
 
 # multiple args
-f: x, y => x + y + constant
-v: f(10, 20)
+f2: x, y => x + y + constant
+v: f2(10, 20)
 
 # currying
 g: x => y => x + y + constant
@@ -132,6 +124,14 @@ v3: v2(20)
 # higher-order function
 h: fn => fn(constant)
 v4: h(x => x - 30)
+
+# closure scope
+private_scope: {
+  secret: 123
+  add: x => x + secret
+}
+
+test: private_scope.add(10)
 </textarea
       >
       <div
