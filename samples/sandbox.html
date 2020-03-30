@@ -127,11 +127,14 @@ v4: h(x => x - 30)
 
 # closure scope
 private_scope: {
-  secret: 123
+  secret: max(-0.5, sin(time))
   add: x => x + secret
 }
 
-test: private_scope.add(10)
+secret_add: private_scope.add
+
+test: secret_add(10)
+
 </textarea
       >
       <div
