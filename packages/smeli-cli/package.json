@@ -1,0 +1,32 @@
+{
+  "name": "@smeli/cli",
+  "version": "0.0.1",
+  "description": "Command-line utility for Smeli",
+  "author": "Remi Papillie (wsmind)",
+  "license": "MIT",
+  "bin": {
+    "smeli": "./dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smeli-lang/smeli",
+    "directory": "packages/smeli-cli"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@smeli/core": "*",
+    "@smeli/plugin-ui": "*",
+    "@smeli/template-slides": "*",
+    "webpack": "^4.42.1"
+  },
+  "devDependencies": {
+    "@types/resolve": "^1.14.0"
+  }
+}

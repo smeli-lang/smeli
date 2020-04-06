@@ -1,4 +1,4 @@
-import template from "./slider.pug";
+//import template from "./slider.pug";
 import { Scope, NumberValue, TypedValue } from "@smeli/core";
 import { DomNode } from "./types";
 
@@ -23,15 +23,16 @@ export const slider = {
         name: "#node",
         evaluate: (scope: Scope) => {
           const node = document.createElement("div");
-          node.innerHTML = template({
-            styles: {
-              slider: {
-                // "-webkit-appearance": "none",
-                // "-moz-appearance": "none",
-                // "background-color": "#469"
-              }
-            }
-          });
+          // node.innerHTML = template({
+          //   styles: {
+          //     slider: {
+          //       // "-webkit-appearance": "none",
+          //       // "-moz-appearance": "none",
+          //       // "background-color": "#469"
+          //     }
+          //   }
+          // });
+          node.innerHTML = "<input type='range' />";
 
           const slider = node.querySelector(".slider") as HTMLInputElement;
 

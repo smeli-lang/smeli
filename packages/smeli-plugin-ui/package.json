@@ -1,16 +1,15 @@
 {
   "name": "@smeli/plugin-ui",
   "version": "0.0.1",
-  "description": "UI plugin for smeli",
+  "description": "UI plugin for Smeli",
   "author": "Remi Papillie (wsmind)",
   "license": "MIT",
-  "main": "dist/smeli-plugin-ui.umd.js",
-  "browser": "dist/smeli-plugin-ui.umd.js",
-  "module": "dist/smeli-plugin-ui.esm.js",
-  "types": "dist/smeli-plugin-ui.esm.d.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wsmind/smeli",
+    "url": "https://github.com/smeli-lang/smeli",
     "directory": "packages/smeli-plugin-ui"
   },
   "files": [
@@ -24,10 +23,7 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "yarn clean && rollup -c",
-    "watch": "rollup -c -w"
-  },
-  "dependencies": {
-    "pug": "^2.0.4"
+    "build": "tsc",
+    "watch": "tsc -w"
   }
 }

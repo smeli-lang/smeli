@@ -3,10 +3,12 @@ import { DomNode, DomNodeType } from "./types";
 import { slider } from "./slider";
 
 export type UiPluginOptions = {
-  container: HTMLElement;
+  container?: HTMLElement;
 };
 
-const load = ({ container }: UiPluginOptions) => {
+export const loadPlugin = ({
+  container = document.body
+}: UiPluginOptions = {}) => {
   container.innerHTML = "";
 
   return {
@@ -34,5 +36,3 @@ const load = ({ container }: UiPluginOptions) => {
     ]
   };
 };
-
-export { load };

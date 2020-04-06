@@ -1,0 +1,10 @@
+{
+  "name": "hello-world",
+  "private": true,
+  "scripts": {
+    "build": "smeli"
+  },
+  "devDependencies": {
+    "@smeli/cli": "*"
+  }
+}

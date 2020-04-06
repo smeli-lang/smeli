@@ -1,25 +1,39 @@
 {
-    "name": "vscode-smeli",
-    "displayName": "vscode-smeli",
-    "description": "Smeli language support for VS Code",
-    "version": "0.0.1",
-    "engines": {
-        "vscode": "^1.43.0"
-    },
-    "categories": [
-        "Programming Languages"
+  "name": "vscode-smeli",
+  "displayName": "vscode-smeli",
+  "description": "Smeli language support for VS Code",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smeli-lang/smeli",
+    "directory": "packages/vscode-smeli"
+  },
+  "engines": {
+    "vscode": "^1.43.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "smeli",
+        "aliases": [
+          "Smeli",
+          "smeli"
+        ],
+        "extensions": [
+          ".smeli"
+        ],
+        "configuration": "./language-configuration.json"
+      }
     ],
-    "contributes": {
-        "languages": [{
-            "id": "smeli",
-            "aliases": ["Smeli", "smeli"],
-            "extensions": [".smeli"],
-            "configuration": "./language-configuration.json"
-        }],
-        "grammars": [{
-            "language": "smeli",
-            "scopeName": "source.smeli",
-            "path": "./syntaxes/smeli.tmLanguage.json"
-        }]
-    }
+    "grammars": [
+      {
+        "language": "smeli",
+        "scopeName": "source.smeli",
+        "path": "./syntaxes/smeli.tmLanguage.json"
+      }
+    ]
+  }
 }

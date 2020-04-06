@@ -56,9 +56,10 @@
           }
 
           const code = textArea.value;
-          const engine = smeli.load(code, [
-            smeliUi.load({ container: previewContainer })
-          ]);
+          const engine = smeli.smeli({
+            code,
+            plugins: [smeliUi.loadPlugin({ container: previewContainer })]
+          });
 
           messageView.innerHTML = printMessages(engine.messages);
           const globalScope = engine.step(engine.statements.length);

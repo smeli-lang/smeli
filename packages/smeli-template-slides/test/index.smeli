@@ -1,0 +1,5 @@
+ui: ui {
+    page: slider {
+        value: sin(time) * 20 + 50
+    }
+}

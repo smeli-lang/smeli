@@ -61,7 +61,6 @@ test("loads bindings first, then code", () => {
   const pluginScope = scope.evaluate("hello") as Scope;
   expect(pluginScope.type()).toBe(ScopeType);
 
-  console.log(pluginScope);
   const world = pluginScope.evaluate("world");
   expect(world).toEqual(new NumberValue(62));
 });
