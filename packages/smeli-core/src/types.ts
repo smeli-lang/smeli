@@ -56,6 +56,25 @@ export const NumberType: TypeTraits = {
   __str__: (self: NumberValue) => self.value.toString()
 };
 
+export class StringValue implements TypedValue {
+  value: string;
+
+  constructor(value: string) {
+    this.value = value;
+  }
+
+  type() {
+    return StringType;
+  }
+}
+
+export const StringType: TypeTraits = {
+  __name__: () => "string",
+  __add__: (lhs: StringValue, rhs: StringValue) =>
+    new StringValue(lhs.value + rhs.value),
+  __str__: (self: StringValue) => self.value
+};
+
 type ClosureType = (scope: Scope) => TypedValue;
 
 export class FunctionValue implements TypedValue {
