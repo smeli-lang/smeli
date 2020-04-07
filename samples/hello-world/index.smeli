@@ -1,4 +1,12 @@
+#>>> (navigate with page up/down)
+
 # hello
+#> world
+
+# let's
+#> display
+#> a slider
+
 f: x => sin(x)
 
 ui: ui {

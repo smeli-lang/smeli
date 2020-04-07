@@ -1,10 +1,4 @@
-import {
-  TypedValue,
-  NumberType,
-  TypeChecker,
-  NumberValue,
-  FunctionValue
-} from "./types";
+import { NumberType, NumberValue, FunctionValue, StringValue } from "./types";
 import { Binding, Scope } from "./scope";
 
 const max: Binding = {
@@ -16,6 +10,11 @@ const max: Binding = {
       const result = Math.max(x.value, y.value);
       return new NumberValue(result);
     })
+};
+
+const outline: Binding = {
+  name: "#outline",
+  evaluate: () => new StringValue("")
 };
 
 const sin: Binding = {
@@ -69,4 +68,4 @@ const time: Binding = {
   }
 };*/
 
-export const builtins: Binding[] = [max, sin, time];
+export const builtins: Binding[] = [max, outline, sin, time];

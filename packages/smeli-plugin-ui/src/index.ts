@@ -1,5 +1,7 @@
 import { Scope, ScopeType } from "@smeli/core";
 import { DomNode, DomNodeType } from "./types";
+
+import { outline } from "./outline";
 import { slider } from "./slider";
 
 export type UiPluginOptions = {
@@ -16,7 +18,7 @@ export const loadPlugin = ({
     bindings: [
       {
         name: "page",
-        evaluate: (scope: Scope) => scope.evaluate("slider")
+        evaluate: (scope: Scope) => scope.evaluate("outline")
       },
       {
         name: "#update",
@@ -32,6 +34,7 @@ export const loadPlugin = ({
         },
         invalidate: () => (container.innerHTML = "")
       },
+      outline,
       slider
     ]
   };

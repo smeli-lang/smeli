@@ -1,5 +1,11 @@
 import { Binding, Scope, ScopeType } from "./scope";
-import { TypedValue, NumberValue, TypeChecker, FunctionValue } from "./types";
+import {
+  TypedValue,
+  TypeChecker,
+  FunctionValue,
+  StringValue,
+  StringType
+} from "./types";
 
 export type ParameterList = { [key: string]: TypedValue };
 
@@ -208,9 +214,15 @@ export class Comment implements Statement {
     this.text = text;
     this.markerLevel = markerLevel;
 
+    const hLevel = markerLevel + 1;
+    const html = `<h${hLevel}>${text}</h${hLevel}>`;
+
     this.binding = {
-      name: "commentLine",
-      evaluate: () => new NumberValue(this.line)
+      name: "#outline",
+      evaluate: (scope: Scope) => {
+        const previous = scope.evaluate("#outline", StringType) as StringValue;
+        return new StringValue(previous.value + html);
+      }
     };
   }
 }
