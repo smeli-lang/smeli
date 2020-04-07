@@ -2,7 +2,8 @@
   "name": "hello-world",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "smeli"
+    "build": "smeli",
+    "watch": "smeli -w"
   },
   "devDependencies": {
     "@smeli/cli": "*"
