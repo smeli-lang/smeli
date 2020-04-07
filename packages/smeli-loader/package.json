@@ -1,0 +1,13 @@
+{
+  "name": "smeli-loader",
+  "version": "0.0.1",
+  "description": "Webpack loader for Smeli code",
+  "author": "Remi Papillie (wsmind)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smeli-lang/smeli",
+    "directory": "packages/smeli-loader"
+  },
+  "scripts": {}
+}

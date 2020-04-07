@@ -4,11 +4,24 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const HtmlWebpackInlineSourcePlugin = require("html-webpack-inline-source-plugin");
 const FilterChunkWebpackPlugin = require("filter-chunk-webpack-plugin");
 
-module.exports = ({ entry, outputPath }) => ({
+module.exports = ({ rootFile, outputPath }) => ({
   mode: "production",
   entry: path.join(__dirname, "src/index.js"),
   output: {
     path: outputPath
+  },
+  module: {
+    rules: [
+      {
+        test: /\.smeli$/,
+        use: "smeli-loader"
+      }
+    ]
+  },
+  resolve: {
+    alias: {
+      __root_smeli_file_alias__: rootFile
+    }
   },
   plugins: [
     new HtmlWebpackPlugin({

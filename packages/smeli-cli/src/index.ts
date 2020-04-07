@@ -7,7 +7,7 @@ console.log("hello!");
 const template = require("@smeli/template-slides");
 
 const templateOptions = {
-  entry: path.resolve("index.smeli"),
+  rootFile: path.resolve("index.smeli"),
   outputPath: path.resolve("dist")
 };
 
@@ -21,6 +21,6 @@ compiler.run((err, stats) => {
     console.log(err);
     console.log(stats);
   } else {
-    console.log("output written to", template.entry);
+    console.log("output written to", templateOptions.outputPath);
   }
 });

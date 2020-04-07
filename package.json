@@ -1,7 +1,8 @@
 {
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "samples/*"
   ],
   "name": "smeli",
   "description": "Self-Modifying Expression Language for Interactivity",
