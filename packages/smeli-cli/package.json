@@ -5,8 +5,9 @@
   "author": "Remi Papillie (wsmind)",
   "license": "MIT",
   "bin": {
-    "smeli": "./dist/index.js"
+    "smeli": "dist/cli.js"
   },
+  "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/smeli-lang/smeli",
