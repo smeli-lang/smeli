@@ -2,6 +2,7 @@
   "name": "hello-world",
   "private": true,
   "scripts": {
+    "clean": "rimraf dist",
     "build": "smeli"
   },
   "devDependencies": {
