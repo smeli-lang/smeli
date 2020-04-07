@@ -32,7 +32,7 @@ export const slider = {
           //     }
           //   }
           // });
-          node.innerHTML = "<input type='range' />";
+          node.innerHTML = "<input type='range' class='slider' />";
 
           const slider = node.querySelector(".slider") as HTMLInputElement;
 

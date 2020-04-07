@@ -2,8 +2,6 @@
 import webpack from "webpack";
 import path from "path";
 
-console.log("hello!");
-
 const template = require("@smeli/template-slides");
 
 const templateOptions = {

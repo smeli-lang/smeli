@@ -1,5 +1,11 @@
+f: x => sin(x)
+
 ui: ui {
     page: slider {
-        value: sin(time) * 20 + 50
+        value: f(time) * 50 + 50
     }
 }
+
+f: x => sin(x) + sin(x * 5) * 0.3
+
+f: x => sin(x + sin(x * 5) * 0.2)
