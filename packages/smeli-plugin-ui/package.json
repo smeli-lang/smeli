@@ -25,5 +25,8 @@
     "clean": "rimraf dist",
     "build": "tsc",
     "watch": "tsc -w"
+  },
+  "dependencies": {
+    "jss": "^10.1.1"
   }
 }

@@ -3,6 +3,7 @@ import { DomNode, DomNodeType } from "./types";
 
 import { outline } from "./outline";
 import { slider } from "./slider";
+import { styles } from "./styles";
 
 export type UiPluginOptions = {
   container?: HTMLElement;
@@ -35,7 +36,8 @@ export const loadPlugin = ({
         invalidate: () => (container.innerHTML = "")
       },
       outline,
-      slider
+      slider,
+      styles
     ]
   };
 };

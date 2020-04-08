@@ -156,6 +156,10 @@ export class Scope implements TypedValue {
     }
   }
 
+  root(): Scope {
+    return this.parent?.root() || this;
+  }
+
   type() {
     return ScopeType;
   }

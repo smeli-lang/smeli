@@ -1,5 +1,6 @@
 import { Scope, StringType, StringValue, TypedValue } from "@smeli/core";
 import { DomNode } from "./types";
+import { evaluateStyles } from "./styles";
 
 export const outline = {
   name: "outline",
@@ -8,6 +9,7 @@ export const outline = {
     scope.push({
       name: "#node",
       evaluate: (scope: Scope) => {
+        const styles = evaluateStyles(scope);
         const outlineData = scope.evaluate(
           "#outline",
           StringType
@@ -15,6 +17,7 @@ export const outline = {
         const outlineHtml = outlineData.value;
 
         const node = document.createElement("div");
+        node.className = styles.outline;
         node.innerHTML = outlineHtml;
 
         return new DomNode(node);

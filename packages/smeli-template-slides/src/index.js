@@ -18,11 +18,10 @@ window.onload = () => {
   function update() {
     try {
       engine.update();
+      requestAnimationFrame(update);
     } catch (e) {
       console.log(e);
     }
-
-    requestAnimationFrame(update);
   }
 
   requestAnimationFrame(update);
