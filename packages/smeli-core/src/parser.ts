@@ -10,7 +10,7 @@ import {
   FunctionCall,
   LambdaExpression
 } from "./ast";
-import { NumberValue } from "./types";
+import { NumberValue, StringValue } from "./types";
 
 // grammar
 // program ::= block EOF
@@ -25,6 +25,7 @@ import { NumberValue } from "./types";
 const LINE_END = /(\r\n|\r|\n)/y;
 const WHITESPACE = /[ \t]*/y;
 const NUMBER = /-?(([1-9]+[0-9]*)|([0-9]*\.[0-9]+)|(0b[01]+)|(0o[0-7]+)|(0x[0-9a-fA-F]+)|0)\b/y;
+const STRING = /"[^"]*"/y;
 const NAME = /[_a-zA-Z][_0-9a-zA-Z]*\b/y;
 const COMMENT_PREFIX = /#>*/y;
 const TEXT_LINE = /[^\r\n]*/y;
@@ -160,6 +161,18 @@ export function parseNumberLiteral(state: ParserState) {
   const value = Number(negative ? stringValue.substr(1) : stringValue);
 
   return new Literal(new NumberValue(negative ? -value : value));
+}
+
+export function parseStringLiteral(state: ParserState) {
+  const stringValue = state.match(STRING);
+  if (!stringValue) {
+    return null;
+  }
+
+  // remove enclosing quotes
+  const value = stringValue.substring(1, stringValue.length - 1);
+
+  return new Literal(new StringValue(value));
 }
 
 export function parseIdentifier(state: ParserState) {

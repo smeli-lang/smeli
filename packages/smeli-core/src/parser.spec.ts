@@ -3,11 +3,12 @@ import {
   parseWhitespace,
   parseEndOfLine,
   parseNumberLiteral,
+  parseStringLiteral,
   parseIdentifier,
   parseComment,
   parseStatement
 } from "./parser";
-import { NumberValue } from "./types";
+import { NumberValue, StringValue } from "./types";
 
 /**
  * Parser state
@@ -292,6 +293,17 @@ test("parseNumberLiteral: inside substring", () => {
   expect(literal).not.toBeNull();
   expect(literal!.value).toEqual(new NumberValue(255));
   expect(state.n).toBe(10);
+});
+
+/**
+ * String literal
+ */
+test("parseStringLiteral: basic", () => {
+  const state = new ParserState(`"hello"`);
+  const literal = parseStringLiteral(state);
+  expect(literal).not.toBeNull();
+  expect(literal!.value).toEqual(new StringValue("hello"));
+  expect(state.n).toBe(7);
 });
 
 /**
