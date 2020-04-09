@@ -8,10 +8,19 @@ window.onload = () => {
   engine.step(1);
 
   document.addEventListener("keydown", event => {
-    if (event.code === "PageDown") {
-      engine.step(1);
-    } else if (event.code === "PageUp") {
-      engine.step(-1);
+    // note: slide clickers typically send page up/down events
+    switch (event.code) {
+      case "PageDown":
+      case "ArrowDown":
+      case "ArrowRight":
+        engine.step(1);
+        break;
+
+      case "PageUp":
+      case "ArrowUp":
+      case "ArrowLeft":
+        engine.step(-1);
+        break;
     }
   });
 
