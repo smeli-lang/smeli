@@ -4,6 +4,7 @@ import { defaultThemeLight } from "./theme";
 
 import { containerStyles } from "./container.styles";
 import { outlineStyles } from "./outline.styles";
+import { textStyles } from "./text.styles";
 
 export const styles: Binding = {
   name: "#styles",
@@ -13,7 +14,8 @@ export const styles: Binding = {
 
     return new DomStyles({
       container: containerStyles(theme),
-      outline: outlineStyles(theme)
+      outline: outlineStyles(theme),
+      text: textStyles(theme)
     });
   },
   invalidate: (value: TypedValue) => (value as DomStyles).dispose()

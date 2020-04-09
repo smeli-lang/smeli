@@ -17,7 +17,7 @@ export const outline = {
         const outlineHtml = outlineData.value;
 
         const node = document.createElement("div");
-        node.className = styles.outline;
+        node.className = styles.outline + " " + styles.text;
         node.innerHTML = outlineHtml;
 
         return new DomNode(node);

@@ -215,7 +215,8 @@ export class Comment implements Statement {
     this.markerLevel = markerLevel;
 
     const hLevel = markerLevel + 1;
-    const html = `<h${hLevel}>${text}</h${hLevel}>`;
+    const cssClass = hLevel === 1 ? "important" : "normal";
+    const html = `<h${hLevel} class=${cssClass}>${text}</h${hLevel}>`;
 
     this.binding = {
       name: "#outline",

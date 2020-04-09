@@ -1,11 +1,5 @@
-#>>> (navigate with page up/down)
-
-# hello
-#> world
-
-# let's
-#> display
-#> a slider
+# Hello, world!
+#> let's display a slider
 
 f: x => sin(x)
 
@@ -20,3 +14,7 @@ f: x => sin(x) + sin(x * 5) * 0.3
 
 #> and yet another one
 f: x => sin(x + sin(x * 5) * 0.2)
+
+ui: ui {
+    page: outline
+}
