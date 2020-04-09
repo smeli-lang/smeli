@@ -1,4 +1,4 @@
-import jss from "jss";
+import { jss } from "./jss";
 
 import { TypedValue, TypeTraits } from "@smeli/core";
 

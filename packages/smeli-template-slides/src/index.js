@@ -14,12 +14,14 @@ window.onload = () => {
       case "ArrowDown":
       case "ArrowRight":
         engine.step(1);
+        requestAnimationFrame(update);
         break;
 
       case "PageUp":
       case "ArrowUp":
       case "ArrowLeft":
         engine.step(-1);
+        requestAnimationFrame(update);
         break;
     }
   });
@@ -27,7 +29,7 @@ window.onload = () => {
   function update() {
     try {
       engine.update();
-      requestAnimationFrame(update);
+      //requestAnimationFrame(update);
     } catch (e) {
       console.log(e);
     }

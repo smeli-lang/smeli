@@ -1,20 +1,19 @@
 import { Scope, ScopeType, TypedValue, Binding } from "@smeli/core";
 import { DomStyles, DomStylesType } from "./types";
+import { defaultThemeLight } from "./theme";
 
-import { outlineStyle } from "./outline.style";
+import { containerStyles } from "./container.styles";
+import { outlineStyles } from "./outline.styles";
 
 export const styles: Binding = {
   name: "#styles",
   evaluate: (scope: Scope) => {
     // next step: evaluate theme from scope here
-    const theme = {
-      colors: {
-        background: "#125012"
-      }
-    };
+    const theme = defaultThemeLight;
 
     return new DomStyles({
-      outline: outlineStyle(theme)
+      container: containerStyles(theme),
+      outline: outlineStyles(theme)
     });
   },
   invalidate: (value: TypedValue) => (value as DomStyles).dispose()

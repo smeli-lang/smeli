@@ -3,7 +3,7 @@ import { DomNode, DomNodeType } from "./types";
 
 import { outline } from "./outline";
 import { slider } from "./slider";
-import { styles } from "./styles";
+import { styles, evaluateStyles } from "./styles";
 
 export type UiPluginOptions = {
   container?: HTMLElement;
@@ -26,6 +26,9 @@ export const loadPlugin = ({
         evaluate: (scope: Scope) => {
           // guard against multiple evaluations
           container.innerHTML = "";
+
+          const styles = evaluateStyles(scope);
+          container.className = styles.container;
 
           const page = scope.evaluate("page", ScopeType) as Scope;
           const node = page.evaluate("#node", DomNodeType) as DomNode;
