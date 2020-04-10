@@ -1,20 +1,37 @@
 # Hello, world!
-#> let's display a slider
+#> let's play a card game
 
 f: x => sin(x)
 
-ui: ui {
-    page: slider {
-        value: f(time) * 50 + 50
-    }
+outline_card: ui.layout {
+  surface: "background"
+  elevation: 2
+  item0: ui.outline {}
 }
 
-#> another function
+slider_card: ui.layout {
+  direction: "column"
+  surface: "primary"
+  elevation: 2
+  item0: ui.layout {
+    surface: "secondary"
+    elevation: 2
+  }
+  item1: ui.slider {
+    value: f(time) * 50 + 50
+  }
+}
+
+ui: ui {
+  page: layout {
+    direction: "responsive_row"
+    item0: outline_card
+    item1: slider_card
+  }
+}
+
+# another function
 f: x => sin(x) + sin(x * 5) * 0.3
 
-#> and yet another one
+# and yet another one
 f: x => sin(x + sin(x * 5) * 0.2)
-
-ui: ui {
-    page: outline
-}
