@@ -286,7 +286,11 @@ export function parseAtom(state: ParserState) {
     }
   }
 
-  return parseNumberLiteral(state) || parseScopeExpression(state, null);
+  return (
+    parseNumberLiteral(state) ||
+    parseStringLiteral(state) ||
+    parseScopeExpression(state, null)
+  );
 }
 
 export function parseFactor(state: ParserState) {

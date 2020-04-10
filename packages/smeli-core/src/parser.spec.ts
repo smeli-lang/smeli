@@ -306,6 +306,21 @@ test("parseStringLiteral: basic", () => {
   expect(state.n).toBe(7);
 });
 
+test("parseStringLiteral: stops at quote boundary", () => {
+  const state = new ParserState(`"hello"123`);
+  const literal = parseStringLiteral(state);
+  expect(literal).not.toBeNull();
+  expect(literal!.value).toEqual(new StringValue("hello"));
+  expect(state.n).toBe(7);
+});
+
+test("parseStringLiteral: invalid (non-terminated)", () => {
+  const state = new ParserState(`"hello`);
+  const literal = parseStringLiteral(state);
+  expect(literal).toBeNull();
+  expect(state.n).toBe(0);
+});
+
 /**
  * Identifier
  */
