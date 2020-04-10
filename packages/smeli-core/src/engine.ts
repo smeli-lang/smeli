@@ -1,6 +1,6 @@
 import { Statement } from "./ast";
 import { ParserState, parseStatementList, ParserReport } from "./parser";
-import { Scope } from "./scope";
+import { Scope, ScopeType } from "./scope";
 import { builtins } from "./builtins";
 import { PluginDefinition, pushPlugin } from "./plugins";
 
@@ -11,6 +11,8 @@ export class Engine {
 
   nextStatement: number = 0;
 
+  sideEffects: Map<string, string[]> = new Map();
+
   constructor(code: string, plugins: PluginDefinition[] = []) {
     this.globalScope = new Scope();
 
@@ -18,7 +20,13 @@ export class Engine {
     this.globalScope.push(builtins);
 
     // plugins
-    plugins.forEach(plugin => pushPlugin(this.globalScope, plugin));
+    plugins.forEach(plugin => {
+      pushPlugin(this.globalScope, plugin);
+
+      if (plugin.sideEffects) {
+        this.sideEffects.set(plugin.name, plugin.sideEffects);
+      }
+    });
 
     const state = new ParserState(code, 0, "smeli");
     this.statements = parseStatementList(state);
@@ -45,6 +53,18 @@ export class Engine {
 
   update() {
     this.globalScope.clearCache();
-    this.globalScope.populateCache();
+
+    // evaluate only bindings with side effects,
+    // everything else will be lazily evaluated
+    // indirectly
+    for (let [pluginName, bindingNames] of this.sideEffects) {
+      const pluginScope = this.globalScope.evaluate(
+        pluginName,
+        ScopeType
+      ) as Scope;
+      for (let binding of bindingNames) {
+        pluginScope.evaluate(binding);
+      }
+    }
   }
 }

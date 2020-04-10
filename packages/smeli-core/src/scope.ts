@@ -103,7 +103,10 @@ export class Scope implements TypedValue {
       let value = scope.cache.get(binding);
       if (!value) {
         value = binding.evaluate(scope);
+        //console.log("cache miss:", scope, binding, value);
         scope.cache.set(binding, value);
+      } else {
+        //console.log("cache hit:", scope, binding, value);
       }
 
       stack.push(binding);
@@ -131,28 +134,6 @@ export class Scope implements TypedValue {
     // verify all child scopes have properly unregistered
     if (this.childScopes.size > 0) {
       throw new Error("Child scope was not unregistered after invalidation");
-    }
-  }
-
-  populateCache() {
-    // collect all binding names
-    const names = new Set<string>();
-    let scope: Scope | null = this;
-    while (scope) {
-      for (let name of scope.bindings.keys()) {
-        names.add(name);
-      }
-      scope = scope.prefix;
-    }
-
-    // evaluate all bindings
-    for (let name of names) {
-      this.evaluate(name);
-    }
-
-    // then child scopes
-    for (let childScope of this.childScopes) {
-      childScope.populateCache();
     }
   }
 

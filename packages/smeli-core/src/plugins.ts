@@ -4,6 +4,7 @@ import { ParserState, parseStatementList } from "./parser";
 export type PluginDefinition = {
   // name of the global plugin scope
   name: string;
+  sideEffects?: string[];
   bindings?: Binding[];
   code?: string;
 };
