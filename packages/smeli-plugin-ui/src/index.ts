@@ -1,6 +1,7 @@
 import { Scope, ScopeType } from "@smeli/core";
 import { DomNode, DomNodeType } from "./types";
 
+import { layout } from "./layout";
 import { outline } from "./outline";
 import { slider } from "./slider";
 import { styles, evaluateStyles } from "./styles";
@@ -16,6 +17,7 @@ export const loadPlugin = ({
 
   return {
     name: "ui",
+    sideEffects: ["#update"],
     bindings: [
       {
         name: "page",
@@ -38,6 +40,7 @@ export const loadPlugin = ({
         },
         invalidate: () => (container.innerHTML = "")
       },
+      layout,
       outline,
       slider,
       styles

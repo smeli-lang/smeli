@@ -2,6 +2,7 @@ import { Theme } from "./theme";
 
 export const containerStyles = (theme: Theme) => ({
   "background-color": theme.colors.background,
+  color: theme.colors.onBackground,
   "font-family": "verdana",
   "font-size": "32px",
   margin: 0,

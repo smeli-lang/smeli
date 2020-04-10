@@ -1,16 +1,24 @@
 export type Theme = {
   colors: {
+    background: string;
     primary: string;
     secondary: string;
-    background: string;
+
+    onBackground: string;
+    onPrimary: string;
+    onSecondary: string;
   };
 };
 
 export const defaultThemeLight: Theme = {
   colors: {
+    background: "#ffffff",
     primary: "#c5e1a5",
     secondary: "#80cbc4",
-    background: "#ffffff"
+
+    onBackground: "#000000",
+    onPrimary: "#000000",
+    onSecondary: "#000000"
   }
 };
 
