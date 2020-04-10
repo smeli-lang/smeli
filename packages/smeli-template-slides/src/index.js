@@ -8,7 +8,7 @@ window.onload = () => {
   // (this should probably be moved to the webpack loader)
   if (engine.messages.length > 0) {
     document.body.innerHTML = engine.messages
-      .map(message => `line ${message.line}: ${message.message}`)
+      .map(message => `${message.line}:${message.column}: ${message.message}`)
       .join("<br />");
     return;
   }
@@ -23,12 +23,14 @@ window.onload = () => {
       case "ArrowDown":
       case "ArrowRight":
         engine.step(1);
+        requestAnimationFrame(update);
         break;
 
       case "PageUp":
       case "ArrowUp":
       case "ArrowLeft":
         engine.step(-1);
+        requestAnimationFrame(update);
         break;
     }
   });
@@ -36,7 +38,7 @@ window.onload = () => {
   function update() {
     try {
       engine.update();
-      requestAnimationFrame(update);
+      //requestAnimationFrame(update);
     } catch (e) {
       console.log(e);
     }
