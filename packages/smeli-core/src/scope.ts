@@ -6,6 +6,11 @@ export type Binding = {
   invalidate?: (value: TypedValue) => void;
 };
 
+type EvaluationContext = {
+  scope: Scope;
+  binding: Binding;
+};
+
 export class Scope implements TypedValue {
   parent: Scope | null;
   prefix: Scope | null;
@@ -13,6 +18,8 @@ export class Scope implements TypedValue {
   bindings: Map<string, Binding[]>;
   cache: Map<Binding, TypedValue>;
   childScopes: Set<Scope>;
+
+  static evaluationStack: EvaluationContext[] = [];
 
   constructor(parent: Scope | null = null, prefix: Scope | null = null) {
     this.parent = parent;
@@ -97,13 +104,48 @@ export class Scope implements TypedValue {
 
   evaluateFrom(name: string, scope: Scope): TypedValue | null {
     const stack = this.bindings.get(name);
-    if (stack && stack.length > 0) {
+    if (stack) {
+      for (let i = stack.length - 1; i >= 0; i--) {
+        const binding = stack[i] as Binding;
+
+        // if this binding is already being evaluated
+        // from the same scope, skip it
+        if (this.isEvaluating(scope, binding)) {
+          continue;
+        }
+
+        // early out if this evaluation is already cached
+        let value = scope.cache.get(binding);
+        if (value) {
+          //console.log("cache hit:", scope, binding, value);
+          return value;
+        }
+
+        //console.log("cache miss:", scope, binding);
+        Scope.evaluationStack.push({
+          scope,
+          binding
+        });
+
+        value = binding.evaluate(scope);
+
+        Scope.evaluationStack.pop();
+
+        //console.log("cache store:", scope, binding, value);
+        scope.cache.set(binding, value);
+
+        return value;
+      }
+    }
+
+    /*if (stack && stack.length > 0) {
       const binding = stack.pop() as Binding;
 
       let value = scope.cache.get(binding);
       if (!value) {
+        //console.log("cache miss:", scope, binding);
         value = binding.evaluate(scope);
-        //console.log("cache miss:", scope, binding, value);
+        //console.log("cache store:", scope, binding, value);
         scope.cache.set(binding, value);
       } else {
         //console.log("cache hit:", scope, binding, value);
@@ -111,10 +153,21 @@ export class Scope implements TypedValue {
 
       stack.push(binding);
 
-      return value;
-    }
+      return value;0
+    }*/
 
     return this.prefix?.evaluateFrom(name, scope) || null;
+  }
+
+  isEvaluating(scope: Scope, binding: Binding) {
+    for (let i = Scope.evaluationStack.length - 1; i >= 0; i--) {
+      const context = Scope.evaluationStack[i];
+      if (context.scope === scope && context.binding === binding) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   clearCache() {
