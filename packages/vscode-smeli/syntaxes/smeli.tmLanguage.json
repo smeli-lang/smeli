@@ -14,11 +14,11 @@
       "patterns": [
         {
           "name": "markup.heading",
-          "match": "#>.*"
+          "match": "#+>.*"
         },
         {
           "name": "comment.line",
-          "match": "#.*"
+          "match": "#+.*"
         }
       ]
     },

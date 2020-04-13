@@ -4,7 +4,7 @@ import {
   TypeChecker,
   FunctionValue,
   StringValue,
-  StringType
+  StringType,
 } from "./types";
 
 export type ParameterList = { [key: string]: TypedValue };
@@ -62,7 +62,7 @@ export class ScopeExpression implements Expression {
     }
 
     const scope = new Scope(parentScope, prefixScope);
-    this.statements.forEach(statement => scope.push(statement.binding));
+    this.statements.forEach((statement) => scope.push(statement.binding));
 
     return scope;
   }
@@ -83,12 +83,12 @@ export class LambdaExpression implements Expression {
   }
 
   evaluate(parentScope: Scope) {
-    return new FunctionValue(parentScope, scope => {
+    return new FunctionValue(parentScope, (scope) => {
       // remap positional arguments to names
       this.args.forEach((identifier, index) => {
         scope.push({
           name: identifier.name,
-          evaluate: scope => scope.evaluate(index.toString())
+          evaluate: (scope) => scope.evaluate(index.toString()),
         });
       });
       return this.body.evaluate(scope);
@@ -117,7 +117,7 @@ export class FunctionCall implements Expression {
     this.args.map((arg, index) =>
       evaluationScope.push({
         name: index.toString(),
-        evaluate: () => arg.evaluate(scope)
+        evaluate: () => arg.evaluate(scope),
       })
     );
 
@@ -173,13 +173,13 @@ export class BinaryOperator implements Expression {
 
 export interface Statement {
   line: number;
-  markerLevel: number;
+  isMarker: boolean;
   binding: Binding | Binding[];
 }
 
 export class BindingDefinition implements Statement {
   line: number;
-  markerLevel: number = 0;
+  isMarker: boolean = false;
   binding: Binding;
 
   identifier: Identifier;
@@ -192,38 +192,46 @@ export class BindingDefinition implements Statement {
 
     this.binding = {
       name: identifier.name,
-      evaluate: scope => expression.evaluate(scope)
+      evaluate: (scope) => expression.evaluate(scope),
     };
 
     if (expression.invalidate) {
       // somehow the compiler refused to acknoledge the check here
-      this.binding.invalidate = value => (expression.invalidate as any)(value);
+      this.binding.invalidate = (value) =>
+        (expression.invalidate as any)(value);
     }
   }
 }
 
 export class Comment implements Statement {
   line: number;
-  markerLevel: number;
-  text: string;
-
+  isMarker: boolean;
   binding: Binding;
 
-  constructor(line: number, text: string, markerLevel: number) {
-    this.line = line;
-    this.text = text;
-    this.markerLevel = markerLevel;
+  headingLevel: number;
+  text: string;
 
-    const hLevel = markerLevel + 1;
-    const cssClass = hLevel === 1 ? "important" : "normal";
-    const html = `<h${hLevel} class=${cssClass}>${text}</h${hLevel}>`;
+  constructor(
+    line: number,
+    isMarker: boolean,
+    headingLevel: number,
+    text: string
+  ) {
+    this.line = line;
+    this.isMarker = isMarker;
+
+    this.headingLevel = headingLevel;
+    this.text = text;
+
+    const cssClass = headingLevel === 1 ? "important" : "normal";
+    const html = `<h${headingLevel} class=${cssClass}>${text}</h${headingLevel}>`;
 
     this.binding = {
       name: "#outline",
       evaluate: (scope: Scope) => {
         const previous = scope.evaluate("#outline", StringType) as StringValue;
         return new StringValue(previous.value + html);
-      }
+      },
     };
   }
 }

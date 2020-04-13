@@ -1,5 +1,5 @@
 # Hello, world!
-#> let's play a card game
+##> let's play a card game
 
 f: x => sin(x)
 
@@ -30,8 +30,8 @@ ui: ui {
   }
 }
 
-# another function
+#> another function
 f: x => sin(x) + sin(x * 5) * 0.3
 
-# and yet another one
+#> and yet another one
 f: x => sin(x + sin(x * 5) * 0.2)

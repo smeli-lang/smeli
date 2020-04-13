@@ -8,7 +8,7 @@ import {
   Comment,
   ScopeExpression,
   FunctionCall,
-  LambdaExpression
+  LambdaExpression,
 } from "./ast";
 import { NumberValue, StringValue } from "./types";
 
@@ -27,7 +27,7 @@ const WHITESPACE = /[ \t]*/y;
 const NUMBER = /-?(([1-9]+[0-9]*)|([0-9]*\.[0-9]+)|(0b[01]+)|(0o[0-7]+)|(0x[0-9a-fA-F]+)|0)\b/y;
 const STRING = /"[^"]*"/y;
 const NAME = /[_a-zA-Z][_0-9a-zA-Z]*\b/y;
-const COMMENT_PREFIX = /#>*/y;
+const COMMENT_PREFIX = /#{1,6}>?/y;
 const TEXT_LINE = /[^\r\n]*/y;
 
 export type ParserReport = {
@@ -95,7 +95,7 @@ export class ParserState {
       file: this.fileName,
       line,
       column,
-      message
+      message,
     });
   }
 
@@ -375,11 +375,12 @@ export function parseComment(state: ParserState) {
     state.reportError("Invalid comment prefix");
     return null;
   }
-  const markerLevel = prefix.length - 1; // don't count the # in the marker level
+  const isMarker = prefix[prefix.length - 1] === ">";
+  const headingLevel = isMarker ? prefix.length - 1 : prefix.length;
 
   const text = state.match(TEXT_LINE)?.trim() || "";
 
-  const comment = new Comment(currentLine, text, markerLevel);
+  const comment = new Comment(currentLine, isMarker, headingLevel, text);
   return comment;
 }
 

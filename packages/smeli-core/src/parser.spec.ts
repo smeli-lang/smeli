@@ -6,7 +6,7 @@ import {
   parseStringLiteral,
   parseIdentifier,
   parseComment,
-  parseStatement
+  parseStatement,
 } from "./parser";
 import { NumberValue, StringValue } from "./types";
 
@@ -36,20 +36,20 @@ test("ParserState: line counting in error reports", () => {
       file: "src/test.smeli",
       line: 1,
       column: 6,
-      message: "Something is broken!"
+      message: "Something is broken!",
     },
     {
       file: "src/test.smeli",
       line: 2,
       column: 1,
-      message: "Something else is broken!"
+      message: "Something else is broken!",
     },
     {
       file: "src/test.smeli",
       line: 2,
       column: 4,
-      message: "Nothing works."
-    }
+      message: "Nothing works.",
+    },
   ]);
 });
 
@@ -382,28 +382,55 @@ test("parseComment: invalid (doesn't start with #)", () => {
   expect(state.n).toBe(0);
 });
 
-test("parseComment: marker level 0", () => {
-  const state = new ParserState("# just a plain comment");
+test("parseComment: heading level 1", () => {
+  const state = new ParserState("# title comment");
   const comment = parseComment(state);
   expect(comment).not.toBeNull();
-  expect(comment!.text).toBe("just a plain comment");
-  expect(comment!.markerLevel).toBe(0);
+  expect(comment!.text).toBe("title comment");
+  expect(comment!.headingLevel).toBe(1);
 });
 
-test("parseComment: marker level 1", () => {
-  const state = new ParserState("#> first level");
+test("parseComment: heading level 2", () => {
+  const state = new ParserState("## subtitle");
   const comment = parseComment(state);
   expect(comment).not.toBeNull();
-  expect(comment!.text).toBe("first level");
-  expect(comment!.markerLevel).toBe(1);
+  expect(comment!.text).toBe("subtitle");
+  expect(comment!.headingLevel).toBe(2);
 });
 
-test("parseComment: marker level 6", () => {
-  const state = new ParserState("#>>>>>> sixth level");
+test("parseComment: heading level 6", () => {
+  const state = new ParserState("###### sixth level");
   const comment = parseComment(state);
   expect(comment).not.toBeNull();
   expect(comment!.text).toBe("sixth level");
-  expect(comment!.markerLevel).toBe(6);
+  expect(comment!.headingLevel).toBe(6);
+});
+
+test("parseComment: markerless", () => {
+  const state = new ParserState("# hello");
+  const comment = parseComment(state);
+  expect(comment).not.toBeNull();
+  expect(comment!.text).toBe("hello");
+  expect(comment!.headingLevel).toBe(1);
+  expect(comment!.isMarker).toBe(false);
+});
+
+test("parseComment: marker", () => {
+  const state = new ParserState("#> hello");
+  const comment = parseComment(state);
+  expect(comment).not.toBeNull();
+  expect(comment!.text).toBe("hello");
+  expect(comment!.headingLevel).toBe(1);
+  expect(comment!.isMarker).toBe(true);
+});
+
+test("parseComment: sublevel marker", () => {
+  const state = new ParserState("###> hello");
+  const comment = parseComment(state);
+  expect(comment).not.toBeNull();
+  expect(comment!.text).toBe("hello");
+  expect(comment!.headingLevel).toBe(3);
+  expect(comment!.isMarker).toBe(true);
 });
 
 /**
