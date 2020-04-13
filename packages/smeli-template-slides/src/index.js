@@ -8,28 +8,28 @@ window.onload = () => {
   // (this should probably be moved to the webpack loader)
   if (engine.messages.length > 0) {
     document.body.innerHTML = engine.messages
-      .map(message => `${message.line}:${message.column}: ${message.message}`)
+      .map((message) => `${message.line}:${message.column}: ${message.message}`)
       .join("<br />");
     return;
   }
 
   // run to the first marker
-  engine.step(1);
+  engine.next();
 
-  document.addEventListener("keydown", event => {
+  document.addEventListener("keydown", (event) => {
     // note: slide clickers typically send page up/down events
     switch (event.code) {
       case "PageDown":
       case "ArrowDown":
       case "ArrowRight":
-        engine.step(1);
+        engine.next();
         //requestAnimationFrame(update);
         break;
 
       case "PageUp":
       case "ArrowUp":
       case "ArrowLeft":
-        engine.step(-1);
+        engine.previous();
         //requestAnimationFrame(update);
         break;
     }

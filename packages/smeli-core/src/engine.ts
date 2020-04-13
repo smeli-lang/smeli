@@ -20,7 +20,7 @@ export class Engine {
     this.globalScope.push(builtins);
 
     // plugins
-    plugins.forEach(plugin => {
+    plugins.forEach((plugin) => {
       pushPlugin(this.globalScope, plugin);
 
       if (plugin.sideEffects) {
@@ -49,6 +49,24 @@ export class Engine {
     this.globalScope.clearCache();
 
     return this.globalScope;
+  }
+
+  next() {
+    while (this.nextStatement < this.statements.length - 1) {
+      this.step(1);
+      if (this.statements[this.nextStatement].isMarker) {
+        break;
+      }
+    }
+  }
+
+  previous() {
+    while (this.nextStatement > 0) {
+      this.step(-1);
+      if (this.statements[this.nextStatement].isMarker) {
+        break;
+      }
+    }
   }
 
   update() {
