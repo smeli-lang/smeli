@@ -3,12 +3,6 @@
 
 f: x => sin(x)
 
-outline_card: ui.layout {
-  surface: "background"
-  elevation: 2
-  item0: ui.outline {}
-}
-
 slider_card: ui.layout {
   direction: "column"
   surface: "primary"
@@ -25,7 +19,7 @@ slider_card: ui.layout {
 ui: ui {
   page: layout {
     direction: "responsive_row"
-    item0: outline_card
+    item0: outline
     item1: slider_card
   }
 }
