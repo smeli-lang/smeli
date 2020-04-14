@@ -1,6 +1,6 @@
-//import template from "./slider.pug";
 import { Scope, NumberValue, TypedValue } from "@smeli/core";
 import { DomNode } from "./types";
+import { evaluateStyles } from "./styles";
 
 export const slider = {
   name: "slider",
@@ -9,20 +9,25 @@ export const slider = {
     scope.push([
       {
         name: "min",
-        evaluate: () => new NumberValue(0)
+        evaluate: () => new NumberValue(0),
       },
       {
         name: "max",
-        evaluate: () => new NumberValue(100)
+        evaluate: () => new NumberValue(100),
       },
       {
         name: "value",
-        evaluate: () => new NumberValue(42)
+        evaluate: () => new NumberValue(42),
       },
       {
         name: "#node",
         evaluate: (scope: Scope) => {
-          const node = document.createElement("div");
+          const styles = evaluateStyles(scope);
+
+          const slider = document.createElement("input");
+          slider.type = "range";
+          slider.className = styles.slider;
+
           // node.innerHTML = template({
           //   styles: {
           //     slider: {
@@ -32,14 +37,11 @@ export const slider = {
           //     }
           //   }
           // });
-          node.innerHTML = "<input type='range' class='slider' />";
-
-          const slider = node.querySelector(".slider") as HTMLInputElement;
 
           function handleInput() {
             scope.push({
               name: "value",
-              evaluate: () => new NumberValue(parseInt(slider.value))
+              evaluate: () => new NumberValue(parseInt(slider.value)),
             });
           }
 
@@ -51,14 +53,14 @@ export const slider = {
             "value"
           ) as NumberValue).value.toString();
 
-          return new DomNode(node);
-        }
-      }
+          return new DomNode(slider);
+        },
+      },
     ]);
 
     return scope;
   },
-  invalidate: (value: TypedValue) => (value as Scope).dispose()
+  invalidate: (value: TypedValue) => (value as Scope).dispose(),
 };
 
 // evaluate: (scope: Scope) => {

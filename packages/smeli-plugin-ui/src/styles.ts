@@ -6,6 +6,7 @@ import { containerStyles } from "./container.styles";
 import { layoutStyles } from "./layout.styles";
 import { outlineStyles } from "./outline.styles";
 import { plotStyles } from "./plot.styles";
+import { sliderStyles } from "./slider.styles";
 import { textStyles } from "./text.styles";
 
 export const styles: Binding = {
@@ -19,6 +20,7 @@ export const styles: Binding = {
       layout: layoutStyles(theme),
       outline: outlineStyles(theme),
       plot: plotStyles(theme),
+      slider: sliderStyles(theme),
       text: textStyles(theme),
     });
   },
