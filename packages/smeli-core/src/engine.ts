@@ -52,7 +52,7 @@ export class Engine {
   }
 
   next() {
-    while (this.nextStatement < this.statements.length - 1) {
+    while (this.nextStatement < this.statements.length) {
       this.step(1);
       if (this.statements[this.nextStatement].isMarker) {
         break;
