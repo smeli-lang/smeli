@@ -47,6 +47,26 @@ export const plot = {
           context.arc(0, 0, 0.1, 0, 2.0 * Math.PI);
           context.fill();
 
+          context.strokeStyle = "rgba(0, 0, 0, 0.87)";
+
+          // x = 0
+          if (viewport[0] <= 0 && viewport[2] >= 0) {
+            context.lineWidth = (2 * viewportWidth) / width;
+            context.beginPath();
+            context.moveTo(0, viewport[1]);
+            context.lineTo(0, viewport[3]);
+            context.stroke();
+          }
+
+          // y = 0
+          if (viewport[1] <= 0 && viewport[3] >= 0) {
+            context.lineWidth = (2 * viewportHeight) / height;
+            context.beginPath();
+            context.moveTo(viewport[0], 0);
+            context.lineTo(viewport[2], 0);
+            context.stroke();
+          }
+
           // horizontal grid
           context.strokeStyle = "rgba(0, 0, 0, 0.6)";
           context.lineWidth = viewportHeight / height;
