@@ -54,7 +54,10 @@ export class Engine {
   next() {
     while (this.nextStatement < this.statements.length) {
       this.step(1);
-      if (this.statements[this.nextStatement].isMarker) {
+      if (
+        this.nextStatement < this.statements.length &&
+        this.statements[this.nextStatement].isMarker
+      ) {
         break;
       }
     }
