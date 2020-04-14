@@ -5,6 +5,7 @@ import { defaultThemeLight } from "./theme";
 import { containerStyles } from "./container.styles";
 import { layoutStyles } from "./layout.styles";
 import { outlineStyles } from "./outline.styles";
+import { plotStyles } from "./plot.styles";
 import { textStyles } from "./text.styles";
 
 export const styles: Binding = {
@@ -17,10 +18,11 @@ export const styles: Binding = {
       container: containerStyles(theme),
       layout: layoutStyles(theme),
       outline: outlineStyles(theme),
-      text: textStyles(theme)
+      plot: plotStyles(theme),
+      text: textStyles(theme),
     });
   },
-  invalidate: (value: TypedValue) => (value as DomStyles).dispose()
+  invalidate: (value: TypedValue) => (value as DomStyles).dispose(),
 };
 
 export const evaluateStyles = (scope: Scope) => {

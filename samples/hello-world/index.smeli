@@ -8,8 +8,9 @@ slider_card: ui.layout {
   surface: "primary"
   elevation: 2
   item0: ui.layout {
-    surface: "secondary"
+    surface: "background"
     elevation: 2
+    item0: ui.plot {}
   }
   item1: ui.slider {
     value: f(time) * 50 + 50

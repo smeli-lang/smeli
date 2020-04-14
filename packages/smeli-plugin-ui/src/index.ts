@@ -2,6 +2,7 @@ import { Scope, ScopeType } from "@smeli/core";
 import { DomNode, DomNodeType } from "./types";
 
 import { layout } from "./layout";
+import { plot } from "./plot";
 import { outline } from "./outline";
 import { slider } from "./slider";
 import { styles, evaluateStyles } from "./styles";
@@ -11,7 +12,7 @@ export type UiPluginOptions = {
 };
 
 export const loadPlugin = ({
-  container = document.body
+  container = document.body,
 }: UiPluginOptions = {}) => {
   container.innerHTML = "";
 
@@ -21,7 +22,7 @@ export const loadPlugin = ({
     bindings: [
       {
         name: "page",
-        evaluate: (scope: Scope) => scope.evaluate("outline")
+        evaluate: (scope: Scope) => scope.evaluate("outline"),
       },
       {
         name: "#update",
@@ -38,12 +39,13 @@ export const loadPlugin = ({
 
           return node;
         },
-        invalidate: () => (container.innerHTML = "")
+        invalidate: () => (container.innerHTML = ""),
       },
       layout,
       outline,
+      plot,
       slider,
-      styles
-    ]
+      styles,
+    ],
   };
 };
