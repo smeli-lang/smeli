@@ -3,19 +3,19 @@
 
 f: x => sin(x)
 
-slider_card: ui.layout {
+plot_card: ui.layout {
   direction: "column"
   surface: "primary"
   elevation: 2
-  item0: ui.layout {
+  item0: ui.slider {
+    value: f(time) * 50 + 50
+  }
+  item1: ui.layout {
     surface: "background"
     elevation: 2
     item0: ui.plot {
       function: x => f(x + time)
     }
-  }
-  item1: ui.slider {
-    value: f(time) * 50 + 50
   }
 }
 
@@ -23,7 +23,7 @@ ui: ui {
   page: layout {
     direction: "responsive_row"
     item0: outline
-    item1: slider_card
+    item1: plot_card
   }
 }
 
@@ -31,5 +31,4 @@ ui: ui {
 f: x => sin(x) + sin(x * 5) * 0.3
 
 #> and yet another one
-f: x => sin(x + sin(x * 5) * 0.2) * sin(time)
-f: x => 4
+f: x => sin(x + sin(x * 5) * 0.2) * sin(time * 0.3)
