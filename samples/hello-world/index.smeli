@@ -10,7 +10,9 @@ slider_card: ui.layout {
   item0: ui.layout {
     surface: "background"
     elevation: 2
-    item0: ui.plot {}
+    item0: ui.plot {
+      function: x => f(x + time)
+    }
   }
   item1: ui.slider {
     value: f(time) * 50 + 50
@@ -29,4 +31,5 @@ ui: ui {
 f: x => sin(x) + sin(x * 5) * 0.3
 
 #> and yet another one
-f: x => sin(x + sin(x * 5) * 0.2)
+f: x => sin(x + sin(x * 5) * 0.2) * sin(time)
+f: x => 4
