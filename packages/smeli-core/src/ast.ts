@@ -196,7 +196,7 @@ export class BindingDefinition implements Statement {
     };
 
     if (expression.invalidate) {
-      // somehow the compiler refused to acknoledge the check here
+      // somehow the compiler refused to acknowledge the check here
       this.binding.invalidate = (value) =>
         (expression.invalidate as any)(value);
     }
