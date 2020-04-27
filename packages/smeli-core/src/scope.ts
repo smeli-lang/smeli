@@ -137,24 +137,6 @@ export class Scope implements TypedValue {
       }
     }
 
-    /*if (stack && stack.length > 0) {
-      const binding = stack.pop() as Binding;
-
-      let value = scope.cache.get(binding);
-      if (!value) {
-        //console.log("cache miss:", scope, binding);
-        value = binding.evaluate(scope);
-        //console.log("cache store:", scope, binding, value);
-        scope.cache.set(binding, value);
-      } else {
-        //console.log("cache hit:", scope, binding, value);
-      }
-
-      stack.push(binding);
-
-      return value;0
-    }*/
-
     return this.prefix?.evaluateFrom(name, scope) || null;
   }
 
