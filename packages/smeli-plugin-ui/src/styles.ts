@@ -24,7 +24,6 @@ export const styles: Binding = {
       text: textStyles(theme),
     });
   },
-  invalidate: (value: TypedValue) => (value as DomStyles).dispose(),
 };
 
 export const evaluateStyles = (scope: Scope) => {

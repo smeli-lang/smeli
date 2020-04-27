@@ -5,7 +5,7 @@ test("push and pop a single binding", () => {
   const scope = new Scope();
   const binding = {
     name: "a",
-    evaluate: () => new NumberValue(42)
+    evaluate: () => new NumberValue(42),
   };
 
   scope.push(binding);
@@ -21,15 +21,15 @@ test("evaluates binding history", () => {
   const bindings = [
     {
       name: "a",
-      evaluate: () => new NumberValue(42)
+      evaluate: () => new NumberValue(42),
     },
     {
       name: "a",
       evaluate: (scope: Scope) => {
         const a = scope.evaluate("a", NumberType) as NumberValue;
         return new NumberValue(a.value + 22);
-      }
-    }
+      },
+    },
   ];
 
   scope.push(bindings);
@@ -40,7 +40,7 @@ test("evaluates bindings from prefix", () => {
   const prefix = new Scope();
   prefix.push({
     name: "x",
-    evaluate: () => new NumberValue(10)
+    evaluate: () => new NumberValue(10),
   });
 
   const scope = new Scope(null, prefix);
@@ -52,12 +52,12 @@ test("evaluates bindings from prefix against the derived scope", () => {
   prefix.push([
     {
       name: "x",
-      evaluate: () => new NumberValue(10)
+      evaluate: () => new NumberValue(10),
     },
     {
       name: "y",
-      evaluate: scope => scope.evaluate("x")
-    }
+      evaluate: (scope) => scope.evaluate("x"),
+    },
   ]);
 
   const scope = new Scope(null, prefix);
@@ -67,8 +67,8 @@ test("evaluates bindings from prefix against the derived scope", () => {
   scope.push([
     {
       name: "x",
-      evaluate: () => new NumberValue(20)
-    }
+      evaluate: () => new NumberValue(20),
+    },
   ]);
 
   scope.clearCache();
@@ -81,12 +81,12 @@ test("using the same prefix from different scopes is reentrant", () => {
   prefix.push([
     {
       name: "x",
-      evaluate: () => new NumberValue(10)
+      evaluate: () => new NumberValue(10),
     },
     {
       name: "y",
-      evaluate: scope => scope.evaluate("x")
-    }
+      evaluate: (scope) => scope.evaluate("x"),
+    },
   ]);
 
   const scope = new Scope(null, prefix);
@@ -94,15 +94,14 @@ test("using the same prefix from different scopes is reentrant", () => {
     {
       name: "child",
       evaluate: (parentScope: Scope) => new Scope(parentScope, prefix),
-      invalidate: (value: TypedValue) => (value as Scope).dispose()
     },
     {
       name: "x",
       evaluate: (scope: Scope) => {
         const childScope = scope.evaluate("child", ScopeType) as Scope;
         return childScope.evaluate("y");
-      }
-    }
+      },
+    },
   ]);
 
   expect(scope.evaluate("y")).toEqual(new NumberValue(10));

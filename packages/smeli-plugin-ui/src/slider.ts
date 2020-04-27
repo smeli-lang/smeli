@@ -60,7 +60,6 @@ export const slider = {
 
     return scope;
   },
-  invalidate: (value: TypedValue) => (value as Scope).dispose(),
 };
 
 // evaluate: (scope: Scope) => {

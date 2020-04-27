@@ -39,7 +39,6 @@ export const loadPlugin = ({
 
           return node;
         },
-        invalidate: () => (container.innerHTML = ""),
       },
       layout,
       outline,

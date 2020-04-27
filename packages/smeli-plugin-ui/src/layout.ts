@@ -5,7 +5,7 @@ import {
   StringType,
   NumberValue,
   ScopeType,
-  NumberType
+  NumberType,
 } from "@smeli/core";
 import { DomNode, DomNodeType } from "./types";
 import { evaluateStyles } from "./styles";
@@ -17,26 +17,26 @@ export const layout = {
     scope.push([
       {
         name: "direction",
-        evaluate: () => new StringValue("row")
+        evaluate: () => new StringValue("row"),
       },
       {
         name: "surface",
-        evaluate: () => new StringValue("none")
+        evaluate: () => new StringValue("none"),
       },
       {
         name: "elevation",
-        evaluate: () => new NumberValue(0)
+        evaluate: () => new NumberValue(0),
       },
 
       // there's no array support in the langage for now,
       // multiple fields are used as a temporary workaround
       {
         name: "item0",
-        evaluate: () => new NumberValue(0)
+        evaluate: () => new NumberValue(0),
       },
       {
         name: "item1",
-        evaluate: () => new NumberValue(0)
+        evaluate: () => new NumberValue(0),
       },
 
       {
@@ -73,11 +73,10 @@ export const layout = {
           }
 
           return new DomNode(node);
-        }
-      }
+        },
+      },
     ]);
 
     return scope;
   },
-  invalidate: (value: TypedValue) => (value as Scope).dispose()
 };

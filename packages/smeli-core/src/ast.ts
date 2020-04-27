@@ -11,7 +11,6 @@ export type ParameterList = { [key: string]: TypedValue };
 
 export interface Expression {
   evaluate(scope: Scope): TypedValue;
-  invalidate?(value: TypedValue): void;
 }
 
 export class Literal implements Expression {
@@ -65,11 +64,6 @@ export class ScopeExpression implements Expression {
     this.statements.forEach((statement) => scope.push(statement.binding));
 
     return scope;
-  }
-
-  invalidate(value: TypedValue) {
-    const scope = value as Scope;
-    scope.dispose();
   }
 }
 
@@ -194,12 +188,6 @@ export class BindingDefinition implements Statement {
       name: identifier.name,
       evaluate: (scope) => expression.evaluate(scope),
     };
-
-    if (expression.invalidate) {
-      // somehow the compiler refused to acknowledge the check here
-      this.binding.invalidate = (value) =>
-        (expression.invalidate as any)(value);
-    }
   }
 }
 

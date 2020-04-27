@@ -139,5 +139,4 @@ export const plot = {
 
     return scope;
   },
-  invalidate: (value: TypedValue) => (value as Scope).dispose(),
 };

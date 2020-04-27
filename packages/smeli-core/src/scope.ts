@@ -3,7 +3,6 @@ import { TypeTraits, TypedValue } from "./types";
 export type Binding = {
   name: string;
   evaluate: (scope: Scope) => TypedValue;
-  invalidate?: (value: TypedValue) => void;
 };
 
 type EvaluationContext = {
@@ -44,7 +43,7 @@ export class Scope implements TypedValue {
 
   push(binding: Binding | Binding[]) {
     if (Array.isArray(binding)) {
-      binding.forEach(item => this.push(item));
+      binding.forEach((item) => this.push(item));
       return;
     }
 
@@ -124,7 +123,7 @@ export class Scope implements TypedValue {
         //console.log("cache miss:", scope, binding);
         Scope.evaluationStack.push({
           scope,
-          binding
+          binding,
         });
 
         value = binding.evaluate(scope);
@@ -176,10 +175,10 @@ export class Scope implements TypedValue {
       childScope.clearCache();
     }
 
-    // invalidate all cache entries
-    for (let [binding, value] of this.cache) {
-      if (binding.invalidate) {
-        binding.invalidate(value);
+    // dispose of all cache entries
+    for (let value of this.cache.values()) {
+      if (value.dispose) {
+        value.dispose();
       }
     }
     this.cache.clear();
@@ -200,5 +199,5 @@ export class Scope implements TypedValue {
 }
 
 export const ScopeType: TypeTraits = {
-  __name__: () => "scope"
+  __name__: () => "scope",
 };

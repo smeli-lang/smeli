@@ -12,7 +12,7 @@ export type PluginDefinition = {
 export function pushPlugin(parentScope: Scope, definition: PluginDefinition) {
   parentScope.push({
     name: definition.name,
-    evaluate: parentScope => {
+    evaluate: (parentScope) => {
       const scope = new Scope(parentScope);
 
       if (definition.bindings) {
@@ -22,11 +22,10 @@ export function pushPlugin(parentScope: Scope, definition: PluginDefinition) {
       if (definition.code) {
         const parserState = new ParserState(definition.code);
         const statements = parseStatementList(parserState);
-        statements.forEach(statement => scope.push(statement.binding));
+        statements.forEach((statement) => scope.push(statement.binding));
       }
 
       return scope;
     },
-    invalidate: value => (value as Scope).dispose()
   });
 }

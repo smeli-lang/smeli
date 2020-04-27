@@ -21,10 +21,9 @@ export const outline = {
         node.innerHTML = outlineHtml;
 
         return new DomNode(node);
-      }
+      },
     });
 
     return scope;
   },
-  invalidate: (value: TypedValue) => (value as Scope).dispose()
 };

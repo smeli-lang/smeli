@@ -2,6 +2,7 @@ import { Scope } from "./scope";
 
 export interface TypedValue {
   type(): TypeTraits;
+  dispose?(): void;
 }
 
 export interface TypeTraits {
@@ -53,7 +54,7 @@ export const NumberType: TypeTraits = {
     new NumberValue(lhs.value * rhs.value),
   __div__: (lhs: NumberValue, rhs: NumberValue) =>
     new NumberValue(lhs.value / rhs.value),
-  __str__: (self: NumberValue) => self.value.toString()
+  __str__: (self: NumberValue) => self.value.toString(),
 };
 
 export class StringValue implements TypedValue {
@@ -72,7 +73,7 @@ export const StringType: TypeTraits = {
   __name__: () => "string",
   __add__: (lhs: StringValue, rhs: StringValue) =>
     new StringValue(lhs.value + rhs.value),
-  __str__: (self: StringValue) => self.value
+  __str__: (self: StringValue) => self.value,
 };
 
 type ClosureType = (scope: Scope) => TypedValue;
@@ -94,5 +95,5 @@ export class FunctionValue implements TypedValue {
 export const FunctionType: TypeTraits = {
   __name__: () => "closure",
   __call__: (self: FunctionValue, scope: Scope) => self.closure(scope),
-  __str__: (self: FunctionValue) => "() => ()" // replace with signature when implemented
+  __str__: (self: FunctionValue) => "() => ()", // replace with signature when implemented
 };
