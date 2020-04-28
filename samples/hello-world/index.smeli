@@ -32,3 +32,5 @@ f: x => sin(x) + sin(x * 5) * 0.3
 
 #> and yet another one
 f: x => sin(x + sin(x * 5) * 0.2) * sin(time * 0.3)
+
+plot_card: ui.formula {}

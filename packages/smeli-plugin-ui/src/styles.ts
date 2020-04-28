@@ -3,6 +3,7 @@ import { DomStyles, DomStylesType } from "./types";
 import { defaultThemeLight } from "./theme";
 
 import { containerStyles } from "./container.styles";
+import { formulaStyles } from "./formula.styles";
 import { layoutStyles } from "./layout.styles";
 import { outlineStyles } from "./outline.styles";
 import { plotStyles } from "./plot.styles";
@@ -17,6 +18,7 @@ export const styles: Binding = {
 
     return new DomStyles({
       container: containerStyles(theme),
+      formula: formulaStyles(theme),
       layout: layoutStyles(theme),
       outline: outlineStyles(theme),
       plot: plotStyles(theme),

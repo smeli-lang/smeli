@@ -8,29 +8,45 @@ module.exports = ({ rootFile, outputPath }) => ({
   mode: "production",
   entry: path.join(__dirname, "src/index.js"),
   output: {
-    path: outputPath
+    path: outputPath,
   },
   module: {
     rules: [
       {
         test: /\.smeli$/,
-        use: "smeli-loader"
-      }
-    ]
+        use: "smeli-loader",
+      },
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
+      },
+      {
+        test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+        use: [
+          {
+            loader: "file-loader",
+            options: {
+              name: "[name].[ext]",
+              outputPath: "fonts/",
+            },
+          },
+        ],
+      },
+    ],
   },
   resolve: {
     alias: {
-      __root_smeli_file_alias__: rootFile
-    }
+      __root_smeli_file_alias__: rootFile,
+    },
   },
   plugins: [
     new HtmlWebpackPlugin({
       title: "Smeli Slides",
-      inlineSource: ".(js|css)$" // embed all javascript and css inline
+      inlineSource: ".(js|css)$", // embed all javascript and css inline
     }),
     new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin),
     new FilterChunkWebpackPlugin({
-      patterns: ["*.js", "*.css"] // remove all javascript and css from the output folder
-    })
-  ]
+      patterns: ["*.js", "*.css"], // remove all javascript and css from the output folder
+    }),
+  ],
 });

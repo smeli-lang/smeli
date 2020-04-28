@@ -1,5 +1,5 @@
 {
-  "name": "hello-world",
+  "name": "sample-hello-world",
   "version": "0.0.1",
   "scripts": {
     "clean": "rimraf dist",

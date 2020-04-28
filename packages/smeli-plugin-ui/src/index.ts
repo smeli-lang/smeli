@@ -1,6 +1,7 @@
 import { Scope, ScopeType } from "@smeli/core";
 import { DomNode, DomNodeType } from "./types";
 
+import { formula } from "./formula";
 import { layout } from "./layout";
 import { plot } from "./plot";
 import { outline } from "./outline";
@@ -40,6 +41,7 @@ export const loadPlugin = ({
           return node;
         },
       },
+      formula,
       layout,
       outline,
       plot,

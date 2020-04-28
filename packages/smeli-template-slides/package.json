@@ -11,9 +11,12 @@
     "directory": "packages/smeli-template-slides"
   },
   "dependencies": {
+    "css-loader": "^3.5.3",
+    "file-loader": "^6.0.0",
     "filter-chunk-webpack-plugin": "^2.1.0",
     "html-webpack-inline-source-plugin": "^1.0.0-beta.2",
     "html-webpack-plugin": "^4.0.4",
-    "smeli-loader": "*"
+    "smeli-loader": "*",
+    "style-loader": "^1.2.0"
   }
 }

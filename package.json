@@ -1,9 +1,14 @@
 {
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "samples/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*",
+      "samples/*"
+    ],
+    "nohoist": [
+      "**/@types/katex"
+    ]
+  },
   "name": "smeli",
   "description": "Self-Modifying Expression Language for Interactivity",
   "author": "Remi Papillie (wsmind)",
@@ -20,7 +25,10 @@
   },
   "scripts": {
     "clean": "lerna run --parallel clean",
-    "build": "lerna run build",
+    "build": "yarn build:packages && yarn link:cli && yarn build:samples",
+    "build:packages": "lerna run build --ignore \"sample-*\"",
+    "build:samples": "lerna run build --scope \"sample-*\"",
+    "link:cli": "cd packages/smeli-cli && yarn link",
     "test": "jest",
     "watch": "lerna run --parallel watch",
     "bump": "lerna version --no-push && echo IMPORTANT: remember to push with the --follow-tags option"
