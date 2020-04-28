@@ -29,6 +29,7 @@
     "build:packages": "lerna run build --ignore \"sample-*\"",
     "build:samples": "lerna run build --scope \"sample-*\"",
     "link:cli": "cd packages/smeli-cli && yarn link",
+    "unlink:cli": "cd packages/smeli-cli && yarn unlink",
     "test": "jest",
     "watch": "lerna run --parallel watch",
     "bump": "lerna version --no-push && echo IMPORTANT: remember to push with the --follow-tags option"
