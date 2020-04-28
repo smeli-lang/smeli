@@ -25,7 +25,9 @@ export const formula = {
           element.className = styles.formula + " " + styles.text;
 
           katex.render(code, element);
-          element.className += " important";
+
+          const katexRoot = element.querySelector(".katex") as HTMLElement;
+          katexRoot.className += " important";
 
           return new DomNode(element);
         },
