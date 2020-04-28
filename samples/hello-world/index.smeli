@@ -3,13 +3,15 @@
 
 f: x => sin(x)
 
+thing: ui.slider {
+  value: f(time) * 50 + 50
+}
+
 plot_card: ui.layout {
   direction: "column"
   surface: "primary"
   elevation: 2
-  item0: ui.slider {
-    value: f(time) * 50 + 50
-  }
+  item0: thing
   item1: ui.layout {
     surface: "background"
     elevation: 2
@@ -33,4 +35,9 @@ f: x => sin(x) + sin(x * 5) * 0.3
 #> and yet another one
 f: x => sin(x + sin(x * 5) * 0.2) * sin(time * 0.3)
 
-plot_card: ui.formula {}
+thing: ui.layout {
+  direction: "column"
+  surface: "background"
+  elevation: 2
+  item0: ui.formula {}
+}

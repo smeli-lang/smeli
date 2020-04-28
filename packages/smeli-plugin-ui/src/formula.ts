@@ -22,9 +22,10 @@ export const formula = {
           const code = tex.value;
 
           const element = document.createElement("div");
-          element.className = styles.formula;
+          element.className = styles.formula + " " + styles.text;
 
           katex.render(code, element);
+          element.className += " important";
 
           return new DomNode(element);
         },
