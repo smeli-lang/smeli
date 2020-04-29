@@ -40,6 +40,10 @@ export class Identifier implements Expression {
       scope = TypeChecker.as<Scope>(next, ScopeType);
     }
 
+    if (this.name[0] === "&") {
+      // return expression AST instead of the evaluated result
+    }
+
     return scope.evaluate(this.name);
   }
 }

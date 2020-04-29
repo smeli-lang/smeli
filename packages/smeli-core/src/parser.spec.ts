@@ -340,6 +340,14 @@ test("parseIdentifier: invalid", () => {
   expect(state.n).toBe(0);
 });
 
+test("parseIdentifier: expression-of operator", () => {
+  const state = new ParserState("&name");
+  const id = parseIdentifier(state);
+  expect(id).not.toBeNull();
+  expect(id!.name).toBe("&name");
+  expect(state.n).toBe(5);
+});
+
 /**
  * Comment
  */
