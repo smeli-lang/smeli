@@ -39,5 +39,7 @@ thing: ui.layout {
   direction: "column"
   surface: "background"
   elevation: 2
-  item0: ui.formula {}
+  item0: ui.formula {
+    tex: &f
+  }
 }

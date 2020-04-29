@@ -5,6 +5,7 @@ import {
   FunctionValue,
   StringValue,
   StringType,
+  ExpressionValue,
 } from "./types";
 
 export type ParameterList = { [key: string]: TypedValue };
@@ -42,6 +43,8 @@ export class Identifier implements Expression {
 
     if (this.name[0] === "&") {
       // return expression AST instead of the evaluated result
+      const symbolName = this.name.substr(1);
+      return new ExpressionValue(symbolName, scope.ast(symbolName));
     }
 
     return scope.evaluate(this.name);
@@ -191,6 +194,7 @@ export class BindingDefinition implements Statement {
     this.binding = {
       name: identifier.name,
       evaluate: (scope) => expression.evaluate(scope),
+      ast: this.expression,
     };
   }
 }

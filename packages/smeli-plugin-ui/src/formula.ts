@@ -1,8 +1,20 @@
 import katex from "katex";
 
-import { Scope, StringValue, StringType } from "@smeli/core";
+import {
+  ExpressionType,
+  ExpressionValue,
+  Scope,
+  StringValue,
+  StringType,
+} from "@smeli/core";
+
 import { DomNode } from "./types";
 import { evaluateStyles } from "./styles";
+
+// transform a Smeli AST into a TEX expression
+function transpile(value: ExpressionValue): string {
+  return value.name + " = " + value.name;
+}
 
 export const formula = {
   name: "formula",
@@ -18,8 +30,17 @@ export const formula = {
         evaluate: (scope: Scope) => {
           const styles = evaluateStyles(scope);
 
-          const tex = scope.evaluate("tex", StringType) as StringValue;
-          const code = tex.value;
+          const tex = scope.evaluate("tex");
+          let code = "";
+          switch (tex.type()) {
+            case StringType:
+              code = (tex as StringValue).value;
+              break;
+            case ExpressionType:
+              const expression = tex as ExpressionValue;
+              code = transpile(expression);
+              break;
+          }
 
           const element = document.createElement("div");
           element.className = styles.formula + " " + styles.text;

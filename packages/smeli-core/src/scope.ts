@@ -3,6 +3,7 @@ import { TypeTraits, TypedValue } from "./types";
 export type Binding = {
   name: string;
   evaluate: (scope: Scope) => TypedValue;
+  ast?: any;
 };
 
 type EvaluationContext = {
@@ -80,18 +81,38 @@ export class Scope implements TypedValue {
   }
 
   evaluate(name: string, type?: TypeTraits): TypedValue {
-    const result = this.evaluateFrom(name, this);
-    if (result) {
+    const binding = this.lookup(name, this);
+    if (binding) {
+      // early out if this evaluation is already cached
+      let value = this.cache.get(binding);
+      if (value) {
+        //console.log("cache hit:", scope, binding, value);
+        return value;
+      }
+
+      //console.log("cache miss:", scope, binding);
+      Scope.evaluationStack.push({
+        scope: this,
+        binding,
+      });
+
+      value = binding.evaluate(this);
+
+      Scope.evaluationStack.pop();
+
+      //console.log("cache store:", scope, binding, value);
+      this.cache.set(binding, value);
+
       // enforce type if provided
-      if (type && result.type() !== type) {
-        const typeName = result.type().__name__();
+      if (type && value.type() !== type) {
+        const typeName = value.type().__name__();
         const expectedTypeName = type.__name__();
         throw new Error(
           `Type error: '${name}' has type '${typeName}' instead of '${expectedTypeName}'`
         );
       }
 
-      return result;
+      return value;
     }
 
     if (this.parent) {
@@ -101,7 +122,23 @@ export class Scope implements TypedValue {
     throw new Error(`No previous definition found for '${name}'`);
   }
 
-  evaluateFrom(name: string, scope: Scope): TypedValue | null {
+  ast(name: string): any {
+    const binding = this.lookup(name, this);
+
+    if (binding) {
+      if (!binding.ast) {
+        throw new Error(`Binding '${name}' has no expression`);
+      }
+
+      return binding.ast;
+    } else if (this.parent) {
+      return this.parent.ast(name);
+    }
+
+    throw new Error(`No previous definition found for '${name}'`);
+  }
+
+  lookup(name: string, scope: Scope): Binding | null {
     const stack = this.bindings.get(name);
     if (stack) {
       for (let i = stack.length - 1; i >= 0; i--) {
@@ -113,31 +150,11 @@ export class Scope implements TypedValue {
           continue;
         }
 
-        // early out if this evaluation is already cached
-        let value = scope.cache.get(binding);
-        if (value) {
-          //console.log("cache hit:", scope, binding, value);
-          return value;
-        }
-
-        //console.log("cache miss:", scope, binding);
-        Scope.evaluationStack.push({
-          scope,
-          binding,
-        });
-
-        value = binding.evaluate(scope);
-
-        Scope.evaluationStack.pop();
-
-        //console.log("cache store:", scope, binding, value);
-        scope.cache.set(binding, value);
-
-        return value;
+        return binding;
       }
     }
 
-    return this.prefix?.evaluateFrom(name, scope) || null;
+    return this.prefix?.lookup(name, scope) || null;
   }
 
   isEvaluating(scope: Scope, binding: Binding) {

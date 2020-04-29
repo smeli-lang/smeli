@@ -1,4 +1,5 @@
 import { Scope } from "./scope";
+import { Expression } from "./ast";
 
 export interface TypedValue {
   type(): TypeTraits;
@@ -96,4 +97,22 @@ export const FunctionType: TypeTraits = {
   __name__: () => "closure",
   __call__: (self: FunctionValue, scope: Scope) => self.closure(scope),
   __str__: (self: FunctionValue) => "() => ()", // replace with signature when implemented
+};
+
+export class ExpressionValue implements TypedValue {
+  name: string;
+  expression: Expression;
+
+  constructor(name: string, expression: Expression) {
+    this.name = name;
+    this.expression = expression;
+  }
+
+  type() {
+    return ExpressionType;
+  }
+}
+
+export const ExpressionType: TypeTraits = {
+  __name__: () => "expression",
 };
