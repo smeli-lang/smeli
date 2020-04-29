@@ -1,8 +1,14 @@
 import katex from "katex";
 
 import {
+  BinaryOperator,
+  Expression,
   ExpressionType,
   ExpressionValue,
+  FunctionCall,
+  Identifier,
+  LambdaExpression,
+  Literal,
   Scope,
   StringValue,
   StringType,
@@ -11,9 +17,84 @@ import {
 import { DomNode } from "./types";
 import { evaluateStyles } from "./styles";
 
+export type Visitor = Map<object, (expression: any) => string>;
+
+function traverse(expression: Expression, visitor: Visitor): string {
+  const constructor = expression.constructor;
+  if (!visitor.has(constructor)) {
+    throw new Error(`Cannot transpile this expression to TeX`);
+  }
+
+  const callback = visitor.get(constructor);
+  return (callback as any)(expression);
+}
+
+const visitor: Visitor = new Map();
+
+visitor.set(Literal, (literal: Literal) => {
+  const type = literal.value.type();
+  if (type.__str__) {
+    return type.__str__(literal.value);
+  }
+
+  throw new Error("Unimplemented literal transpilation to TeX");
+});
+
+visitor.set(Identifier, (identifier: Identifier) => {
+  return identifier.name;
+});
+
+visitor.set(LambdaExpression, (lambda: LambdaExpression) => {
+  const parameterNames = lambda.args.map(
+    (identifier: Identifier) => identifier.name
+  );
+  return parameterNames.join(", ") + " => " + traverse(lambda.body, visitor);
+});
+
+visitor.set(FunctionCall, (functionCall: FunctionCall) => {
+  const name = traverse(functionCall.identifier, visitor);
+  const args = functionCall.args.map((expression: Expression) =>
+    traverse(expression, visitor)
+  );
+  return name + "(" + args.join(", ") + ")";
+});
+
+visitor.set(BinaryOperator, (operator: BinaryOperator) => {
+  // turn division into a fraction
+  if (operator.operatorName === "__div__") {
+    return "\\frac{a}{b}";
+  }
+
+  const texOperators = {
+    __add__: "+",
+    __sub__: "-",
+    __mul__: "*",
+  };
+
+  const lhs = traverse(operator.lhs, visitor);
+  const rhs = traverse(operator.rhs, visitor);
+  return lhs + " " + texOperators[operator.operatorName] + " " + rhs;
+});
+
 // transform a Smeli AST into a TEX expression
 function transpile(value: ExpressionValue): string {
-  return value.name + " = " + value.name;
+  // if the root of the expression is a lambda, transform it to
+  // the f(x) form as we have the function name here
+  if (value.expression.constructor === LambdaExpression) {
+    const lambda = value.expression as LambdaExpression;
+    const parameterNames = lambda.args.map(
+      (identifier: Identifier) => identifier.name
+    );
+    return (
+      value.name +
+      "(" +
+      parameterNames.join(", ") +
+      ") = " +
+      traverse(lambda.body, visitor)
+    );
+  } else {
+    return value.name + " = " + traverse(value.expression, visitor);
+  }
 }
 
 export const formula = {
