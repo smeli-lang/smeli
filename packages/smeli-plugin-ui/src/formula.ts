@@ -60,9 +60,12 @@ visitor.set(FunctionCall, (functionCall: FunctionCall) => {
 });
 
 visitor.set(BinaryOperator, (operator: BinaryOperator) => {
+  const lhs = traverse(operator.lhs, visitor);
+  const rhs = traverse(operator.rhs, visitor);
+
   // turn division into a fraction
   if (operator.operatorName === "__div__") {
-    return "\\frac{a}{b}";
+    return "\\frac{" + lhs + "}{" + rhs + "}";
   }
 
   const texOperators = {
@@ -71,8 +74,6 @@ visitor.set(BinaryOperator, (operator: BinaryOperator) => {
     __mul__: "*",
   };
 
-  const lhs = traverse(operator.lhs, visitor);
-  const rhs = traverse(operator.rhs, visitor);
   return lhs + " " + texOperators[operator.operatorName] + " " + rhs;
 });
 

@@ -14,6 +14,8 @@ tex_formula: ui.layout {
 
 thing: ui.layout {
   direction: "column"
+  surface: "secondary"
+  elevation: 2
   item0: tex_formula
   item1: ui.slider {
     value: f(time) * 50 + 50
@@ -29,7 +31,7 @@ plot_card: ui.layout {
     surface: "background"
     elevation: 2
     item0: ui.plot {
-      function: x => f(x + time)
+      function: x => f(x)
     }
   }
 }
@@ -47,3 +49,6 @@ f: x => sin(x) + sin(x * 5) * 0.3
 
 #> and yet another one
 f: x => sin(x + sin(x * 5) * 0.2) * sin(time * 0.3)
+
+#> dividing
+f: x => sin(time * 0.7) / sin(time + x)
