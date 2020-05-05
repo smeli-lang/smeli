@@ -1,10 +1,10 @@
 import {
   Scope,
-  TypedValue,
-  FunctionType,
-  FunctionValue,
-  NumberValue,
-  Binding,
+  // TypedValue,
+  // FunctionType,
+  // FunctionValue,
+  // NumberValue,
+  // Binding,
 } from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateStyles } from "./styles";
@@ -95,7 +95,7 @@ export const plot = {
           }
 
           // function
-          const functionValue = scope.evaluate(
+          /*const functionValue = scope.evaluate(
             "function",
             FunctionType
           ) as FunctionValue;
@@ -130,7 +130,7 @@ export const plot = {
           }
           context.stroke();
 
-          evaluationScope.dispose();
+          evaluationScope.dispose();*/
 
           return new DomNode(canvas);
         },

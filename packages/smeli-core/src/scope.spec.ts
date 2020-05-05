@@ -12,7 +12,6 @@ test("push and pop a single binding", () => {
   expect(scope.evaluate("a")).toEqual(new NumberValue(42));
 
   scope.pop(binding);
-  scope.clearCache();
   expect(() => scope.evaluate("a")).toThrowError();
 });
 
@@ -64,14 +63,11 @@ test("evaluates bindings from prefix against the derived scope", () => {
   expect(scope.evaluate("x")).toEqual(new NumberValue(10));
   expect(scope.evaluate("y")).toEqual(new NumberValue(10));
 
-  scope.push([
-    {
-      name: "x",
-      evaluate: () => new NumberValue(20),
-    },
-  ]);
+  scope.push({
+    name: "x",
+    evaluate: () => new NumberValue(20),
+  });
 
-  scope.clearCache();
   expect(scope.evaluate("x")).toEqual(new NumberValue(20));
   expect(scope.evaluate("y")).toEqual(new NumberValue(20));
 });

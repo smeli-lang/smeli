@@ -9,6 +9,7 @@ export interface TypedValue {
 export interface TypeTraits {
   __name__(): string;
 
+  __signature__?(self: TypedValue): FunctionSignature;
   __call__?(self: TypedValue, scope: Scope): TypedValue;
 
   __add__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
@@ -77,26 +78,75 @@ export const StringType: TypeTraits = {
   __str__: (self: StringValue) => self.value,
 };
 
-type ClosureType = (scope: Scope) => TypedValue;
-
-export class FunctionValue implements TypedValue {
+export type FunctionSignature = {
   parentScope: Scope;
-  closure: ClosureType;
+  arguments: string[];
+};
 
-  constructor(parentScope: Scope, closure: ClosureType) {
+export class NativeFunction implements TypedValue {
+  parentScope: Scope;
+  argumentTypes: TypeTraits[];
+  compute: (...args: any[]) => TypedValue;
+
+  constructor(
+    parentScope: Scope,
+    argumentTypes: TypeTraits[],
+    compute: (...args: any[]) => TypedValue
+  ) {
     this.parentScope = parentScope;
-    this.closure = closure;
+    this.argumentTypes = argumentTypes;
+    this.compute = compute;
   }
 
   type() {
-    return FunctionType;
+    return NativeFunctionType;
   }
 }
 
-export const FunctionType: TypeTraits = {
-  __name__: () => "closure",
-  __call__: (self: FunctionValue, scope: Scope) => self.closure(scope),
-  __str__: (self: FunctionValue) => "() => ()", // replace with signature when implemented
+export const NativeFunctionType: TypeTraits = {
+  __name__: () => "native_function",
+
+  __signature__: (self: NativeFunction) => ({
+    parentScope: self.parentScope,
+
+    // remap positional arguments to numeric names
+    arguments: self.argumentTypes.map((_, index) => index.toString()),
+  }),
+
+  __call__: (self: NativeFunction, scope: Scope) => {
+    const args = self.argumentTypes.map((type, index) =>
+      scope.evaluate(index.toString(), type)
+    );
+    return self.compute(...args);
+  },
+};
+
+export class Lambda implements TypedValue {
+  signature: FunctionSignature;
+  evaluate: (scope: Scope) => TypedValue;
+
+  constructor(
+    parentScope: Scope,
+    argumentNames: string[],
+    evaluate: (scope: Scope) => TypedValue
+  ) {
+    this.signature = {
+      parentScope,
+      arguments: argumentNames,
+    };
+    this.evaluate = evaluate;
+  }
+
+  type() {
+    return LambdaType;
+  }
+}
+
+export const LambdaType: TypeTraits = {
+  __name__: () => "lambda",
+  __signature__: (self: Lambda) => self.signature,
+  __call__: (self: Lambda, scope: Scope) => self.evaluate(scope),
+  __str__: (self: Lambda) => `lambda(${self.signature.arguments.join(", ")})`,
 };
 
 export class ExpressionValue implements TypedValue {

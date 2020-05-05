@@ -1,8 +1,8 @@
 import { Binding, Scope, ScopeType } from "./scope";
 import {
+  Lambda,
   TypedValue,
   TypeChecker,
-  FunctionValue,
   StringValue,
   StringType,
   ExpressionValue,
@@ -84,16 +84,10 @@ export class LambdaExpression implements Expression {
   }
 
   evaluate(parentScope: Scope) {
-    return new FunctionValue(parentScope, (scope) => {
-      // remap positional arguments to names
-      this.args.forEach((identifier, index) => {
-        scope.push({
-          name: identifier.name,
-          evaluate: (scope) => scope.evaluate(index.toString()),
-        });
-      });
-      return this.body.evaluate(scope);
-    });
+    const argumentNames = this.args.map((id) => id.name);
+    return new Lambda(parentScope, argumentNames, (scope: Scope) =>
+      this.body.evaluate(scope)
+    );
   }
 }
 
@@ -107,24 +101,34 @@ export class FunctionCall implements Expression {
   }
 
   evaluate(scope: Scope) {
-    const functionValue = this.identifier.evaluate(scope) as FunctionValue;
+    const functionValue = this.identifier.evaluate(scope);
     const functionType = functionValue.type();
 
-    if (!functionType.__call__) {
+    scope.partial(functionValue);
+
+    if (!functionType.__signature__ || !functionType.__call__) {
       throw new Error(`${this.identifier.name} is not a function`);
     }
 
-    const evaluationScope = new Scope(functionValue.parentScope);
-    this.args.map((arg, index) =>
+    const signature = functionType.__signature__(functionValue);
+
+    if (signature.arguments.length !== this.args.length) {
+      throw new Error(
+        `${this.identifier.name}: argument mismatch, expected ${signature.arguments.length} but got ${this.args.length}`
+      );
+    }
+
+    const evaluationScope = new Scope(signature.parentScope);
+    signature.arguments.map((name, index) =>
       evaluationScope.push({
-        name: index.toString(),
-        evaluate: () => arg.evaluate(scope),
+        name,
+        evaluate: () => this.args[index].evaluate(scope),
       })
     );
 
-    const result = functionType.__call__(functionValue, evaluationScope);
+    scope.partial(evaluationScope);
 
-    evaluationScope.dispose();
+    const result = functionType.__call__(functionValue, evaluationScope);
 
     return result;
   }

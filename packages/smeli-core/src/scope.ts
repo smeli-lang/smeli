@@ -1,4 +1,5 @@
-import { TypeTraits, TypedValue } from "./types";
+import { CacheEntry } from "./cache";
+import { TypeTraits, TypedValue, ExpressionValue } from "./types";
 
 export type Binding = {
   name: string;
@@ -6,20 +7,14 @@ export type Binding = {
   ast?: any;
 };
 
-type EvaluationContext = {
-  scope: Scope;
-  binding: Binding;
-};
-
 export class Scope implements TypedValue {
   parent: Scope | null;
   prefix: Scope | null;
 
   bindings: Map<string, Binding[]>;
-  cache: Map<Binding, TypedValue>;
+  cache: Map<Binding, CacheEntry>;
   childScopes: Set<Scope>;
-
-  static evaluationStack: EvaluationContext[] = [];
+  derivedScopes: Set<Scope>;
 
   constructor(parent: Scope | null = null, prefix: Scope | null = null) {
     this.parent = parent;
@@ -28,17 +23,26 @@ export class Scope implements TypedValue {
     this.bindings = new Map();
     this.cache = new Map();
     this.childScopes = new Set();
+    this.derivedScopes = new Set();
 
-    // register itself in parent scope
-    if (parent) {
-      parent.childScopes.add(this);
-    }
+    // register itself in parent and prefix scopes
+    parent?.childScopes.add(this);
+    prefix?.derivedScopes.add(this);
   }
 
   dispose() {
-    // unregister from parent scope
-    if (this.parent) {
-      this.parent.childScopes.delete(this);
+    // unregister from parent and prefix scopes
+    this.parent?.childScopes.delete(this);
+    this.prefix?.derivedScopes.delete(this);
+
+    // dispose of all cache entries
+    for (let cacheEntry of this.cache.values()) {
+      cacheEntry.invalidate();
+    }
+
+    // verify all child scopes have properly unregistered
+    if (this.childScopes.size > 0) {
+      throw new Error("Child scope was not unregistered after invalidation");
     }
   }
 
@@ -46,6 +50,12 @@ export class Scope implements TypedValue {
     if (Array.isArray(binding)) {
       binding.forEach((item) => this.push(item));
       return;
+    }
+
+    // invalidate cache entries depending on the previously cached value
+    const previousBinding = this.lookup(binding.name, this);
+    if (previousBinding) {
+      this.deprecateDerivedBinding(previousBinding);
     }
 
     let stack = this.bindings.get(binding.name);
@@ -75,6 +85,9 @@ export class Scope implements TypedValue {
       throw new Error(`Wrong unbinding order for '${binding.name}'`);
     }
 
+    // destroy the associated cache entries
+    this.invalidateDerivedBinding(binding);
+
     if (stack.length === 0) {
       this.bindings.delete(binding.name);
     }
@@ -83,33 +96,18 @@ export class Scope implements TypedValue {
   evaluate(name: string, type?: TypeTraits): TypedValue {
     const binding = this.lookup(name, this);
     if (binding) {
-      // early out if this evaluation is already cached
-      let value = this.cache.get(binding);
-      if (value) {
-        //console.log("cache hit:", scope, binding, value);
-        return value;
+      // create a cache entry if necessary
+      let cacheEntry = this.cache.get(binding);
+      if (!cacheEntry) {
+        cacheEntry = new CacheEntry(this, binding);
+        this.cache.set(binding, cacheEntry);
       }
 
-      //console.log("cache miss:", scope, binding);
-      Scope.evaluationStack.push({
-        scope: this,
-        binding,
-      });
-
-      value = binding.evaluate(this);
-
-      Scope.evaluationStack.pop();
-
-      //console.log("cache store:", scope, binding, value);
-      this.cache.set(binding, value);
+      const value = cacheEntry.evaluate();
 
       // enforce type if provided
-      if (type && value.type() !== type) {
-        const typeName = value.type().__name__();
-        const expectedTypeName = type.__name__();
-        throw new Error(
-          `Type error: '${name}' has type '${typeName}' instead of '${expectedTypeName}'`
-        );
+      if (type) {
+        this.checkType(name, value, type);
       }
 
       return value;
@@ -120,6 +118,10 @@ export class Scope implements TypedValue {
     }
 
     throw new Error(`No previous definition found for '${name}'`);
+  }
+
+  partial(partialValue: TypedValue): void {
+    CacheEntry.partial(partialValue);
   }
 
   ast(name: string): any {
@@ -146,7 +148,7 @@ export class Scope implements TypedValue {
 
         // if this binding is already being evaluated
         // from the same scope, skip it
-        if (this.isEvaluating(scope, binding)) {
+        if (CacheEntry.isEvaluating(scope, binding)) {
           continue;
         }
 
@@ -157,34 +159,43 @@ export class Scope implements TypedValue {
     return this.prefix?.lookup(name, scope) || null;
   }
 
-  isEvaluating(scope: Scope, binding: Binding) {
-    for (let i = Scope.evaluationStack.length - 1; i >= 0; i--) {
-      const context = Scope.evaluationStack[i];
-      if (context.scope === scope && context.binding === binding) {
-        return true;
-      }
-    }
-
-    return false;
+  // signaled by the cache system to discard a cache entry
+  // during garbage collection
+  uncache(binding: Binding) {
+    this.cache.delete(binding);
   }
 
-  clearCache() {
-    // clear child scopes first
-    for (let childScope of this.childScopes) {
-      childScope.clearCache();
+  private deprecateDerivedBinding(binding: Binding) {
+    const cacheEntry = this.cache.get(binding);
+    if (cacheEntry) {
+      cacheEntry.deprecate();
     }
 
-    // dispose of all cache entries
-    for (let value of this.cache.values()) {
-      if (value.dispose) {
-        value.dispose();
-      }
+    // recursively deprecate the binding on all derived scopes
+    for (let derivedScope of this.derivedScopes.values()) {
+      derivedScope.deprecateDerivedBinding(binding);
     }
-    this.cache.clear();
+  }
 
-    // verify all child scopes have properly unregistered
-    if (this.childScopes.size > 0) {
-      throw new Error("Child scope was not unregistered after invalidation");
+  private invalidateDerivedBinding(binding: Binding) {
+    const cacheEntry = this.cache.get(binding);
+    if (cacheEntry) {
+      cacheEntry.invalidate();
+    }
+
+    // recursively invalidate all derived scopes
+    for (let derivedScope of this.derivedScopes.values()) {
+      derivedScope.invalidateDerivedBinding(binding);
+    }
+  }
+
+  private checkType(name: string, value: TypedValue, type: TypeTraits) {
+    if (value.type() !== type) {
+      const typeName = value.type().__name__();
+      const expectedTypeName = type.__name__();
+      throw new Error(
+        `Type error: '${name}' has type '${typeName}' instead of '${expectedTypeName}'`
+      );
     }
   }
 

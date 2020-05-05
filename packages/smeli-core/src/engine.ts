@@ -3,6 +3,7 @@ import { ParserState, parseStatementList, ParserReport } from "./parser";
 import { Scope, ScopeType } from "./scope";
 import { builtins } from "./builtins";
 import { PluginDefinition, pushPlugin } from "./plugins";
+import { CacheEntry } from "./cache";
 
 export class Engine {
   globalScope: Scope;
@@ -46,8 +47,6 @@ export class Engine {
       count++;
     }
 
-    this.globalScope.clearCache();
-
     return this.globalScope;
   }
 
@@ -73,8 +72,6 @@ export class Engine {
   }
 
   update() {
-    this.globalScope.clearCache();
-
     // evaluate only bindings with side effects,
     // everything else will be lazily evaluated
     // indirectly
@@ -87,5 +84,8 @@ export class Engine {
         pluginScope.evaluate(binding);
       }
     }
+
+    // dispose of all unreferenced cached values
+    CacheEntry.gc();
   }
 }

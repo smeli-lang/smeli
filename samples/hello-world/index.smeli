@@ -22,25 +22,11 @@ thing: ui.layout {
   }
 }
 
-plot_card: ui.layout {
-  direction: "column"
-  surface: "primary"
-  elevation: 2
-  item0: thing
-  item1: ui.layout {
-    surface: "background"
-    elevation: 2
-    item0: ui.plot {
-      function: x => f(x)
-    }
-  }
-}
-
 ui: ui {
   page: layout {
     direction: "responsive_row"
     item0: outline
-    item1: plot_card
+    item1: thing
   }
 }
 
@@ -52,3 +38,18 @@ f: x => sin(x + sin(x * 5) * 0.2) * sin(time * 0.3)
 
 #> dividing
 f: x => sin(time * 0.7) / sin(time + x)
+
+#> debug
+# plot_card: ui.layout {
+#   direction: "column"
+#   surface: "primary"
+#   elevation: 2
+#   item0: thing
+#   item1: ui.layout {
+#     surface: "background"
+#     elevation: 2
+#     item0: ui.plot {
+#       function: x => f(x)
+#     }
+#   }
+# }
