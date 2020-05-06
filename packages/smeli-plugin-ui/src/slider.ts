@@ -28,16 +28,6 @@ export const slider = {
           slider.type = "range";
           slider.className = styles.slider;
 
-          // node.innerHTML = template({
-          //   styles: {
-          //     slider: {
-          //       // "-webkit-appearance": "none",
-          //       // "-moz-appearance": "none",
-          //       // "background-color": "#469"
-          //     }
-          //   }
-          // });
-
           function handleInput() {
             scope.push({
               name: "value",
