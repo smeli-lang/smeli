@@ -1,6 +1,19 @@
 import { NativeFunction, NumberType, NumberValue, StringValue } from "./types";
 import { Binding, Scope } from "./scope";
 
+const min: Binding = {
+  name: "min",
+  evaluate: (parentScope: Scope) =>
+    new NativeFunction(
+      parentScope,
+      [NumberType, NumberType],
+      (lhs: NumberValue, rhs: NumberValue): NumberValue => {
+        const result = Math.min(lhs.value, rhs.value);
+        return new NumberValue(result);
+      }
+    ),
+};
+
 const max: Binding = {
   name: "max",
   evaluate: (parentScope: Scope) =>
@@ -73,4 +86,4 @@ const time: Binding = {
   }
 };*/
 
-export const builtins: Binding[] = [max, outline, sin, time];
+export const builtins: Binding[] = [min, max, outline, sin, time];
