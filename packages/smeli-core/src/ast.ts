@@ -101,10 +101,10 @@ export class FunctionCall implements Expression {
   }
 
   evaluate(scope: Scope) {
-    const functionValue = this.identifier.evaluate(scope);
+    const functionValue = scope.evaluate((scope: Scope) =>
+      this.identifier.evaluate(scope)
+    );
     const functionType = functionValue.type();
-
-    scope.partial(functionValue);
 
     if (!functionType.__signature__ || !functionType.__call__) {
       throw new Error(`${this.identifier.name} is not a function`);
@@ -118,15 +118,15 @@ export class FunctionCall implements Expression {
       );
     }
 
-    const evaluationScope = new Scope(signature.parentScope);
+    const evaluationScope = scope.evaluate(
+      () => new Scope(signature.parentScope)
+    ) as Scope;
     signature.arguments.map((name, index) =>
       evaluationScope.push({
         name,
         evaluate: () => this.args[index].evaluate(scope),
       })
     );
-
-    scope.partial(evaluationScope);
 
     const result = functionType.__call__(functionValue, evaluationScope);
 

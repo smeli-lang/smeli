@@ -6,7 +6,6 @@ export class CacheEntry {
   private binding: Binding;
 
   private value: TypedValue | null;
-  private partials: TypedValue[];
 
   private dependencies: Set<CacheEntry>;
   private references: Set<CacheEntry>;
@@ -91,7 +90,6 @@ export class CacheEntry {
     this.binding = binding;
 
     this.value = null;
-    this.partials = [];
 
     this.dependencies = new Set<CacheEntry>();
     this.references = new Set<CacheEntry>();
@@ -150,24 +148,6 @@ export class CacheEntry {
     return this.binding.ast;
   }
 
-  // store an intermediate TypedValue which will never be returned
-  // as evaluation result, for proper disposal and garbage collection
-  static partial(partialValue: TypedValue): void {
-    // if this value is already owned by a cache entry,
-    // just ignore it (also applies if the same value is
-    // registered multiple times on the same entry - it
-    // will be stored only once)
-    if (CacheEntry.valueOwner.has(partialValue)) {
-      return;
-    }
-
-    const evaluationStack = CacheEntry.evaluationStack;
-    const entry = evaluationStack[evaluationStack.length - 1];
-
-    entry.partials.push(partialValue);
-    CacheEntry.valueOwner.set(partialValue, entry);
-  }
-
   // a new binding with the same name has been bound
   // to the scope (or one of its prefixes)
   deprecate() {
@@ -224,17 +204,6 @@ export class CacheEntry {
       CacheEntry.valueOwner.delete(this.value);
     }
     this.value = null;
-
-    // partials are only stored if owned by this entry
-    // the array is reversed in case of inter-partial dependency
-    this.partials.reverse();
-    for (let partial of this.partials.values()) {
-      if (partial.dispose) {
-        partial.dispose();
-      }
-      CacheEntry.valueOwner.delete(partial);
-    }
-    this.partials.length = 0;
   }
 
   private addReference(entry: CacheEntry) {

@@ -133,10 +133,6 @@ export class Scope implements TypedValue {
     throw new Error(`No previous definition found for '${nameOrEvaluator}'`);
   }
 
-  partial(partialValue: TypedValue): void {
-    CacheEntry.partial(partialValue);
-  }
-
   ast(name: string): any {
     const binding = this.lookup(name, this);
 
