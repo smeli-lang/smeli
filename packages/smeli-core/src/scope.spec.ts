@@ -13,6 +13,8 @@ test("push and pop a single binding", () => {
 
   scope.pop(binding);
   expect(() => scope.evaluate("a")).toThrowError();
+
+  scope.dispose();
 });
 
 test("evaluates binding history", () => {
@@ -33,6 +35,8 @@ test("evaluates binding history", () => {
 
   scope.push(bindings);
   expect(scope.evaluate("a")).toEqual(new NumberValue(64));
+
+  scope.dispose();
 });
 
 test("evaluates bindings from prefix", () => {
@@ -44,6 +48,9 @@ test("evaluates bindings from prefix", () => {
 
   const scope = new Scope(null, prefix);
   expect(scope.evaluate("x")).toEqual(new NumberValue(10));
+
+  scope.dispose();
+  prefix.dispose();
 });
 
 test("evaluates bindings from prefix against the derived scope", () => {
@@ -70,6 +77,9 @@ test("evaluates bindings from prefix against the derived scope", () => {
 
   expect(scope.evaluate("x")).toEqual(new NumberValue(20));
   expect(scope.evaluate("y")).toEqual(new NumberValue(20));
+
+  scope.dispose();
+  prefix.dispose();
 });
 
 test("using the same prefix from different scopes is reentrant", () => {
@@ -101,4 +111,7 @@ test("using the same prefix from different scopes is reentrant", () => {
   ]);
 
   expect(scope.evaluate("y")).toEqual(new NumberValue(10));
+
+  scope.dispose();
+  prefix.dispose();
 });

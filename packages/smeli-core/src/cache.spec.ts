@@ -136,6 +136,8 @@ test("popping a binding should dispose the cached value", () => {
   scope.pop(binding);
 
   expect(value.disposed).toBe(true);
+
+  scope.dispose();
 });
 
 test("pushing a new binding on the prefix invalidates cache in derived scopes", () => {
@@ -157,4 +159,7 @@ test("pushing a new binding on the prefix invalidates cache in derived scopes", 
     evaluate: () => new NumberValue(84),
   });
   expect(scope.evaluate("y")).toEqual(new NumberValue(84));
+
+  scope.dispose();
+  prefix.dispose();
 });
