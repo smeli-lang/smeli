@@ -4,6 +4,7 @@ import { Scope, ScopeType } from "./scope";
 import { builtins } from "./builtins";
 import { PluginDefinition, pushPlugin } from "./plugins";
 import { CacheEntry } from "./cache";
+import { NumberValue } from "./types";
 
 export class Engine {
   globalScope: Scope;
@@ -13,6 +14,8 @@ export class Engine {
   nextStatement: number = 0;
 
   sideEffects: Map<string, string[]> = new Map();
+
+  cacheRoot: CacheEntry;
 
   constructor(code: string, plugins: PluginDefinition[] = []) {
     this.globalScope = new Scope();
@@ -29,6 +32,28 @@ export class Engine {
       }
     });
 
+    const rootBinding = {
+      name: "#root",
+      evaluate: (scope: Scope) => {
+        // evaluate only bindings with side effects,
+        // everything else will be lazily evaluated
+        // indirectly
+        for (let [pluginName, bindingNames] of this.sideEffects) {
+          const pluginScope = scope.evaluate(pluginName, ScopeType) as Scope;
+          for (let binding of bindingNames) {
+            pluginScope.evaluate(binding);
+          }
+        }
+
+        return new NumberValue(0);
+      },
+    };
+
+    // root cache entry
+    this.globalScope.push(rootBinding);
+    this.cacheRoot = new CacheEntry(this.globalScope, rootBinding);
+
+    // parse code
     const state = new ParserState(code, 0, "smeli");
     this.statements = parseStatementList(state);
     this.messages = state.messages;
@@ -72,20 +97,16 @@ export class Engine {
   }
 
   update() {
-    // evaluate only bindings with side effects,
-    // everything else will be lazily evaluated
-    // indirectly
-    for (let [pluginName, bindingNames] of this.sideEffects) {
-      const pluginScope = this.globalScope.evaluate(
-        pluginName,
-        ScopeType
-      ) as Scope;
-      for (let binding of bindingNames) {
-        pluginScope.evaluate(binding);
-      }
-    }
+    // things referenced from the cache root will not be garbage collected
+    CacheEntry.pushRoot(this.cacheRoot);
+
+    // evaluate all the side effects
+    CacheEntry.evaluateRoot();
 
     // dispose of all unreferenced cached values
     CacheEntry.gc();
+
+    // reset to initial state
+    CacheEntry.popRoot();
   }
 }

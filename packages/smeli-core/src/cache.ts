@@ -31,6 +31,45 @@ export class CacheEntry {
     return false;
   }
 
+  static pushRoot(entry: CacheEntry) {
+    CacheEntry.unreferencedEntries.delete(entry);
+    CacheEntry.evaluationStack.push(entry);
+  }
+
+  static popRoot() {
+    const entry = CacheEntry.evaluationStack.pop();
+
+    if (!entry) {
+      throw new Error("No cache root found on the evaluation stack");
+    }
+
+    if (entry.references.size > 0) {
+      throw new Error("Cache root has references, this is not supported");
+    }
+
+    CacheEntry.unreferencedEntries.add(entry);
+  }
+
+  static evaluateRoot() {
+    if (CacheEntry.evaluationStack.length === 0) {
+      throw new Error("No cache root found on the evaluation stack");
+    }
+
+    const root =
+      CacheEntry.evaluationStack[CacheEntry.evaluationStack.length - 1];
+
+    const value = root.binding.evaluate(root.scope);
+
+    // this value might be owned by another entry
+    if (!CacheEntry.valueOwner.has(value)) {
+      CacheEntry.valueOwner.set(value, root);
+    }
+
+    root.value = value;
+
+    return value;
+  }
+
   static gc() {
     const unreferenced = CacheEntry.unreferencedEntries;
 
@@ -56,6 +95,11 @@ export class CacheEntry {
 
     this.dependencies = new Set<CacheEntry>();
     this.references = new Set<CacheEntry>();
+
+    // entries are created unreferenced,
+    // they will persist across the next gc call
+    // if something uses them
+    CacheEntry.unreferencedEntries.add(this);
   }
 
   evaluate(): TypedValue {
@@ -160,6 +204,7 @@ export class CacheEntry {
       if (this.value.dispose) {
         this.value.dispose();
       }
+      CacheEntry.valueOwner.delete(this.value);
     }
     this.value = null;
 
@@ -170,6 +215,7 @@ export class CacheEntry {
       if (partial.dispose) {
         partial.dispose();
       }
+      CacheEntry.valueOwner.delete(partial);
     }
     this.partials.length = 0;
   }

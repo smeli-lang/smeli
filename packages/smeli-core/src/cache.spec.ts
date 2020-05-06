@@ -103,18 +103,52 @@ test("deprecated bindings should be disposed in the GC phase", () => {
     evaluate: () => value1,
   });
 
-  expect(value0.disposed).toBe(false);
+  CacheEntry.gc();
+
+  expect(value0.disposed).toBe(true);
   expect(value1.disposed).toBe(false);
 
   expect(scope.evaluate("a")).toEqual(value1);
 
-  expect(value0.disposed).toBe(false);
+  expect(value0.disposed).toBe(true);
   expect(value1.disposed).toBe(false);
 
   CacheEntry.gc();
 
   expect(value0.disposed).toBe(true);
-  expect(value1.disposed).toBe(false);
+  expect(value1.disposed).toBe(true);
+
+  scope.dispose();
+});
+
+test("cache root prevents garbage collection", () => {
+  const value = new FakeValue();
+
+  const rootBinding = {
+    name: "root",
+    evaluate: (scope: Scope) => scope.evaluate("a"),
+  };
+
+  const scope = new Scope();
+  scope.push([
+    rootBinding,
+    {
+      name: "a",
+      evaluate: () => value,
+    },
+  ]);
+
+  const cacheRoot = new CacheEntry(scope, rootBinding);
+  CacheEntry.pushRoot(cacheRoot);
+
+  CacheEntry.evaluateRoot();
+  CacheEntry.gc();
+  expect(value.disposed).toBe(false);
+
+  // outside of the root evaluation, the value should become unreferenced
+  CacheEntry.popRoot();
+  CacheEntry.gc();
+  expect(value.disposed).toBe(true);
 
   scope.dispose();
 });
