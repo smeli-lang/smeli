@@ -40,7 +40,7 @@ export const layout = {
       },
 
       {
-        name: "#node",
+        name: "#ui:node",
         evaluate: (scope: Scope) => {
           const styles = evaluateStyles(scope);
           const direction = scope.evaluate(
@@ -61,18 +61,34 @@ export const layout = {
           // append drop shadows dynamically depending on elevation
           node.style.boxShadow = `0px 4px ${elevation.value * 4}px #0008`;
 
-          const items = [scope.evaluate("item0"), scope.evaluate("item1")];
-          for (let item of items) {
-            if (item.type() === ScopeType) {
-              const childNode = (item as Scope).evaluate(
-                "#node",
-                DomNodeType
-              ) as DomNode;
-              node.appendChild(childNode.node);
-            }
-          }
+          const result = scope.evaluate(() => new DomNode(node));
 
-          return new DomNode(node);
+          // cache the parent node creation
+          return (scope: Scope) => {
+            // evaluate valid children items
+            const items = [scope.evaluate("item0"), scope.evaluate("item1")];
+            const itemNodes = items
+              .filter((item) => item.type() === ScopeType)
+              .map(
+                (item) =>
+                  (item as Scope).evaluate("#ui:node", DomNodeType) as DomNode
+              );
+
+            // cheap diff to limit the number of DOM operations
+            const currentChildren = node.childNodes;
+            itemNodes.forEach((itemNode, index) => {
+              if (currentChildren.length <= index) {
+                node.appendChild(itemNode.node);
+              } else {
+                const currentChild = currentChildren[index];
+                if (currentChild !== itemNode.node) {
+                  node.replaceChild(itemNode.node, currentChild);
+                }
+              }
+            });
+
+            return result;
+          };
         },
       },
     ]);

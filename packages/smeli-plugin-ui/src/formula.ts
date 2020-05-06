@@ -108,7 +108,7 @@ export const formula = {
         evaluate: () => new StringValue("l = \\sqrt(x^2 + y^2)"),
       },
       {
-        name: "#node",
+        name: "#ui:node",
         evaluate: (scope: Scope) => {
           const styles = evaluateStyles(scope);
 

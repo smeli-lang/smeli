@@ -1,4 +1,4 @@
-import { Scope, NumberValue, TypedValue } from "@smeli/core";
+import { Scope, NumberValue, NumberType } from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateStyles } from "./styles";
 
@@ -17,10 +17,10 @@ export const slider = {
       },
       {
         name: "value",
-        evaluate: () => new NumberValue(42),
+        evaluate: () => new NumberValue(0),
       },
       {
-        name: "#node",
+        name: "#ui:node",
         evaluate: (scope: Scope) => {
           const styles = evaluateStyles(scope);
 
@@ -28,6 +28,8 @@ export const slider = {
           slider.type = "range";
           slider.className = styles.slider;
 
+          // temporary input handling, the binding override
+          // also needs to be removed and displayed to the user
           function handleInput() {
             scope.push({
               name: "value",
@@ -37,13 +39,22 @@ export const slider = {
 
           slider.addEventListener("input", handleInput);
 
-          slider.min = (scope.evaluate("min") as NumberValue).value.toString();
-          slider.max = (scope.evaluate("max") as NumberValue).value.toString();
-          slider.value = (scope.evaluate(
-            "value"
-          ) as NumberValue).value.toString();
+          const result = scope.evaluate(() => new DomNode(slider));
 
-          return new DomNode(slider);
+          // cache expensive setup in an intermediate stage
+          // (also - it allows the slider to override its value binding
+          // without destroying itself)
+          return (scope: Scope) => {
+            const min = scope.evaluate("min", NumberType) as NumberValue;
+            const max = scope.evaluate("max", NumberType) as NumberValue;
+            const value = scope.evaluate("value", NumberType) as NumberValue;
+
+            slider.min = min.value.toString();
+            slider.max = max.value.toString();
+            slider.value = value.value.toString();
+
+            return result;
+          };
         },
       },
     ]);
@@ -51,33 +62,3 @@ export const slider = {
     return scope;
   },
 };
-
-// evaluate: (scope: Scope) => {
-//   const node = document.createElement("div");
-//   node.innerHTML = template();
-
-//   const slider = this.node.querySelector(".slider") as HTMLInputElement;
-
-//   function handleInput() {
-//     scope.bind("value", parseInt(slider.value));
-//   }
-
-//   return [
-//     () => {
-//       slider.addEventListener("input", handleInput);
-
-//       return () => {
-//         slider.min = scope.evaluate("min");
-//         slider.max = scope.evaluate("max");
-
-//         return () => {
-//           slider.value = scope.evaluate("value");
-//           return node;
-//         };
-//       };
-//     },
-//     () => {
-//       slider.removeEventListener("input", handleInput);
-//     }
-//   ];
-// }

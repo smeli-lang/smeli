@@ -28,17 +28,31 @@ export const loadPlugin = ({
       {
         name: "#update",
         evaluate: (scope: Scope) => {
-          // guard against multiple evaluations
-          container.innerHTML = "";
-
           const styles = evaluateStyles(scope);
           container.className = styles.container;
 
-          const page = scope.evaluate("page", ScopeType) as Scope;
-          const node = page.evaluate("#node", DomNodeType) as DomNode;
-          container.appendChild(node.node);
+          // cache style
+          return (scope: Scope) => {
+            const page = scope.evaluate("page", ScopeType) as Scope;
 
-          return node;
+            // cache page
+            return (scope: Scope) => {
+              const node = page.evaluate("#ui:node", DomNodeType) as DomNode;
+
+              // diff with currently displayed page
+              if (!container.hasChildNodes()) {
+                container.appendChild(node.node);
+              } else {
+                const firstChild = container.firstChild;
+                if (firstChild !== node.node) {
+                  // the hasChildNode() test guarantees a valid first child here
+                  container.replaceChild(node.node, firstChild as Node);
+                }
+              }
+
+              return node;
+            };
+          };
         },
       },
       formula,
