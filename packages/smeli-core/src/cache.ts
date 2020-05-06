@@ -160,8 +160,8 @@ export class CacheEntry {
       if (this.value.dispose) {
         this.value.dispose();
       }
-      this.value = null;
     }
+    this.value = null;
 
     // partials are only stored if owned by this entry
     // the array is reversed in case of inter-partial dependency
