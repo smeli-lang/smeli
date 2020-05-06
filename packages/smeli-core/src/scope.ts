@@ -128,12 +128,17 @@ export class Scope implements TypedValue {
     const binding = this.lookup(name, this);
 
     if (binding) {
-      if (!binding.ast) {
-        throw new Error(`Binding '${name}' has no expression`);
+      // create a cache entry if necessary
+      let cacheEntry = this.cache.get(binding);
+      if (!cacheEntry) {
+        cacheEntry = new CacheEntry(this, binding);
+        this.cache.set(binding, cacheEntry);
       }
 
-      return binding.ast;
-    } else if (this.parent) {
+      return cacheEntry.ast();
+    }
+
+    if (this.parent) {
       return this.parent.ast(name);
     }
 

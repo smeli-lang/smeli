@@ -133,6 +133,23 @@ export class CacheEntry {
     return value;
   }
 
+  ast(): any {
+    const evaluationStack = CacheEntry.evaluationStack;
+
+    // keep track of cache dependencies
+    if (evaluationStack.length > 0) {
+      const entry = evaluationStack[evaluationStack.length - 1];
+      entry.dependencies.add(this);
+      this.addReference(entry);
+    }
+
+    if (!this.binding.ast) {
+      throw new Error(`Binding '${this.binding.name}' has no expression`);
+    }
+
+    return this.binding.ast;
+  }
+
   // store an intermediate TypedValue which will never be returned
   // as evaluation result, for proper disposal and garbage collection
   static partial(partialValue: TypedValue): void {
