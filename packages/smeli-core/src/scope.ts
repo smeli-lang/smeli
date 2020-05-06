@@ -2,7 +2,7 @@ import { CacheEntry } from "./cache";
 import { TypeTraits, TypedValue } from "./types";
 
 // uncomment the end when staged evaluation is implemented
-type Evaluator = (scope: Scope) => TypedValue; // | Evaluator;
+export type Evaluator = (scope: Scope) => TypedValue; // | Evaluator;
 
 export type Binding = {
   name: string;

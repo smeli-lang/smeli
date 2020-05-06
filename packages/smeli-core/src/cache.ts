@@ -1,5 +1,10 @@
-import { Binding, Scope } from "./scope";
+import { Binding, Evaluator, Scope } from "./scope";
 import { TypedValue } from "./types";
+
+type EvaluationStage = {
+  evaluate: Evaluator;
+  dependencies: Set<CacheEntry>;
+};
 
 export class CacheEntry {
   private scope: Scope;
@@ -7,8 +12,10 @@ export class CacheEntry {
 
   private value: TypedValue | null;
 
-  private dependencies: Set<CacheEntry>;
   private references: Set<CacheEntry>;
+
+  private stages: EvaluationStage[];
+  private currentStage: number;
 
   // dynamic dependency graph construction
   private static evaluationStack: CacheEntry[] = [];
@@ -91,8 +98,16 @@ export class CacheEntry {
 
     this.value = null;
 
-    this.dependencies = new Set<CacheEntry>();
     this.references = new Set<CacheEntry>();
+
+    // initial evaluation stage
+    this.stages = [
+      {
+        dependencies: new Set<CacheEntry>(),
+        evaluate: (scope: Scope) => this.binding.evaluate(scope),
+      },
+    ];
+    this.currentStage = 0;
 
     // entries are created unreferenced,
     // they will persist across the next gc call
@@ -106,7 +121,7 @@ export class CacheEntry {
     // keep track of cache dependencies
     if (evaluationStack.length > 0) {
       const entry = evaluationStack[evaluationStack.length - 1];
-      entry.dependencies.add(this);
+      entry.stages[entry.currentStage].dependencies.add(this);
       this.addReference(entry);
     }
 
@@ -117,7 +132,7 @@ export class CacheEntry {
 
     evaluationStack.push(this);
     //console.log("start eval: " + this.binding.name);
-    const value = this.binding.evaluate(this.scope);
+    const value = this.stages[this.currentStage].evaluate(this.scope);
     //console.log("end eval:   " + this.binding.name, this.dependencies);
     evaluationStack.pop();
 
@@ -137,7 +152,7 @@ export class CacheEntry {
     // keep track of cache dependencies
     if (evaluationStack.length > 0) {
       const entry = evaluationStack[evaluationStack.length - 1];
-      entry.dependencies.add(this);
+      entry.stages[entry.currentStage].dependencies.add(this);
       this.addReference(entry);
     }
 
@@ -191,10 +206,13 @@ export class CacheEntry {
   // then dispose of all the values owned by this cache entry,
   private discard() {
     // unregister from dependencies
-    for (let dep of this.dependencies.values()) {
-      dep.removeReference(this);
+    for (let stage of this.stages) {
+      const dependencies = stage.dependencies;
+      for (let dep of dependencies) {
+        dep.removeReference(this);
+      }
+      dependencies.clear();
     }
-    this.dependencies.clear();
 
     // this entry might not own its value
     if (this.value && CacheEntry.valueOwner.get(this.value) === this) {
