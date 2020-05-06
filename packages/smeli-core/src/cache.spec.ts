@@ -153,6 +153,18 @@ test("cache root prevents garbage collection", () => {
   scope.dispose();
 });
 
+test("temporary bindings are garbage collected", () => {
+  const scope = new Scope();
+
+  const value = scope.evaluate(() => new FakeValue()) as FakeValue;
+  expect(value.disposed).toBe(false);
+
+  CacheEntry.gc();
+  expect(value.disposed).toBe(true);
+
+  scope.dispose();
+});
+
 test("popping a binding should dispose the cached value", () => {
   const value = new FakeValue();
 

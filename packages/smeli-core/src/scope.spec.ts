@@ -115,3 +115,12 @@ test("using the same prefix from different scopes is reentrant", () => {
   scope.dispose();
   prefix.dispose();
 });
+
+test("evaluates temporary bindings", () => {
+  const scope = new Scope();
+
+  const value = scope.evaluate(() => new NumberValue(42));
+  expect(value).toEqual(new NumberValue(42));
+
+  scope.dispose();
+});

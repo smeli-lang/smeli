@@ -1,9 +1,12 @@
 import { CacheEntry } from "./cache";
-import { TypeTraits, TypedValue, ExpressionValue } from "./types";
+import { TypeTraits, TypedValue } from "./types";
+
+// uncomment the end when staged evaluation is implemented
+type Evaluator = (scope: Scope) => TypedValue; // | Evaluator;
 
 export type Binding = {
   name: string;
-  evaluate: (scope: Scope) => TypedValue;
+  evaluate: Evaluator;
   ast?: any;
 };
 
@@ -93,8 +96,18 @@ export class Scope implements TypedValue {
     }
   }
 
-  evaluate(name: string, type?: TypeTraits): TypedValue {
-    const binding = this.lookup(name, this);
+  evaluate(nameOrEvaluator: string | Evaluator, type?: TypeTraits): TypedValue {
+    let binding;
+    if (typeof nameOrEvaluator === "function") {
+      // create a temporary binding for this evaluator
+      binding = {
+        name: "#temp",
+        evaluate: nameOrEvaluator,
+      };
+    } else {
+      binding = this.lookup(nameOrEvaluator, this);
+    }
+
     if (binding) {
       // create a cache entry if necessary
       let cacheEntry = this.cache.get(binding);
@@ -107,17 +120,17 @@ export class Scope implements TypedValue {
 
       // enforce type if provided
       if (type) {
-        this.checkType(name, value, type);
+        this.checkType(binding.name, value, type);
       }
 
       return value;
     }
 
     if (this.parent) {
-      return this.parent.evaluate(name);
+      return this.parent.evaluate(nameOrEvaluator);
     }
 
-    throw new Error(`No previous definition found for '${name}'`);
+    throw new Error(`No previous definition found for '${nameOrEvaluator}'`);
   }
 
   partial(partialValue: TypedValue): void {
