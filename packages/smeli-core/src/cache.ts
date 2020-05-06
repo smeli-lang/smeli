@@ -64,15 +64,7 @@ export class CacheEntry {
     const root =
       CacheEntry.evaluationStack[CacheEntry.evaluationStack.length - 1];
 
-    const value = root.binding.evaluate(root.scope);
-
-    // this value might be owned by another entry
-    if (!CacheEntry.valueOwner.has(value)) {
-      CacheEntry.valueOwner.set(value, root);
-    }
-
-    root.value = value;
-
+    const value = root.computeValue();
     return value;
   }
 
@@ -131,17 +123,8 @@ export class CacheEntry {
     }
 
     evaluationStack.push(this);
-    //console.log("start eval: " + this.binding.name);
-    const value = this.stages[this.currentStage].evaluate(this.scope);
-    //console.log("end eval:   " + this.binding.name, this.dependencies);
+    const value = this.computeValue();
     evaluationStack.pop();
-
-    // this value might be owned by another entry
-    if (!CacheEntry.valueOwner.has(value)) {
-      CacheEntry.valueOwner.set(value, this);
-    }
-
-    this.value = value;
 
     return value;
   }
@@ -193,26 +176,66 @@ export class CacheEntry {
     this.discard();
   }
 
+  private computeValue(): TypedValue {
+    //console.log("start eval: " + this.binding.name);
+
+    while (!this.value) {
+      //console.log("stage #" + this.currentStage);
+      const result = this.stages[this.currentStage].evaluate(this.scope);
+      if (typeof result === "function") {
+        // move to the next evaluation stage
+        this.stages.push({
+          dependencies: new Set<CacheEntry>(),
+          evaluate: result,
+        });
+        this.currentStage++;
+      } else {
+        // this value might be owned by another entry
+        if (!CacheEntry.valueOwner.has(result)) {
+          CacheEntry.valueOwner.set(result, this);
+        }
+        this.value = result;
+      }
+    }
+
+    //console.log("end eval:   " + this.binding.name, this.dependencies);
+
+    return this.value;
+  }
+
   private invalidateReferences() {
     // invalidate other entries depending on this one
     // (which will in turn remove themselves from our reference list)
     while (this.references.size > 0) {
       const ref = this.references.values().next().value;
-      ref.invalidate();
+      ref.invalidateReferences();
+
+      // discard only the impacted stages
+      for (let i = 0; i <= ref.currentStage; i++) {
+        const stage = ref.stages[i];
+        if (stage.dependencies.has(this)) {
+          ref.discard(i);
+          break;
+        }
+      }
     }
   }
 
   // unregister from the dependencies
   // then dispose of all the values owned by this cache entry,
-  private discard() {
+  private discard(targetStage: number = 0) {
     // unregister from dependencies
-    for (let stage of this.stages) {
-      const dependencies = stage.dependencies;
-      for (let dep of dependencies) {
+    for (let i = targetStage; i <= this.currentStage; i++) {
+      const stage = this.stages[i];
+      for (let dep of stage.dependencies) {
         dep.removeReference(this);
       }
-      dependencies.clear();
+      stage.dependencies.clear();
     }
+
+    // destroy intermediate stages
+    this.stages.length = targetStage + 1;
+    this.currentStage = targetStage;
 
     // this entry might not own its value
     if (this.value && CacheEntry.valueOwner.get(this.value) === this) {

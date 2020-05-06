@@ -209,3 +209,77 @@ test("pushing a new binding on the prefix invalidates cache in derived scopes", 
   scope.dispose();
   prefix.dispose();
 });
+
+test("multi-stage evaluation: simple case", () => {
+  let stage0 = 0;
+  let stage1 = 0;
+
+  const scope = new Scope();
+  scope.push({
+    name: "x",
+    evaluate: () => {
+      stage0++;
+      return () => {
+        stage1++;
+        return new NumberValue(125);
+      };
+    },
+  });
+
+  expect(stage0).toBe(0);
+  expect(stage1).toBe(0);
+
+  expect(scope.evaluate("x")).toEqual(new NumberValue(125));
+
+  expect(stage0).toBe(1);
+  expect(stage1).toBe(1);
+
+  expect(scope.evaluate("x")).toEqual(new NumberValue(125));
+
+  // second time should be fully cached
+  expect(stage0).toBe(1);
+  expect(stage1).toBe(1);
+});
+
+test("multi-stage evaluation: caches intermediate stages", () => {
+  let stage0 = 0;
+  let stage1 = 0;
+
+  const scope = new Scope();
+  scope.push([
+    {
+      name: "dependency",
+      evaluate: () => new NumberValue(125),
+    },
+    {
+      name: "x",
+      evaluate: () => {
+        stage0++;
+        return () => {
+          stage1++;
+          return scope.evaluate("dependency");
+        };
+      },
+    },
+  ]);
+
+  expect(stage0).toBe(0);
+  expect(stage1).toBe(0);
+
+  expect(scope.evaluate("x")).toEqual(new NumberValue(125));
+
+  expect(stage0).toBe(1);
+  expect(stage1).toBe(1);
+
+  // update the dependency (should invalidate only stage 1)
+  scope.push({
+    name: "dependency",
+    evaluate: () => new NumberValue(3600),
+  });
+
+  expect(scope.evaluate("x")).toEqual(new NumberValue(3600));
+
+  // only stage1 should be recomputed
+  expect(stage0).toBe(1);
+  expect(stage1).toBe(2);
+});
