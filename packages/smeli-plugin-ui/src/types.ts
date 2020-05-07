@@ -2,11 +2,27 @@ import { jss } from "./jss";
 
 import { TypedValue, TypeTraits } from "@smeli/core";
 
+export type EventListenerMap = { [key: string]: EventListener };
+
 export class DomNode implements TypedValue {
   node: HTMLElement;
+  eventListeners: EventListenerMap;
 
-  constructor(node: HTMLElement) {
+  constructor(node: HTMLElement, eventListeners: EventListenerMap = {}) {
     this.node = node;
+    this.eventListeners = eventListeners;
+
+    for (let eventName of Object.keys(this.eventListeners)) {
+      const listener = this.eventListeners[eventName];
+      this.node.addEventListener(eventName, listener);
+    }
+  }
+
+  dispose() {
+    for (let eventName of Object.keys(this.eventListeners)) {
+      const listener = this.eventListeners[eventName];
+      this.node.removeEventListener(eventName, listener);
+    }
   }
 
   type() {
@@ -17,7 +33,7 @@ export class DomNode implements TypedValue {
 export const DomNodeType: TypeTraits = {
   __name__: () => "dom_node",
 
-  __str__: (self: DomNode) => `<${self.node.tagName.toLowerCase()} />`
+  __str__: (self: DomNode) => `<${self.node.tagName.toLowerCase()} />`,
 };
 
 export class DomStyles implements TypedValue {
@@ -37,5 +53,5 @@ export class DomStyles implements TypedValue {
 }
 
 export const DomStylesType: TypeTraits = {
-  __name__: () => "dom_styles"
+  __name__: () => "dom_styles",
 };

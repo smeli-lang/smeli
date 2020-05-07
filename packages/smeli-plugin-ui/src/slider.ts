@@ -1,4 +1,4 @@
-import { Scope, NumberValue, NumberType } from "@smeli/core";
+import { Binding, NumberType, NumberValue, Scope } from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateStyles } from "./styles";
 
@@ -28,18 +28,53 @@ export const slider = {
           slider.type = "range";
           slider.className = styles.slider;
 
-          // temporary input handling, the binding override
-          // also needs to be removed and displayed to the user
-          function handleInput() {
-            scope.push({
-              name: "value",
-              evaluate: () => new NumberValue(parseInt(slider.value)),
-            });
-          }
+          let override: Binding | null = null;
+          let overrideActive = false;
 
-          slider.addEventListener("input", handleInput);
+          const result = scope.evaluate(
+            () =>
+              new DomNode(slider, {
+                input: (event: Event) => {
+                  if (override && overrideActive) {
+                    scope.pop(override);
+                  } else {
+                    slider.classList.add("override");
+                  }
 
-          const result = scope.evaluate(() => new DomNode(slider));
+                  const inputValue = parseFloat(slider.value);
+
+                  override = {
+                    name: "value",
+                    evaluate: () => new NumberValue(inputValue),
+                  };
+                  scope.push(override);
+                  overrideActive = true;
+                },
+
+                mousedown: ((event: MouseEvent) => {
+                  // toggle override on right click
+                  if (event.button === 2) {
+                    event.preventDefault();
+
+                    if (override) {
+                      if (overrideActive) {
+                        overrideActive = false;
+                        scope.pop(override);
+                        slider.classList.remove("override");
+                      } else {
+                        overrideActive = true;
+                        scope.push(override);
+                        slider.classList.add("override");
+                      }
+                    }
+                  }
+                }) as EventListener,
+
+                mouseup: () => slider.blur(),
+
+                contextmenu: (event: Event) => event.preventDefault(),
+              })
+          );
 
           // cache expensive setup in an intermediate stage
           // (also - it allows the slider to override its value binding
