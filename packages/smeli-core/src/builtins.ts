@@ -1,4 +1,11 @@
-import { NativeFunction, NumberType, NumberValue, StringValue } from "./types";
+import {
+  NativeFunction,
+  NumberType,
+  NumberValue,
+  StringValue,
+  TypeTraits,
+  TypedValue,
+} from "./types";
 import { Binding, Scope } from "./scope";
 
 const min: Binding = {
@@ -45,45 +52,46 @@ const sin: Binding = {
     ),
 };
 
-// this is a hack; it won't work once caching is fully implemented
-const time: Binding = {
-  name: "time",
-  evaluate: () => new NumberValue(Date.now() * 0.001),
+class Timer implements TypedValue {
+  private binding: Binding;
+  private intervalId: any;
+
+  constructor(scope: Scope) {
+    this.binding = {
+      name: "#time",
+      evaluate: () => new NumberValue(Date.now() * 0.001),
+    };
+
+    scope.push(this.binding);
+
+    this.intervalId = setInterval(() => {
+      scope.pop(this.binding);
+      scope.push(this.binding);
+    }, 5) as any;
+  }
+
+  dispose() {
+    clearInterval(this.intervalId);
+  }
+
+  type() {
+    return TimerType;
+  }
+}
+
+const TimerType: TypeTraits = {
+  __name__: () => "timer",
 };
 
-/*const timer: Binding = {
-  name: "timer",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
-      {
-        name: "time",
-        evaluate: () => new NumberValue(0)
-      },
-      {
-        name: "#update",
-        evaluate: scope => {
-          let binding: Binding | null = null;
-          setInterval(() => {
-            if (binding) {
-              scope.pop(binding);
-              binding = null;
-            }
+const time: Binding = {
+  name: "time",
+  evaluate: (scope: Scope) => {
+    // the timer will rebind the private #time value regularly
+    const timer = scope.evaluate((scope: Scope) => new Timer(scope));
 
-            binding = {
-              name: "time",
-              evaluate: () => new NumberValue(Date.now())
-            };
-            scope.push(binding);
-          }, 10);
-
-          return new NumberValue(0);
-        }
-      }
-    ]);
-
-    return scope;
-  }
-};*/
+    // forward the changing time value
+    return (scope: Scope) => scope.evaluate("#time");
+  },
+};
 
 export const builtins: Binding[] = [min, max, outline, sin, time];
