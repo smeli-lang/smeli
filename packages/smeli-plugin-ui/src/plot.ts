@@ -79,7 +79,7 @@ function redraw(
   }
 
   // data points
-  context.lineWidth = (4 * viewportWidth) / width;
+  context.lineWidth = (8 * viewportWidth) / width;
   context.strokeStyle = "rgba(64, 150, 80, 0.83)";
 
   const step = viewportWidth / (dataPoints.length - 1);
