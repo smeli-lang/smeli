@@ -132,6 +132,24 @@ export class Scope implements TypedValue {
     throw new Error(`No previous definition found for '${nameOrEvaluator}'`);
   }
 
+  transient(evaluator: Evaluator, type?: TypeTraits) {
+    let value: Evaluator | TypedValue;
+    value = evaluator;
+
+    while (typeof value === "function") {
+      value = value(this);
+    }
+
+    CacheEntry.transient(value);
+
+    // enforce type if provided
+    if (type) {
+      this.checkType("transient value", value, type);
+    }
+
+    return value;
+  }
+
   ast(name: string): any {
     const binding = this.lookup(name, this);
 

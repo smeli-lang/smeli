@@ -26,6 +26,10 @@ export class CacheEntry {
   // ownership of TypedValue objects
   private static valueOwner: Map<TypedValue, CacheEntry> = new Map();
 
+  // values evaluated directly without caching, they
+  // only need to be disposed after the evaluator returns
+  private static transients: TypedValue[] = [];
+
   static isEvaluating(scope: Scope, binding: Binding) {
     for (let i = CacheEntry.evaluationStack.length - 1; i >= 0; i--) {
       const entry = CacheEntry.evaluationStack[i];
@@ -82,6 +86,26 @@ export class CacheEntry {
 
       unreferenced.delete(entry);
     }
+  }
+
+  static transient(value: TypedValue) {
+    // values owned by something else will
+    // be disposed later by their owners
+    if (CacheEntry.valueOwner.has(value)) {
+      return;
+    }
+
+    const evaluationStack = CacheEntry.evaluationStack;
+    if (evaluationStack.length === 0) {
+      throw new Error("Cannot start evaluation with a transient");
+    }
+
+    // give ownership to the top of the stack
+    const entry = evaluationStack[evaluationStack.length - 1];
+    CacheEntry.valueOwner.set(value, entry);
+
+    // store it for disposal
+    CacheEntry.transients.push(value);
   }
 
   constructor(scope: Scope, binding: Binding) {
@@ -182,6 +206,16 @@ export class CacheEntry {
     while (!this.value) {
       //console.log("stage #" + this.currentStage);
       const result = this.stages[this.currentStage].evaluate(this.scope);
+
+      // clear out any owned transient values
+      for (let transientValue of CacheEntry.transients) {
+        CacheEntry.valueOwner.delete(transientValue);
+        if (transientValue.dispose) {
+          transientValue.dispose();
+        }
+      }
+      CacheEntry.transients.length = 0;
+
       if (typeof result === "function") {
         // move to the next evaluation stage
         this.stages.push({

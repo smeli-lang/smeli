@@ -156,7 +156,7 @@ export const plot = {
               return (scope: Scope) => {
                 // evaluate all data points
                 const dataPoints = evaluationScopes.map((evaluationScope) => {
-                  const value = scope.evaluate(
+                  const value = scope.transient(
                     () =>
                       // __call__ is checked earlier
                       (functionType.__call__ as any)(
