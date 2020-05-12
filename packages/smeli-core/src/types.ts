@@ -1,4 +1,4 @@
-import { Scope } from "./scope";
+import { Scope, Evaluator } from "./scope";
 import { Expression } from "./ast";
 
 export interface TypedValue {
@@ -11,6 +11,7 @@ export interface TypeTraits {
 
   __signature__?(self: TypedValue): FunctionSignature;
   __call__?(self: TypedValue, scope: Scope): TypedValue;
+  __call_site__?(self: TypedValue, scope: Scope, args: Evaluator[]): Evaluator;
 
   __add__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
   __sub__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
@@ -122,6 +123,9 @@ export const NativeFunctionType: TypeTraits = {
 };
 
 export class Lambda implements TypedValue {
+  parentScope: Scope;
+  argumentNames: string[];
+
   signature: FunctionSignature;
   evaluate: (scope: Scope) => TypedValue;
 
@@ -130,6 +134,9 @@ export class Lambda implements TypedValue {
     argumentNames: string[],
     evaluate: (scope: Scope) => TypedValue
   ) {
+    this.parentScope = parentScope;
+    this.argumentNames = argumentNames;
+
     this.signature = {
       parentScope,
       arguments: argumentNames,
@@ -146,6 +153,33 @@ export const LambdaType: TypeTraits = {
   __name__: () => "lambda",
   __signature__: (self: Lambda) => self.signature,
   __call__: (self: Lambda, scope: Scope) => self.evaluate(scope),
+
+  __call_site__(self: Lambda, scope: Scope, args: Evaluator[]): Evaluator {
+    // simple signature check (length only)
+    if (self.argumentNames.length !== args.length) {
+      throw new Error(
+        `Argument mismatch, expected ${self.argumentNames.length} but got ${args.length}`
+      );
+    }
+
+    // the evaluation scope is child to the closure parent scope
+    // to keep the correct resolution for unbound symbols
+    const evaluationScope = scope.evaluate(
+      () => new Scope(self.parentScope)
+    ) as Scope;
+
+    // arguments are evaluated against the calling scope
+    self.argumentNames.forEach((name, index) => {
+      evaluationScope.push({
+        name,
+        evaluate: () => args[index](scope),
+      });
+    });
+
+    // closure expression is evaluated against its evaluation scope
+    return () => self.evaluate(evaluationScope);
+  },
+
   __str__: (self: Lambda) => `lambda(${self.signature.arguments.join(", ")})`,
 };
 

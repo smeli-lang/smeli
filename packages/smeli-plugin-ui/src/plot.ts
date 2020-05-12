@@ -1,10 +1,4 @@
-import {
-  Binding,
-  NumberValue,
-  Scope,
-  TypeTraits,
-  NumberType,
-} from "@smeli/core";
+import { NumberValue, Scope, NumberType, Evaluator } from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateStyles } from "./styles";
 
@@ -117,16 +111,8 @@ export const plot = {
             const functionValue = scope.evaluate("function");
             const functionType = functionValue.type();
 
-            if (!functionType.__signature__ || !functionType.__call__) {
+            if (!functionType.__call_site__) {
               throw new Error(`"function" is not a function`);
-            }
-
-            const signature = functionType.__signature__(functionValue);
-
-            if (signature.arguments.length !== 1) {
-              throw new Error(
-                `plot expects a function that takes exactly one argument`
-              );
             }
 
             // cache evaluation function
@@ -135,37 +121,28 @@ export const plot = {
               const viewport = [-2, -3, 7, 4]; // xmin, ymin, xmax, ymax
               const resolution = 256;
 
-              const evaluationScopes: Scope[] = [];
+              const evaluators: Evaluator[] = [];
               const step = (viewport[2] - viewport[0]) / (resolution - 1);
               for (let i = 0; i < resolution; i++) {
                 const input = viewport[0] + i * step;
 
-                const evaluationScope = scope.evaluate(
-                  () => new Scope(signature.parentScope)
-                ) as Scope;
+                const argumentValue = new NumberValue(input);
+                const callSiteEvaluator = (functionType.__call_site__ as any)(
+                  functionValue,
+                  scope,
+                  [() => argumentValue]
+                );
 
-                evaluationScope.push({
-                  name: signature.arguments[0],
-                  evaluate: () => new NumberValue(input),
-                });
-
-                evaluationScopes.push(evaluationScope);
+                evaluators.push(callSiteEvaluator);
               }
 
               // cache evaluation scopes
               return (scope: Scope) => {
-                // evaluate all data points
-                const dataPoints = evaluationScopes.map((evaluationScope) => {
+                const dataPoints = evaluators.map((evaluator) => {
                   const value = scope.transient(
-                    () =>
-                      // __call__ is checked earlier
-                      (functionType.__call__ as any)(
-                        functionValue,
-                        evaluationScope
-                      ),
+                    evaluator,
                     NumberType
                   ) as NumberValue;
-
                   return value.value;
                 });
 
