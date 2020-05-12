@@ -78,13 +78,14 @@ export class CacheEntry {
     // invalidating entries may generate more garbage, as
     // they will dereference their dependencies along the way
     while (unreferenced.size > 0) {
-      const entry = unreferenced.values().next().value;
-      entry.invalidate();
+      for (let entry of unreferenced) {
+        entry.invalidate();
 
-      // signal the scope that this cache entry can be unregistered
-      entry.scope.uncache(entry.binding);
+        // signal the scope that this cache entry can be unregistered
+        entry.scope.uncache(entry.binding);
 
-      unreferenced.delete(entry);
+        unreferenced.delete(entry);
+      }
     }
   }
 
