@@ -1,4 +1,4 @@
-import { Binding, Scope, ScopeType } from "./scope";
+import { Binding, Evaluator, Scope, ScopeType } from "./scope";
 import {
   Lambda,
   TypedValue,
@@ -11,7 +11,7 @@ import {
 export type ParameterList = { [key: string]: TypedValue };
 
 export interface Expression {
-  evaluate(scope: Scope): TypedValue;
+  evaluate: Evaluator;
 }
 
 export class Literal implements Expression {
@@ -106,31 +106,21 @@ export class FunctionCall implements Expression {
     );
     const functionType = functionValue.type();
 
-    if (!functionType.__signature__ || !functionType.__call__) {
+    if (!functionType.__call_site__) {
       throw new Error(`${this.identifier.name} is not a function`);
     }
 
-    const signature = functionType.__signature__(functionValue);
-
-    if (signature.arguments.length !== this.args.length) {
-      throw new Error(
-        `${this.identifier.name}: argument mismatch, expected ${signature.arguments.length} but got ${this.args.length}`
-      );
-    }
-
-    const evaluationScope = scope.evaluate(
-      () => new Scope(signature.parentScope)
-    ) as Scope;
-    signature.arguments.map((name, index) =>
-      evaluationScope.push({
-        name,
-        evaluate: () => this.args[index].evaluate(scope),
-      })
+    const argumentEvaluators = this.args.map((expression) => () =>
+      expression.evaluate(scope)
+    );
+    const resultEvaluator = functionType.__call_site__(
+      functionValue,
+      scope,
+      argumentEvaluators
     );
 
-    const result = functionType.__call__(functionValue, evaluationScope);
-
-    return result;
+    // cache evaluation scope
+    return resultEvaluator;
   }
 }
 
@@ -152,8 +142,8 @@ export class BinaryOperator implements Expression {
   }
 
   evaluate(scope: Scope) {
-    const lvalue = this.lhs.evaluate(scope);
-    const rvalue = this.rhs.evaluate(scope);
+    const lvalue = scope.transient((scope: Scope) => this.lhs.evaluate(scope));
+    const rvalue = scope.transient((scope: Scope) => this.rhs.evaluate(scope));
 
     const ltype = lvalue.type();
     const rtype = rvalue.type();

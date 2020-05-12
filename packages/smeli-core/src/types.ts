@@ -9,8 +9,6 @@ export interface TypedValue {
 export interface TypeTraits {
   __name__(): string;
 
-  __signature__?(self: TypedValue): FunctionSignature;
-  __call__?(self: TypedValue, scope: Scope): TypedValue;
   __call_site__?(self: TypedValue, scope: Scope, args: Evaluator[]): Evaluator;
 
   __add__?(lhs: TypedValue, rhs: TypedValue): TypedValue;
@@ -79,11 +77,6 @@ export const StringType: TypeTraits = {
   __str__: (self: StringValue) => self.value,
 };
 
-export type FunctionSignature = {
-  parentScope: Scope;
-  arguments: string[];
-};
-
 export class NativeFunction implements TypedValue {
   parentScope: Scope;
   argumentTypes: TypeTraits[];
@@ -107,40 +100,42 @@ export class NativeFunction implements TypedValue {
 export const NativeFunctionType: TypeTraits = {
   __name__: () => "native_function",
 
-  __signature__: (self: NativeFunction) => ({
-    parentScope: self.parentScope,
+  __call_site__(
+    self: NativeFunction,
+    scope: Scope,
+    args: Evaluator[]
+  ): Evaluator {
+    // simple signature check (length only)
+    if (self.argumentTypes.length !== args.length) {
+      throw new Error(
+        `Argument mismatch, expected ${self.argumentTypes.length} but got ${args.length}`
+      );
+    }
 
-    // remap positional arguments to numeric names
-    arguments: self.argumentTypes.map((_, index) => index.toString()),
-  }),
+    return (scope: Scope) => {
+      // evaluate arguments at the call site
+      const argValues = self.argumentTypes.map((type, index) =>
+        scope.transient(args[index], type)
+      );
 
-  __call__: (self: NativeFunction, scope: Scope) => {
-    const args = self.argumentTypes.map((type, index) =>
-      scope.evaluate(index.toString(), type)
-    );
-    return self.compute(...args);
+      // call the native evaluator
+      return self.compute(...argValues);
+    };
   },
 };
 
 export class Lambda implements TypedValue {
   parentScope: Scope;
   argumentNames: string[];
-
-  signature: FunctionSignature;
-  evaluate: (scope: Scope) => TypedValue;
+  evaluate: Evaluator;
 
   constructor(
     parentScope: Scope,
     argumentNames: string[],
-    evaluate: (scope: Scope) => TypedValue
+    evaluate: Evaluator
   ) {
     this.parentScope = parentScope;
     this.argumentNames = argumentNames;
-
-    this.signature = {
-      parentScope,
-      arguments: argumentNames,
-    };
     this.evaluate = evaluate;
   }
 
@@ -151,8 +146,6 @@ export class Lambda implements TypedValue {
 
 export const LambdaType: TypeTraits = {
   __name__: () => "lambda",
-  __signature__: (self: Lambda) => self.signature,
-  __call__: (self: Lambda, scope: Scope) => self.evaluate(scope),
 
   __call_site__(self: Lambda, scope: Scope, args: Evaluator[]): Evaluator {
     // simple signature check (length only)
@@ -180,7 +173,7 @@ export const LambdaType: TypeTraits = {
     return () => self.evaluate(evaluationScope);
   },
 
-  __str__: (self: Lambda) => `lambda(${self.signature.arguments.join(", ")})`,
+  __str__: (self: Lambda) => `lambda(${self.argumentNames.join(", ")})`,
 };
 
 export class ExpressionValue implements TypedValue {
