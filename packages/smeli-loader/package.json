@@ -9,5 +9,8 @@
     "url": "https://github.com/smeli-lang/smeli",
     "directory": "packages/smeli-loader"
   },
-  "scripts": {}
+  "scripts": {},
+  "dependencies": {
+    "@smeli/compiler": "*"
+  }
 }

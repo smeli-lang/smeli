@@ -1,3 +1,5 @@
+@plugin("@smeli/plugin-ui")
+
 # Hello, world!
 ##> let's play a card game
 

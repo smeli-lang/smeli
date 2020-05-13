@@ -28,6 +28,20 @@ test("plugin directive: duplicates", () => {
   expect(result.plugins).toEqual(["hello"]);
 });
 
+test("plugin directive: strips directive from output", () => {
+  const code: { [key: string]: string } = {
+    "index.smeli": `
+      @plugin("hello")
+      a: 42
+    `,
+  };
+  const result = compile({
+    resolveChunk: (filename) => code[filename],
+  });
+
+  expect(result.fullCode.trim()).toEqual("a: 42");
+});
+
 test("unknown directive", () => {
   const code: { [key: string]: string } = {
     "index.smeli": `
