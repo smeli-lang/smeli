@@ -5,14 +5,9 @@
 
 f: x => sin(x)
 
-tex_formula: ui.layout {
-  direction: "column"
-  surface: "background"
-  elevation: 2
-  item0: ui.formula {
-    tex: &f
-  }
-}
+@inline("formula_card")
+
+tex_formula: make_formula_card(&f)
 
 thing: ui.layout {
   direction: "column"

@@ -1,0 +1,8 @@
+make_formula_card: expression => ui.layout {
+  direction: "column"
+  surface: "background"
+  elevation: 2
+  item0: ui.formula {
+    tex: expression
+  }
+}

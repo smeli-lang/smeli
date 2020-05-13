@@ -1,7 +1,7 @@
 const fs = require("fs");
 const { compile } = require("@smeli/compiler");
 
-module.exports = (source) => {
+module.exports = function smeliLoader(source) {
   const result = compile({
     entry: "mainChunk",
     resolveChunk: (filename) => {
@@ -10,7 +10,7 @@ module.exports = (source) => {
       }
 
       this.addDependency(filename);
-      return fs.readFileSync(filename);
+      return fs.readFileSync(filename, { encoding: "utf8" });
     },
   });
 
