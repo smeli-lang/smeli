@@ -1,0 +1,23 @@
+{
+  "name": "@smeli/compiler",
+  "version": "0.0.1",
+  "description": "Smeli compiler",
+  "author": "Remi Papillie (wsmind)",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smeli-lang/smeli",
+    "directory": "packages/smeli-compiler"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "files": [
+    "dist"
+  ]
+}
