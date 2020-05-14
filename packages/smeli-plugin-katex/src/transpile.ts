@@ -17,9 +17,49 @@ import {
 
 const texSymbols: { [key: string]: string } = {
   alpha: "\\alpha",
-  Alpha: "\\Alpha",
+  Alpha: "A",
+  beta: "\\beta",
+  Beta: "B",
+  gamma: "\\gamma",
+  Gamma: "\\Gamma",
+  delta: "\\delta",
+  Delta: "\\Delta",
+  epsilon: "\\epsilon",
+  Epsilon: "E",
+  zeta: "\\zeta",
+  Zeta: "Z",
+  eta: "\\eta",
+  Eta: "H",
   theta: "\\theta",
   Theta: "\\Theta",
+  iota: "\\iota",
+  Iota: "I",
+  kappa: "\\kappa",
+  Kappa: "K",
+  lambda: "\\lambda",
+  Lambda: "\\Lambda",
+  mu: "\\mu",
+  Mu: "M",
+  nu: "\\nu",
+  Nu: "N",
+  xi: "\\xi",
+  Xi: "\\Xi",
+  pi: "\\pi",
+  Pi: "\\Pi",
+  rho: "\\rho",
+  Rho: "P",
+  sigma: "\\sigma",
+  Sigma: "\\Sigma",
+  tau: "\\tau",
+  Tau: "T",
+  upsilon: "\\upsilon",
+  Upsilon: "\\Upsilon",
+  phi: "\\phi",
+  Phi: "\\Phi",
+  chi: "\\chi",
+  Chi: "X",
+  psi: "\\psi",
+  Psi: "\\Psi",
   omega: "\\omega",
   Omega: "\\Omega",
 };
@@ -27,7 +67,7 @@ const texSymbols: { [key: string]: string } = {
 const texOperators: { [key: string]: string } = {
   __add__: "+",
   __sub__: "-",
-  __mul__: "*",
+  __mul__: "\\times",
 };
 
 const visitor: Visitor<string> = new Map();
@@ -53,7 +93,11 @@ visitor.set(LambdaExpression, (lambda: LambdaExpression) => {
   const parameterNames = lambda.args.map(
     (identifier: Identifier) => identifier.name
   );
-  return parameterNames.join(", ") + " => " + traverse(lambda.body, visitor);
+  return (
+    parameterNames.join(", ") +
+    " \\Rightarrow " +
+    traverse(lambda.body, visitor)
+  );
 });
 
 visitor.set(FunctionCall, (functionCall: FunctionCall) => {
