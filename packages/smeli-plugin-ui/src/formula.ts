@@ -1,6 +1,7 @@
 import katex from "katex";
 
 import {
+  traverse,
   BinaryOperator,
   Expression,
   ExpressionType,
@@ -12,24 +13,13 @@ import {
   Scope,
   StringValue,
   StringType,
+  Visitor,
 } from "@smeli/core";
 
 import { DomNode } from "./types";
 import { evaluateStyles } from "./styles";
 
-export type Visitor = Map<object, (expression: any) => string>;
-
-function traverse(expression: Expression, visitor: Visitor): string {
-  const constructor = expression.constructor;
-  if (!visitor.has(constructor)) {
-    throw new Error(`Cannot transpile this expression to TeX`);
-  }
-
-  const callback = visitor.get(constructor);
-  return (callback as any)(expression);
-}
-
-const visitor: Visitor = new Map();
+const visitor: Visitor<string> = new Map();
 
 visitor.set(Literal, (literal: Literal) => {
   const type = literal.value.type();

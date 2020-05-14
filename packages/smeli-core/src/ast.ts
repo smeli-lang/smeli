@@ -225,3 +225,19 @@ export class Comment implements Statement {
     };
   }
 }
+
+export type Visitor<T> = Map<object, (expression: any, context?: any) => T>;
+
+export function traverse<T>(
+  expression: Expression,
+  visitor: Visitor<T>,
+  context?: any
+): T {
+  const constructor = expression.constructor;
+  if (!visitor.has(constructor)) {
+    throw new Error(`Cannot transpile this expression to TeX`);
+  }
+
+  const callback = visitor.get(constructor);
+  return (callback as any)(expression, context);
+}
