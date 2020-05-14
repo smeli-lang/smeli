@@ -36,11 +36,21 @@ plot_card: ui.layout {
   }
 }
 
+editor: ace.editor {
+  code: "x = 42"
+}
+
 ui: ui {
   page: layout {
     direction: "responsive_row"
-    item0: ace.editor {}
+    item0: editor
     item1: plot_card
+  }
+}
+
+tex_formula: tex_formula {
+  item0: item0 {
+    code: editor.code
   }
 }
 
