@@ -1,5 +1,8 @@
 import ace from "ace-builds";
 
+import "ace-builds/src-noconflict/theme-monokai";
+import "ace-builds/src-noconflict/mode-python";
+
 import { Scope, StringValue, StringType } from "@smeli/core";
 import { DomNode } from "@smeli/plugin-ui";
 
@@ -26,6 +29,8 @@ export const editor = {
 
           ace.edit(element, {
             value: code.value,
+            theme: "ace/theme/monokai",
+            mode: "ace/mode/python",
           });
 
           return new DomNode(element);
