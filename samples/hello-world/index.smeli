@@ -3,7 +3,7 @@
 # Hello, world!
 ##> let's play a card game
 
-f: x => sin(x)
+f: alpha => sin(alpha)
 
 @inline("formula_card")
 

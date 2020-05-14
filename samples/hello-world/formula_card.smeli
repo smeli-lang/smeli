@@ -5,6 +5,6 @@ make_formula_card: expression => ui.layout {
   surface: "background"
   elevation: 2
   item0: katex.formula {
-    tex: expression
+    code: katex.transpile(expression)
   }
 }
