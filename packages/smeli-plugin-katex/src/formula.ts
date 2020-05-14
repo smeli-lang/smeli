@@ -16,8 +16,9 @@ import {
   Visitor,
 } from "@smeli/core";
 
-import { DomNode } from "./types";
-import { evaluateStyles } from "./styles";
+import { DomNode, evaluateUiStyles } from "@smeli/plugin-ui";
+
+import { evaluateKatexStyles } from "./styles";
 
 const visitor: Visitor<string> = new Map();
 
@@ -100,7 +101,8 @@ export const formula = {
       {
         name: "#ui:node",
         evaluate: (scope: Scope) => {
-          const styles = evaluateStyles(scope);
+          const uiStyles = evaluateUiStyles(scope);
+          const katexStyles = evaluateKatexStyles(scope);
 
           const tex = scope.evaluate("tex");
           let code = "";
@@ -115,7 +117,7 @@ export const formula = {
           }
 
           const element = document.createElement("div");
-          element.className = styles.formula + " " + styles.text;
+          element.className = katexStyles.formula + " " + uiStyles.text;
 
           katex.render(code, element);
 

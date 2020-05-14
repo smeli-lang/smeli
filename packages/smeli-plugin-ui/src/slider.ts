@@ -1,6 +1,6 @@
 import { Binding, NumberType, NumberValue, Scope } from "@smeli/core";
 import { DomNode } from "./types";
-import { evaluateStyles } from "./styles";
+import { evaluateUiStyles } from "./styles";
 
 export const slider = {
   name: "slider",
@@ -22,7 +22,7 @@ export const slider = {
       {
         name: "#ui:node",
         evaluate: (scope: Scope) => {
-          const styles = evaluateStyles(scope);
+          const styles = evaluateUiStyles(scope);
 
           const slider = document.createElement("input");
           slider.type = "range";

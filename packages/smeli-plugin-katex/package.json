@@ -1,7 +1,7 @@
 {
-  "name": "@smeli/plugin-ui",
+  "name": "@smeli/plugin-katex",
   "version": "0.0.1",
-  "description": "UI plugin for Smeli",
+  "description": "KaTeX plugin for Smeli",
   "author": "Remi Papillie (wsmind)",
   "license": "MIT",
   "main": "dist/index.js",
@@ -19,7 +19,8 @@
     "@smeli/core": "*"
   },
   "devDependencies": {
-    "@smeli/core": "*"
+    "@smeli/core": "*",
+    "@types/katex": "^0.11.0"
   },
   "scripts": {
     "clean": "rimraf dist",
@@ -27,7 +28,7 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "jss": "^10.1.1",
-    "jss-plugin-nested": "^10.1.1"
+    "@smeli/plugin-ui": "*",
+    "katex": "^0.11.1"
   }
 }

@@ -1,9 +1,8 @@
-import { Scope, ScopeType, TypedValue, Binding } from "@smeli/core";
+import { Scope, ScopeType, Binding } from "@smeli/core";
 import { DomStyles, DomStylesType } from "./types";
 import { defaultThemeLight } from "./theme";
 
 import { containerStyles } from "./container.styles";
-import { formulaStyles } from "./formula.styles";
 import { layoutStyles } from "./layout.styles";
 import { outlineStyles } from "./outline.styles";
 import { plotStyles } from "./plot.styles";
@@ -18,7 +17,6 @@ export const styles: Binding = {
 
     return new DomStyles({
       container: containerStyles(theme),
-      formula: formulaStyles(theme),
       layout: layoutStyles(theme),
       outline: outlineStyles(theme),
       plot: plotStyles(theme),
@@ -28,7 +26,7 @@ export const styles: Binding = {
   },
 };
 
-export const evaluateStyles = (scope: Scope) => {
+export const evaluateUiStyles = (scope: Scope) => {
   const globalScope = scope.root();
   const uiScope = globalScope.evaluate("ui", ScopeType) as Scope;
   const styles = uiScope.evaluate("#styles", DomStylesType) as DomStyles;

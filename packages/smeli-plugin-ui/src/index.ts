@@ -1,12 +1,18 @@
 import { Scope, ScopeType } from "@smeli/core";
 import { DomNode, DomNodeType } from "./types";
 
-import { formula } from "./formula";
 import { layout } from "./layout";
 import { plot } from "./plot";
 import { outline } from "./outline";
 import { slider } from "./slider";
-import { styles, evaluateStyles } from "./styles";
+import { styles, evaluateUiStyles } from "./styles";
+
+// this is temporary, it will be replaced by theme evaluation
+// on the global scope
+export * from "./theme";
+
+export * from "./types";
+export { evaluateUiStyles };
 
 export type UiPluginOptions = {
   container?: HTMLElement;
@@ -28,7 +34,7 @@ export const loadPlugin = ({
       {
         name: "#update",
         evaluate: (scope: Scope) => {
-          const styles = evaluateStyles(scope);
+          const styles = evaluateUiStyles(scope);
           container.className = styles.container;
 
           // cache style
@@ -55,7 +61,6 @@ export const loadPlugin = ({
           };
         },
       },
-      formula,
       layout,
       outline,
       plot,

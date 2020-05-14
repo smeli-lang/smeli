@@ -1,6 +1,6 @@
 import { NumberValue, Scope, NumberType, Evaluator } from "@smeli/core";
 import { DomNode } from "./types";
-import { evaluateStyles } from "./styles";
+import { evaluateUiStyles } from "./styles";
 
 function redraw(
   canvas: HTMLCanvasElement,
@@ -101,7 +101,7 @@ export const plot = {
           const canvas = document.createElement("canvas");
           const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-          const styles = evaluateStyles(scope);
+          const styles = evaluateUiStyles(scope);
           canvas.className = styles.plot;
 
           const result = scope.evaluate(() => new DomNode(canvas));

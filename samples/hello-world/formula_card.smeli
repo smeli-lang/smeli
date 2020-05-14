@@ -1,8 +1,10 @@
+@plugin("@smeli/plugin-katex")
+
 make_formula_card: expression => ui.layout {
   direction: "column"
   surface: "background"
   elevation: 2
-  item0: ui.formula {
+  item0: katex.formula {
     tex: expression
   }
 }
