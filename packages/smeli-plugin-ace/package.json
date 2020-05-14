@@ -1,0 +1,33 @@
+{
+  "name": "@smeli/plugin-ace",
+  "version": "0.0.1",
+  "description": "ACE code editor plugin for Smeli",
+  "author": "Remi Papillie (wsmind)",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smeli-lang/smeli",
+    "directory": "packages/smeli-plugin-ace"
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "@smeli/core": "*"
+  },
+  "devDependencies": {
+    "@smeli/core": "*"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@smeli/plugin-ui": "*",
+    "ace-builds": "^1.4.11"
+  }
+}

@@ -1,4 +1,5 @@
 @plugin("@smeli/plugin-ui")
+@plugin("@smeli/plugin-ace")
 
 # Hello, world!
 ##> let's play a card game
@@ -38,7 +39,7 @@ plot_card: ui.layout {
 ui: ui {
   page: layout {
     direction: "responsive_row"
-    item0: outline
+    item0: ace.editor {}
     item1: plot_card
   }
 }
