@@ -25,10 +25,14 @@ export const formula = {
           const element = document.createElement("div");
           element.className = katexStyles.formula + " " + uiStyles.text;
 
-          katex.render(code.value, element);
+          try {
+            katex.render(code.value, element);
 
-          const katexRoot = element.querySelector(".katex") as HTMLElement;
-          katexRoot.className += " important";
+            const katexRoot = element.querySelector(".katex") as HTMLElement;
+            katexRoot.className += " important";
+          } catch (error) {
+            element.innerHTML = "<p>" + error.message + "</p>";
+          }
 
           return new DomNode(element);
         },
