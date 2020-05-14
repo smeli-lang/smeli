@@ -15,10 +15,12 @@ module.exports = function smeliLoader(source) {
   });
 
   const output = `
-		${result.plugins.map(
-      (name, index) =>
-        `import  { loadPlugin as loadPlugin${index} } from "${name}"`
-    )}
+		${result.plugins
+      .map(
+        (name, index) =>
+          `import  { loadPlugin as loadPlugin${index} } from "${name}";`
+      )
+      .join("\n")}
 
 		export default (pluginOptions = {}) => {
       const plugins = [${result.plugins.map(
