@@ -146,7 +146,7 @@ export const plot = {
                   return value.value;
                 });
 
-                // redraw next frame
+                // redraw next frame (ensures correct layout, aspect ratio, etc.)
                 requestAnimationFrame(() =>
                   redraw(canvas, context, viewport, dataPoints)
                 );
