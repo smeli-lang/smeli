@@ -8,11 +8,21 @@
     "url": "https://github.com/smeli-lang/smeli",
     "directory": "packages/smeli-vscode"
   },
+  "main": "dist/extension.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
   "engines": {
     "vscode": "^1.43.0"
   },
   "categories": [
     "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:smeli",
+    "onCommand:smeli.openPreview"
   ],
   "contributes": {
     "languages": [
@@ -33,6 +43,13 @@
         "language": "smeli",
         "scopeName": "source.smeli",
         "path": "./syntaxes/smeli.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "smeli.openPreview",
+        "title": "Open Preview",
+        "category": "Smeli"
       }
     ]
   }
