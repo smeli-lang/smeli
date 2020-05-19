@@ -11,7 +11,7 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-smeli"
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/smeli-vscode"
       ]
     },
 

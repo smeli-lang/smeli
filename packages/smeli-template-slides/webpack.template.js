@@ -14,7 +14,7 @@ module.exports = ({ rootFile, outputPath }) => ({
     rules: [
       {
         test: /\.smeli$/,
-        use: "smeli-loader",
+        use: "@smeli/loader",
       },
       {
         test: /\.css$/i,

@@ -1,12 +1,12 @@
 {
-  "name": "vscode-smeli",
-  "displayName": "vscode-smeli",
+  "name": "@smeli/vscode",
+  "displayName": "Smeli",
   "description": "Smeli language support for VS Code",
   "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/smeli-lang/smeli",
-    "directory": "packages/vscode-smeli"
+    "directory": "packages/smeli-vscode"
   },
   "engines": {
     "vscode": "^1.43.0"

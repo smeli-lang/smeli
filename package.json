@@ -11,7 +11,7 @@
   },
   "name": "smeli",
   "description": "Self-Modifying Expression Language for Interactivity",
-  "author": "Remi Papillie (wsmind)",
+  "author": "Remi Papillie <remi.papillie@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^25.1.2",
@@ -26,8 +26,8 @@
   "scripts": {
     "clean": "lerna run --parallel clean",
     "build": "yarn build:packages && yarn link:cli && yarn build:samples",
-    "build:packages": "lerna run build --ignore \"sample-*\"",
-    "build:samples": "lerna run build --scope \"sample-*\"",
+    "build:packages": "lerna run build --scope \"@smeli/*\"",
+    "build:samples": "lerna run build --scope \"@smeli-samples/*\"",
     "link:cli": "cd packages/smeli-cli && yarn link",
     "unlink:cli": "cd packages/smeli-cli && yarn unlink",
     "test": "jest",

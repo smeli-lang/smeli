@@ -2,7 +2,7 @@
   "name": "@smeli/template-slides",
   "version": "0.0.1",
   "description": "Slides template for Smeli",
-  "author": "Remi Papillie (wsmind)",
+  "author": "Remi Papillie <remi.papillie@gmail.com>",
   "license": "MIT",
   "main": "./webpack.template.js",
   "repository": {
@@ -11,12 +11,12 @@
     "directory": "packages/smeli-template-slides"
   },
   "dependencies": {
+    "@smeli/loader": "0.0.1",
     "css-loader": "^3.5.3",
     "file-loader": "^6.0.0",
     "filter-chunk-webpack-plugin": "^2.1.0",
     "html-webpack-inline-source-plugin": "^1.0.0-beta.2",
     "html-webpack-plugin": "^4.0.4",
-    "smeli-loader": "*",
     "style-loader": "^1.2.0"
   }
 }

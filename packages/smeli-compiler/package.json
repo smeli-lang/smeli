@@ -2,7 +2,7 @@
   "name": "@smeli/compiler",
   "version": "0.0.1",
   "description": "Smeli compiler",
-  "author": "Remi Papillie (wsmind)",
+  "author": "Remi Papillie <remi.papillie@gmail.com>",
   "license": "MIT",
   "main": "dist/index.js",
   "module": "dist/index.js",
