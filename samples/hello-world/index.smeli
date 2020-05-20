@@ -2,7 +2,7 @@
 @plugin("@smeli/plugin-ace")
 
 # Hello, world!
-## function plot
+##> function plot
 
 f: alpha => sin(alpha)
 
@@ -78,6 +78,7 @@ ui: ui {
     item0: editor
     item1: ui.layout {
       surface: "secondary"
+      elevation: 2
       item0: make_formula_card(editor.code)
     }
   }
