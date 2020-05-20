@@ -31,7 +31,7 @@ plot_card: ui.layout {
     elevation: 2
     item0: ui.plot {
       function: x => f(x + item1.value / 20 + time)
-      point: vec2(0, f(time))
+      point: vec2(0 - item1.value / 20, thing.item1.value / 50 - 1)
     }
     item1: ui.slider {}
   }
@@ -44,7 +44,6 @@ ui: ui {
     item1: plot_card
   }
 }
-
 
 ##> another function
 f: x => sin(x) + sin(x * 5) * 0.3
