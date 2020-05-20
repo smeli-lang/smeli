@@ -1,12 +1,23 @@
-import { NumberValue, Scope, NumberType, Evaluator } from "@smeli/core";
+import {
+  NumberType,
+  NumberValue,
+  Evaluator,
+  Scope,
+  Vec2,
+  Vec2Type,
+} from "@smeli/core";
+
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
+import { debug } from "vscode";
 
 function redraw(
   canvas: HTMLCanvasElement,
   context: CanvasRenderingContext2D,
   viewport: number[],
-  dataPoints: number[]
+  dataPoints: number[],
+  pointX: number,
+  pointY: number
 ) {
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
@@ -24,66 +35,68 @@ function redraw(
   const viewportHeight = viewport[3] - viewport[1];
 
   // transform to viewport space
-  context.scale(width / viewportWidth, -height / viewportHeight);
-  context.translate(-viewport[0], viewport[1] - 1);
-
-  // origin
-  context.fillStyle = "rgb(0, 0, 0)";
-  context.beginPath();
-  context.arc(0, 0, 0.1, 0, 2.0 * Math.PI);
-  context.fill();
-
-  context.strokeStyle = "rgba(0, 0, 0, 0.87)";
-
-  // x = 0
-  if (viewport[0] <= 0 && viewport[2] >= 0) {
-    context.lineWidth = (2 * viewportWidth) / width;
-    context.beginPath();
-    context.moveTo(0, viewport[1]);
-    context.lineTo(0, viewport[3]);
-    context.stroke();
-  }
-
-  // y = 0
-  if (viewport[1] <= 0 && viewport[3] >= 0) {
-    context.lineWidth = (2 * viewportHeight) / height;
-    context.beginPath();
-    context.moveTo(viewport[0], 0);
-    context.lineTo(viewport[2], 0);
-    context.stroke();
-  }
+  const scaleX = width / viewportWidth;
+  const scaleY = -height / viewportHeight;
+  context.translate(-viewport[0] * scaleX, (viewport[1] - 1) * scaleY);
 
   // horizontal grid
   context.strokeStyle = "rgba(0, 0, 0, 0.6)";
-  context.lineWidth = viewportHeight / height;
+  context.lineWidth = 1;
   for (let y = Math.ceil(viewport[1]); y < Math.floor(viewport[3]); y += 1) {
     context.beginPath();
-    context.moveTo(viewport[0], y);
-    context.lineTo(viewport[2], y);
+    context.moveTo(viewport[0] * scaleX, Math.floor(y * scaleY));
+    context.lineTo(viewport[2] * scaleX, Math.floor(y * scaleY));
     context.stroke();
   }
 
   // vertical grid
-  context.lineWidth = viewportWidth / width;
+  context.lineWidth = 1;
   for (let x = Math.ceil(viewport[0]); x < Math.floor(viewport[2]); x += 1) {
     context.beginPath();
-    context.moveTo(x, viewport[1]);
-    context.lineTo(x, viewport[3]);
+    context.moveTo(Math.floor(x * scaleX), viewport[1] * scaleY);
+    context.lineTo(Math.floor(x * scaleX), viewport[3] * scaleY);
     context.stroke();
   }
 
   // data points
-  context.lineWidth = (8 * viewportWidth) / width;
+  context.lineWidth = 8;
   context.strokeStyle = "rgba(64, 150, 80, 0.83)";
 
   const step = viewportWidth / (dataPoints.length - 1);
   context.beginPath();
-  context.moveTo(viewport[0], dataPoints[0]);
+  context.moveTo(viewport[0] * scaleX, dataPoints[0] * scaleY);
   for (let i = 0; i < dataPoints.length; i++) {
     const x = viewport[0] + i * step;
-    context.lineTo(x, dataPoints[i]);
+    context.lineTo(x * scaleX, dataPoints[i] * scaleY);
   }
   context.stroke();
+
+  // point of interest
+  context.fillStyle = "rgba(64, 150, 80, 0.83)";
+  context.strokeStyle = "rgb(128,203,196, 0.83)";
+
+  context.beginPath();
+  context.arc(pointX * scaleX, pointY * scaleY, 8, 0, 2.0 * Math.PI);
+  context.fill();
+  context.stroke();
+
+  // x = pointX
+  if (viewport[0] <= pointX && viewport[2] >= pointX) {
+    context.lineWidth = 4;
+    context.beginPath();
+    context.moveTo(pointX * scaleX, viewport[1] * scaleY);
+    context.lineTo(pointX * scaleX, viewport[3] * scaleY);
+    context.stroke();
+  }
+
+  // y = pointY
+  if (viewport[1] <= pointY && viewport[3] >= pointY) {
+    context.lineWidth = 4;
+    context.beginPath();
+    context.moveTo(viewport[0] * scaleX, pointY * scaleY);
+    context.lineTo(viewport[2] * scaleX, pointY * scaleY);
+    context.stroke();
+  }
 }
 
 export const plot = {
@@ -94,6 +107,10 @@ export const plot = {
       {
         name: "function",
         evaluate: (scope: Scope) => scope.evaluate("sin"),
+      },
+      {
+        name: "point",
+        evaluate: () => new Vec2(0, 0),
       },
       {
         name: "#ui:node",
@@ -146,9 +163,11 @@ export const plot = {
                   return value.value;
                 });
 
+                const { x, y } = scope.evaluate("point", Vec2Type) as Vec2;
+
                 // redraw next frame (ensures correct layout, aspect ratio, etc.)
                 requestAnimationFrame(() =>
-                  redraw(canvas, context, viewport, dataPoints)
+                  redraw(canvas, context, viewport, dataPoints, x, y)
                 );
 
                 return result;

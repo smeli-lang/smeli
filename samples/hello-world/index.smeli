@@ -2,13 +2,13 @@
 @plugin("@smeli/plugin-ace")
 
 # Hello, world!
-##> let's play a card game
+## function plot
 
 f: alpha => sin(alpha)
 
 @inline("formula_card")
 
-tex_formula: make_formula_card(&f)
+tex_formula: make_formula_card(katex.transpile(&f))
 
 thing: ui.layout {
   direction: "column"
@@ -30,37 +30,29 @@ plot_card: ui.layout {
     surface: "background"
     elevation: 2
     item0: ui.plot {
-      function: x => f(x + item1.value / 20)
+      function: x => f(x + item1.value / 20 + time)
+      point: vec2(0, f(time))
     }
     item1: ui.slider {}
   }
 }
 
-editor: ace.editor {
-  code: "x = 42"
-}
-
 ui: ui {
   page: layout {
     direction: "responsive_row"
-    item0: editor
+    item0: outline
     item1: plot_card
   }
 }
 
-tex_formula: tex_formula {
-  item0: item0 {
-    code: editor.code
-  }
-}
 
-#> another function
+##> another function
 f: x => sin(x) + sin(x * 5) * 0.3
 
-#> and yet another one
+##> and yet another one
 f: x => sin(x + sin(x * 5) * 0.2) * sin(time * 0.3)
 
-#> dividing
+##> fractions
 f: x => sin(time * 0.7) / sin(time + x)
 
 #> sliders
@@ -73,3 +65,20 @@ thing: thing {
 }
 
 f: x => sin(x * 100 / thing.item1.value)
+
+#> code editor
+
+editor: ace.editor {
+  code: "x = 42"
+}
+
+ui: ui {
+  page: layout {
+    direction: "responsive_row"
+    item0: editor
+    item1: ui.layout {
+      surface: "secondary"
+      item0: make_formula_card(editor.code)
+    }
+  }
+}
