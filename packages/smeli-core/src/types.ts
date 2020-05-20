@@ -193,3 +193,26 @@ export class ExpressionValue implements TypedValue {
 export const ExpressionType: TypeTraits = {
   __name__: () => "expression",
 };
+
+export class Vec2 implements TypedValue {
+  x: number;
+  y: number;
+
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+
+  type() {
+    return Vec2Type;
+  }
+}
+
+export const Vec2Type: TypeTraits = {
+  __name__: () => "vec2",
+
+  __add__: (lhs: Vec2, rhs: Vec2) => new Vec2(lhs.x + rhs.x, lhs.y + rhs.y),
+  __sub__: (lhs: Vec2, rhs: Vec2) => new Vec2(lhs.x - rhs.x, lhs.y - rhs.y),
+
+  __str__: (self: Vec2) => `vec2(${self.x}, ${self.y})`,
+};

@@ -12,7 +12,9 @@ import {
   NativeFunction,
   Scope,
   StringValue,
+  Vec2Type,
   Visitor,
+  Vec2,
 } from "@smeli/core";
 
 const texSymbols: { [key: string]: string } = {
@@ -74,7 +76,18 @@ const visitor: Visitor<string> = new Map();
 
 visitor.set(Literal, (literal: Literal) => {
   const type = literal.value.type();
+
+  // special cases
+  if (type === Vec2Type) {
+    const value = literal.value as Vec2;
+    return `\\[ \\left( \\begin{array}{c}
+        ${value.x} \\\\
+        ${value.y} \\\\
+      \\end{array} \\right) \\]`;
+  }
+
   if (type.__str__) {
+    // generic fallback
     return type.__str__(literal.value);
   }
 

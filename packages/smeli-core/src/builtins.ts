@@ -5,6 +5,7 @@ import {
   StringValue,
   TypeTraits,
   TypedValue,
+  Vec2,
 } from "./types";
 import { Binding, Scope } from "./scope";
 
@@ -48,6 +49,19 @@ const sin: Binding = {
       (x: NumberValue): NumberValue => {
         const result = Math.sin(x.value);
         return new NumberValue(result);
+      }
+    ),
+};
+
+const vec2: Binding = {
+  name: "vec2",
+  evaluate: (parentScope: Scope) =>
+    new NativeFunction(
+      parentScope,
+      [NumberType, NumberType],
+      (x: NumberValue, y: NumberValue): Vec2 => {
+        const result = new Vec2(x.value, y.value);
+        return result;
       }
     ),
 };
