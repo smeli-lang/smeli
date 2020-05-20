@@ -108,4 +108,4 @@ const time: Binding = {
   },
 };
 
-export const builtins: Binding[] = [min, max, outline, sin, time];
+export const builtins: Binding[] = [min, max, outline, sin, time, vec2];
