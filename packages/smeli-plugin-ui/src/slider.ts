@@ -16,6 +16,10 @@ export const slider = {
         evaluate: () => new NumberValue(100),
       },
       {
+        name: "step",
+        evaluate: () => new NumberValue(1),
+      },
+      {
         name: "value",
         evaluate: () => new NumberValue(0),
       },
@@ -82,10 +86,12 @@ export const slider = {
           return (scope: Scope) => {
             const min = scope.evaluate("min", NumberType) as NumberValue;
             const max = scope.evaluate("max", NumberType) as NumberValue;
+            const step = scope.evaluate("step", NumberType) as NumberValue;
             const value = scope.evaluate("value", NumberType) as NumberValue;
 
             slider.min = min.value.toString();
             slider.max = max.value.toString();
+            slider.step = step.value.toString();
             slider.value = value.value.toString();
 
             return result;

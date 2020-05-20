@@ -10,14 +10,25 @@ f: alpha => sin(alpha)
 
 tex_formula: make_formula_card(katex.transpile(&f))
 
+magic_slider: ui.slider {
+  min: -1
+  max: 1
+  step: 0.01
+  value: f(time)
+}
+
+offset_slider: ui.slider {
+  min: -4
+  max: 4
+  step: 0.1
+}
+
 thing: ui.layout {
   direction: "column"
   surface: "secondary"
   elevation: 2
   item0: tex_formula
-  item1: ui.slider {
-    value: f(time) * 50 + 50
-  }
+  item1: magic_slider
 }
 
 plot_card: ui.layout {
@@ -30,10 +41,10 @@ plot_card: ui.layout {
     surface: "background"
     elevation: 2
     item0: ui.plot {
-      function: x => f(x + item1.value / 20 + time)
-      point: vec2(0 - item1.value / 20, thing.item1.value / 50 - 1)
+      function: x => f(x + offset_slider.value + time)
+      point: vec2(0 - offset_slider.value * 1, magic_slider.value)
     }
-    item1: ui.slider {}
+    item1: offset_slider
   }
 }
 
