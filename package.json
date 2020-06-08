@@ -7,7 +7,8 @@
       "samples/*"
     ],
     "nohoist": [
-      "**/@types/katex"
+      "**/@types/katex",
+      "**/@types/reach__router"
     ]
   },
   "name": "smeli",
@@ -15,27 +16,28 @@
   "author": "Remi Papillie <remi.papillie@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^12.7.2",
-    "serve": "^11.1.0",
     "@types/jest": "^25.1.2",
+    "@types/node": "^12.7.2",
+    "@types/react": "^16.9.1",
+    "@types/react-dom": "^16.8.5",
+    "@types/react-hot-loader": "^4.1.0",
     "@types/vscode": "^1.45.1",
+    "@types/webpack-env": "^1.14.0",
+    "gh-pages": "^3.0.0",
     "jest": "^25.1.0",
     "lerna": "^3.20.2",
-    "rimraf": "^3.0.2",
-    "ts-jest": "^25.2.0",
-    "typescript": "^3.8.3",
-    "webpack": "^4.42.1",
-    "webpack-cli": "^3.3.11",
+    "react-hot-loader": "^4.12.11",
     "react-static": "^7.2.0",
     "react-static-plugin-reach-router": "^7.2.0",
     "react-static-plugin-sitemap": "^7.2.0",
     "react-static-plugin-source-filesystem": "^7.2.0",
     "react-static-plugin-typescript": "^7.2.0",
-    "@types/react": "^16.9.1",
-    "@types/react-dom": "^16.8.5",
-    "@types/react-hot-loader": "^4.1.0",
-    "@types/webpack-env": "^1.14.0",
-    "react-hot-loader": "^4.12.11"
+    "rimraf": "^3.0.2",
+    "serve": "^11.1.0",
+    "ts-jest": "^25.2.0",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   },
   "scripts": {
     "clean": "lerna run --parallel clean",
@@ -47,6 +49,7 @@
     "unlink:cli": "cd packages/smeli-cli && yarn unlink",
     "test": "jest",
     "watch": "lerna run --parallel watch",
-    "bump": "lerna version --no-push && echo IMPORTANT: remember to push with the --follow-tags option"
+    "bump": "lerna version --no-push && echo IMPORTANT: remember to push with the --follow-tags option",
+    "deploy:website": "yarn clean && yarn build && gh-pages -d apps/smeli.io/dist"
   }
 }
