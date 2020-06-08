@@ -1,0 +1,22 @@
+{
+  "name": "@smeli-apps/website",
+  "version": "0.0.1",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "react-static build",
+    "stage": "react-static build --staging",
+    "watch": "react-static start",
+    "bundle": "react-static bundle",
+    "export": "react-static export",
+    "serve": "serve dist -p 3000 -s"
+  },
+  "dependencies": {
+    "@reach/router": "^1.2.1",
+    "axios": "^0.19.0",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0"
+  },
+  "devDependencies": {
+    "@types/reach__router": "^1.2"
+  }
+}
