@@ -50,6 +50,6 @@
     "test": "jest",
     "watch": "lerna run --parallel watch",
     "bump": "lerna version --no-push && echo IMPORTANT: remember to push with the --follow-tags option",
-    "deploy:website": "yarn clean && yarn build && gh-pages -d apps/smeli.io/dist"
+    "deploy:website": "yarn clean && yarn build && gh-pages -t -d apps/smeli.io/dist"
   }
 }
