@@ -1,5 +1,5 @@
 import { CacheEntry } from "./cache";
-import { TypeTraits, TypedValue } from "./types";
+import { TypedConstructor, TypedValue } from "./types/value";
 
 export type Evaluator = (scope: Scope) => TypedValue | Evaluator;
 
@@ -9,7 +9,9 @@ export type Binding = {
   ast?: any;
 };
 
-export class Scope implements TypedValue {
+export class Scope extends TypedValue {
+  static typeName = "scope";
+
   parent: Scope | null;
   prefix: Scope | null;
 
@@ -19,6 +21,8 @@ export class Scope implements TypedValue {
   derivedScopes: Set<Scope>;
 
   constructor(parent: Scope | null = null, prefix: Scope | null = null) {
+    super();
+
     this.parent = parent;
     this.prefix = prefix;
 
@@ -95,7 +99,18 @@ export class Scope implements TypedValue {
     }
   }
 
-  evaluate(nameOrEvaluator: string | Evaluator, type?: TypeTraits): TypedValue {
+  evaluate<T extends TypedValue>(nameOrEvaluator: (scope: Scope) => T): T;
+  evaluate<T extends TypedValue>(
+    nameOrEvaluator: string | Evaluator
+  ): TypedValue;
+  evaluate<T extends TypedValue>(
+    nameOrEvaluator: string | Evaluator,
+    type: TypedConstructor<T>
+  ): T;
+  evaluate(
+    nameOrEvaluator: string | Evaluator,
+    type?: TypedConstructor<TypedValue>
+  ): any {
     let binding;
     if (typeof nameOrEvaluator === "function") {
       // create a temporary binding for this evaluator
@@ -119,7 +134,7 @@ export class Scope implements TypedValue {
 
       // enforce type if provided
       if (type) {
-        this.checkType(binding.name, value, type);
+        return value.as(type);
       }
 
       return value;
@@ -132,7 +147,7 @@ export class Scope implements TypedValue {
     throw new Error(`No previous definition found for '${nameOrEvaluator}'`);
   }
 
-  transient(evaluator: Evaluator, type?: TypeTraits) {
+  transient(evaluator: Evaluator, type?: TypedConstructor<TypedValue>) {
     let value: Evaluator | TypedValue;
     value = evaluator;
 
@@ -144,7 +159,7 @@ export class Scope implements TypedValue {
 
     // enforce type if provided
     if (type) {
-      this.checkType("transient value", value, type);
+      return value.as(type);
     }
 
     return value;
@@ -220,25 +235,7 @@ export class Scope implements TypedValue {
     }
   }
 
-  private checkType(name: string, value: TypedValue, type: TypeTraits) {
-    if (value.type() !== type) {
-      const typeName = value.type().__name__();
-      const expectedTypeName = type.__name__();
-      throw new Error(
-        `Type error: '${name}' has type '${typeName}' instead of '${expectedTypeName}'`
-      );
-    }
-  }
-
   root(): Scope {
     return this.parent?.root() || this;
   }
-
-  type() {
-    return ScopeType;
-  }
 }
-
-export const ScopeType: TypeTraits = {
-  __name__: () => "scope",
-};

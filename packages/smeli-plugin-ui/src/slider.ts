@@ -1,4 +1,4 @@
-import { Binding, NumberType, NumberValue, Scope } from "@smeli/core";
+import { Binding, NumberValue, Scope } from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
 
@@ -84,10 +84,10 @@ export const slider = {
           // (also - it allows the slider to override its value binding
           // without destroying itself)
           return (scope: Scope) => {
-            const min = scope.evaluate("min", NumberType) as NumberValue;
-            const max = scope.evaluate("max", NumberType) as NumberValue;
-            const step = scope.evaluate("step", NumberType) as NumberValue;
-            const value = scope.evaluate("value", NumberType) as NumberValue;
+            const min = scope.evaluate("min").as(NumberValue);
+            const max = scope.evaluate("max").as(NumberValue);
+            const step = scope.evaluate("step").as(NumberValue);
+            const value = scope.evaluate("value").as(NumberValue);
 
             slider.min = min.value.toString();
             slider.max = max.value.toString();

@@ -1,9 +1,7 @@
 import {
   NativeFunction,
-  NumberType,
   NumberValue,
   StringValue,
-  TypeTraits,
   TypedValue,
   Vec2,
 } from "./types";
@@ -14,7 +12,7 @@ const min: Binding = {
   evaluate: (parentScope: Scope) =>
     new NativeFunction(
       parentScope,
-      [NumberType, NumberType],
+      [NumberValue, NumberValue],
       (lhs: NumberValue, rhs: NumberValue): NumberValue => {
         const result = Math.min(lhs.value, rhs.value);
         return new NumberValue(result);
@@ -27,7 +25,7 @@ const max: Binding = {
   evaluate: (parentScope: Scope) =>
     new NativeFunction(
       parentScope,
-      [NumberType, NumberType],
+      [NumberValue, NumberValue],
       (lhs: NumberValue, rhs: NumberValue): NumberValue => {
         const result = Math.max(lhs.value, rhs.value);
         return new NumberValue(result);
@@ -45,7 +43,7 @@ const sin: Binding = {
   evaluate: (parentScope: Scope) =>
     new NativeFunction(
       parentScope,
-      [NumberType],
+      [NumberValue],
       (x: NumberValue): NumberValue => {
         const result = Math.sin(x.value);
         return new NumberValue(result);
@@ -58,7 +56,7 @@ const vec2: Binding = {
   evaluate: (parentScope: Scope) =>
     new NativeFunction(
       parentScope,
-      [NumberType, NumberType],
+      [NumberValue, NumberValue],
       (x: NumberValue, y: NumberValue): Vec2 => {
         const result = new Vec2(x.value, y.value);
         return result;
@@ -66,11 +64,15 @@ const vec2: Binding = {
     ),
 };
 
-class Timer implements TypedValue {
+class Timer extends TypedValue {
+  static typeName = "timer";
+
   private binding: Binding;
   private intervalId: any;
 
   constructor(scope: Scope) {
+    super();
+
     this.binding = {
       name: "#time",
       evaluate: () => new NumberValue(Date.now() * 0.001),
@@ -87,15 +89,7 @@ class Timer implements TypedValue {
   dispose() {
     clearInterval(this.intervalId);
   }
-
-  type() {
-    return TimerType;
-  }
 }
-
-const TimerType: TypeTraits = {
-  __name__: () => "timer",
-};
 
 const time: Binding = {
   name: "time",

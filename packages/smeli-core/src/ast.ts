@@ -1,11 +1,10 @@
-import { Binding, Evaluator, Scope, ScopeType } from "./scope";
+import { Binding, Evaluator, Scope } from "./scope";
 import {
-  Lambda,
-  TypedValue,
-  TypeChecker,
-  StringValue,
-  StringType,
   ExpressionValue,
+  Lambda,
+  NativeFunction,
+  TypedValue,
+  StringValue,
 } from "./types";
 
 export type ParameterList = { [key: string]: TypedValue };
@@ -37,8 +36,7 @@ export class Identifier implements Expression {
 
   evaluate(scope: Scope) {
     for (let i = 0; i < this.scopeNames.length; i++) {
-      const next = scope.evaluate(this.scopeNames[i]);
-      scope = TypeChecker.as<Scope>(next, ScopeType);
+      scope = scope.evaluate(this.scopeNames[i]).as(Scope);
     }
 
     if (this.name[0] === "&") {
@@ -63,8 +61,7 @@ export class ScopeExpression implements Expression {
   evaluate(parentScope: Scope) {
     let prefixScope = null;
     if (this.prefixExpression) {
-      const prefix = this.prefixExpression.evaluate(parentScope);
-      prefixScope = TypeChecker.as<Scope>(prefix, ScopeType);
+      prefixScope = this.prefixExpression.evaluate(parentScope).as(Scope);
     }
 
     const scope = new Scope(parentScope, prefixScope);
@@ -104,17 +101,15 @@ export class FunctionCall implements Expression {
     const functionValue = scope.evaluate((scope: Scope) =>
       this.identifier.evaluate(scope)
     );
-    const functionType = functionValue.type();
 
-    if (!functionType.__call_site__) {
+    if (!functionValue.is(Lambda) && !functionValue.is(NativeFunction)) {
       throw new Error(`${this.identifier.name} is not a function`);
     }
 
     const argumentEvaluators = this.args.map((expression) => () =>
       expression.evaluate(scope)
     );
-    const resultEvaluator = functionType.__call_site__(
-      functionValue,
+    const resultEvaluator = functionValue.__call_site__(
       scope,
       argumentEvaluators
     );
@@ -145,24 +140,17 @@ export class BinaryOperator implements Expression {
     const lvalue = scope.transient((scope: Scope) => this.lhs.evaluate(scope));
     const rvalue = scope.transient((scope: Scope) => this.rhs.evaluate(scope));
 
-    const ltype = lvalue.type();
-    const rtype = rvalue.type();
-
-    if (ltype !== rtype) {
+    if (!(this.operatorName in lvalue)) {
       throw new Error(
-        `Operands must have the same type for operator ${this.operatorName}`
+        `Operator ${this.operatorName} not defined for type ${
+          lvalue.type().typeName
+        }`
       );
     }
 
-    const operator = ltype[this.operatorName];
-
-    if (!operator) {
-      throw new Error(
-        `Operator ${this.operatorName} not defined for type ${ltype.__name__()}`
-      );
-    }
-
-    return operator(lvalue, rvalue);
+    return (lvalue[this.operatorName] as (rhs: TypedValue) => TypedValue)(
+      rvalue
+    );
   }
 }
 
@@ -219,7 +207,7 @@ export class Comment implements Statement {
     this.binding = {
       name: "#outline",
       evaluate: (scope: Scope) => {
-        const previous = scope.evaluate("#outline", StringType) as StringValue;
+        const previous = scope.evaluate("#outline").as(StringValue);
         return new StringValue(previous.value + html);
       },
     };

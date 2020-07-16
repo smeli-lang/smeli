@@ -1,5 +1,5 @@
-import { Scope, ScopeType, Binding } from "@smeli/core";
-import { DomStyles, DomStylesType } from "./types";
+import { Scope, Binding } from "@smeli/core";
+import { DomStyles } from "./types";
 import { defaultThemeLight } from "./theme";
 
 import { containerStyles } from "./container.styles";
@@ -28,7 +28,7 @@ export const styles: Binding = {
 
 export const evaluateUiStyles = (scope: Scope) => {
   const globalScope = scope.root();
-  const uiScope = globalScope.evaluate("ui", ScopeType) as Scope;
-  const styles = uiScope.evaluate("#styles", DomStylesType) as DomStyles;
+  const uiScope = globalScope.evaluate("ui").as(Scope);
+  const styles = uiScope.evaluate("#styles").as(DomStyles);
   return styles.sheet.classes;
 };

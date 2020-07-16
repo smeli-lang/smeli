@@ -1,6 +1,6 @@
 import { Statement } from "./ast";
 import { ParserState, parseStatementList, ParserReport } from "./parser";
-import { Scope, ScopeType } from "./scope";
+import { Scope } from "./scope";
 import { builtins } from "./builtins";
 import { PluginDefinition, pushPlugin } from "./plugins";
 import { CacheEntry } from "./cache";
@@ -39,7 +39,7 @@ export class Engine {
         // everything else will be lazily evaluated
         // indirectly
         for (let [pluginName, bindingNames] of this.sideEffects) {
-          const pluginScope = scope.evaluate(pluginName, ScopeType) as Scope;
+          const pluginScope = scope.evaluate(pluginName).as(Scope);
           for (let binding of bindingNames) {
             pluginScope.evaluate(binding);
           }

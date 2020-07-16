@@ -1,6 +1,6 @@
 import katex from "katex";
 
-import { Scope, StringValue, StringType } from "@smeli/core";
+import { Scope, StringValue } from "@smeli/core";
 import { DomNode, evaluateUiStyles } from "@smeli/plugin-ui";
 
 import { evaluateKatexStyles } from "./styles";
@@ -20,7 +20,7 @@ export const formula = {
           const uiStyles = evaluateUiStyles(scope);
           const katexStyles = evaluateKatexStyles(scope);
 
-          const code = scope.evaluate("code", StringType) as StringValue;
+          const code = scope.evaluate("code").as(StringValue);
 
           const element = document.createElement("div");
           element.className = katexStyles.formula + " " + uiStyles.text;

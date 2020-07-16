@@ -1,6 +1,6 @@
 import { CacheEntry } from "./cache";
 import { Scope } from "./scope";
-import { TypedValue, NumberValue, TypeTraits } from "./types";
+import { TypedValue, NumberValue } from "./types";
 
 test("evaluate the same binding twice, should be cached", () => {
   let evaluationCount = 0;
@@ -67,21 +67,15 @@ test("reevaluates dependencies when required", () => {
   scope.dispose();
 });
 
-class FakeValue implements TypedValue {
+class FakeValue extends TypedValue {
+  static typeName = "fake";
+
   disposed: boolean = false;
 
   dispose() {
     this.disposed = true;
   }
-
-  type() {
-    return FakeType;
-  }
 }
-
-const FakeType: TypeTraits = {
-  __name__: () => "fake",
-};
 
 test("deprecated bindings should be disposed in the GC phase", () => {
   const value0 = new FakeValue();

@@ -1,13 +1,5 @@
-import {
-  Scope,
-  TypedValue,
-  StringValue,
-  StringType,
-  NumberValue,
-  ScopeType,
-  NumberType,
-} from "@smeli/core";
-import { DomNode, DomNodeType } from "./types";
+import { Scope, StringValue, NumberValue } from "@smeli/core";
+import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
 
 export const layout = {
@@ -43,17 +35,11 @@ export const layout = {
         name: "#ui:node",
         evaluate: (scope: Scope) => {
           const styles = evaluateUiStyles(scope);
-          const direction = scope.evaluate(
-            "direction",
-            StringType
-          ) as StringValue;
+          const direction = scope.evaluate("direction").as(StringValue);
 
-          const surface = scope.evaluate("surface", StringType) as StringValue;
+          const surface = scope.evaluate("surface").as(StringValue);
 
-          const elevation = scope.evaluate(
-            "elevation",
-            NumberType
-          ) as NumberValue;
+          const elevation = scope.evaluate("elevation").as(NumberValue);
 
           const node = document.createElement("div");
           node.className = `${styles.layout} direction-${direction.value} surface-${surface.value}`;
@@ -68,11 +54,8 @@ export const layout = {
             // evaluate valid children items
             const items = [scope.evaluate("item0"), scope.evaluate("item1")];
             const itemNodes = items
-              .filter((item) => item.type() === ScopeType)
-              .map(
-                (item) =>
-                  (item as Scope).evaluate("#ui:node", DomNodeType) as DomNode
-              );
+              .filter((item) => item.is(Scope))
+              .map((item) => (item as Scope).evaluate("#ui:node").as(DomNode));
 
             // cheap diff to limit the number of DOM operations
             const currentChildren = node.childNodes;

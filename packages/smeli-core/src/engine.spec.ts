@@ -1,5 +1,5 @@
 import { Engine } from "./engine";
-import { TypeChecker, NumberValue, NumberType } from "./types";
+import { NumberValue } from "./types";
 
 test("should run a basic statement", () => {
   const engine = new Engine("a: 42");
@@ -10,10 +10,7 @@ test("should run a basic statement", () => {
   const result = engine.globalScope.evaluate("a") || null;
   expect(result).not.toBeNull();
 
-  const numberValue = TypeChecker.as<NumberValue>(
-    result as NumberValue,
-    NumberType
-  );
+  const numberValue = result.as(NumberValue);
   expect(numberValue.value).toBe(42);
 
   engine.step(-1);

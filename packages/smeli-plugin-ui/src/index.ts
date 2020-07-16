@@ -1,5 +1,5 @@
-import { Scope, ScopeType } from "@smeli/core";
-import { DomNode, DomNodeType } from "./types";
+import { Scope } from "@smeli/core";
+import { DomNode } from "./types";
 
 import { layout } from "./layout";
 import { plot } from "./plot";
@@ -39,11 +39,11 @@ export const loadPlugin = ({
 
           // cache style
           return (scope: Scope) => {
-            const page = scope.evaluate("page", ScopeType) as Scope;
+            const page = scope.evaluate("page").as(Scope);
 
             // cache page
             return (scope: Scope) => {
-              const node = page.evaluate("#ui:node", DomNodeType) as DomNode;
+              const node = page.evaluate("#ui:node").as(DomNode);
 
               // diff with currently displayed page
               if (!container.hasChildNodes()) {

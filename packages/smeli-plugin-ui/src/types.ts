@@ -1,14 +1,18 @@
 import { jss } from "./jss";
 
-import { TypedValue, TypeTraits } from "@smeli/core";
+import { TypedValue } from "@smeli/core";
 
 export type EventListenerMap = { [key: string]: EventListener };
 
-export class DomNode implements TypedValue {
+export class DomNode extends TypedValue {
+  static typeName = "dom_node";
+
   node: HTMLElement;
   eventListeners: EventListenerMap;
 
   constructor(node: HTMLElement, eventListeners: EventListenerMap = {}) {
+    super();
+
     this.node = node;
     this.eventListeners = eventListeners;
 
@@ -25,33 +29,22 @@ export class DomNode implements TypedValue {
     }
   }
 
-  type() {
-    return DomNodeType;
+  __str__() {
+    return `<${this.node.tagName.toLowerCase()} />`;
   }
 }
 
-export const DomNodeType: TypeTraits = {
-  __name__: () => "dom_node",
+export class DomStyles extends TypedValue {
+  static typeName = "dom_styles";
 
-  __str__: (self: DomNode) => `<${self.node.tagName.toLowerCase()} />`,
-};
-
-export class DomStyles implements TypedValue {
   sheet: any;
 
   constructor(styles: any) {
+    super();
     this.sheet = jss.createStyleSheet(styles).attach();
   }
 
   dispose() {
     jss.removeStyleSheet(this.sheet);
   }
-
-  type() {
-    return DomStylesType;
-  }
 }
-
-export const DomStylesType: TypeTraits = {
-  __name__: () => "dom_styles",
-};

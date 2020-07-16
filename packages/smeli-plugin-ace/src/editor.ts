@@ -3,7 +3,7 @@ import ace from "ace-builds";
 import "ace-builds/src-noconflict/theme-monokai";
 import "ace-builds/src-noconflict/mode-python";
 
-import { Binding, Scope, StringValue, StringType } from "@smeli/core";
+import { Binding, Scope, StringValue } from "@smeli/core";
 import { DomNode } from "@smeli/plugin-ui";
 
 import { evaluateAceStyles } from "./styles";
@@ -53,7 +53,7 @@ export const editor = {
 
           // cache editor
           return (scope: Scope) => {
-            const code = scope.evaluate("code", StringType) as StringValue;
+            const code = scope.evaluate("code").as(StringValue);
 
             // guard against infinite recursion
             if (!override) {

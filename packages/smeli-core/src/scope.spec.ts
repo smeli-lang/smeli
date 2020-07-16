@@ -1,5 +1,5 @@
-import { Scope, ScopeType } from "./scope";
-import { TypedValue, NumberValue, NumberType } from "./types";
+import { Scope } from "./scope";
+import { NumberValue } from "./types";
 
 test("push and pop a single binding", () => {
   const scope = new Scope();
@@ -27,7 +27,7 @@ test("evaluates binding history", () => {
     {
       name: "a",
       evaluate: (scope: Scope) => {
-        const a = scope.evaluate("a", NumberType) as NumberValue;
+        const a = scope.evaluate("a").as(NumberValue);
         return new NumberValue(a.value + 22);
       },
     },
@@ -104,7 +104,7 @@ test("using the same prefix from different scopes is reentrant", () => {
     {
       name: "x",
       evaluate: (scope: Scope) => {
-        const childScope = scope.evaluate("child", ScopeType) as Scope;
+        const childScope = scope.evaluate("child").as(Scope);
         return childScope.evaluate("y");
       },
     },

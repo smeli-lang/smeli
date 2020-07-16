@@ -1,4 +1,4 @@
-import { Scope, StringType, StringValue } from "@smeli/core";
+import { Scope, StringValue } from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
 
@@ -18,10 +18,7 @@ export const outline = {
 
         // cache parent node
         return (scope: Scope) => {
-          const outlineData = scope.evaluate(
-            "#outline",
-            StringType
-          ) as StringValue;
+          const outlineData = scope.evaluate("#outline").as(StringValue);
 
           node.innerHTML = outlineData.value;
 

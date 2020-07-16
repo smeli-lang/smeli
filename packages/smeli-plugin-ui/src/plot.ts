@@ -1,15 +1,14 @@
 import {
-  NumberType,
   NumberValue,
   Evaluator,
   Scope,
   Vec2,
-  Vec2Type,
+  Lambda,
+  NativeFunction,
 } from "@smeli/core";
 
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
-import { debug } from "vscode";
 
 function redraw(
   canvas: HTMLCanvasElement,
@@ -126,9 +125,11 @@ export const plot = {
           // cache DOM element
           return (scope: Scope) => {
             const functionValue = scope.evaluate("function");
-            const functionType = functionValue.type();
 
-            if (!functionType.__call_site__) {
+            if (
+              !functionValue.is(Lambda) &&
+              !functionValue.is(NativeFunction)
+            ) {
               throw new Error(`"function" is not a function`);
             }
 
@@ -144,8 +145,7 @@ export const plot = {
                 const input = viewport[0] + i * step;
 
                 const argumentValue = new NumberValue(input);
-                const callSiteEvaluator = (functionType.__call_site__ as any)(
-                  functionValue,
+                const callSiteEvaluator = (functionValue.__call_site__ as any)(
                   scope,
                   [() => argumentValue]
                 );
@@ -156,14 +156,11 @@ export const plot = {
               // cache evaluation scopes
               return (scope: Scope) => {
                 const dataPoints = evaluators.map((evaluator) => {
-                  const value = scope.transient(
-                    evaluator,
-                    NumberType
-                  ) as NumberValue;
+                  const value = scope.transient(evaluator).as(NumberValue);
                   return value.value;
                 });
 
-                const { x, y } = scope.evaluate("point", Vec2Type) as Vec2;
+                const { x, y } = scope.evaluate("point").as(Vec2);
 
                 // redraw next frame (ensures correct layout, aspect ratio, etc.)
                 requestAnimationFrame(() =>
