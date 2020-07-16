@@ -103,14 +103,7 @@ export class Scope extends TypedValue {
   evaluate<T extends TypedValue>(
     nameOrEvaluator: string | Evaluator
   ): TypedValue;
-  evaluate<T extends TypedValue>(
-    nameOrEvaluator: string | Evaluator,
-    type: TypedConstructor<T>
-  ): T;
-  evaluate(
-    nameOrEvaluator: string | Evaluator,
-    type?: TypedConstructor<TypedValue>
-  ): any {
+  evaluate(nameOrEvaluator: string | Evaluator): any {
     let binding;
     if (typeof nameOrEvaluator === "function") {
       // create a temporary binding for this evaluator
@@ -132,11 +125,6 @@ export class Scope extends TypedValue {
 
       const value = cacheEntry.evaluate();
 
-      // enforce type if provided
-      if (type) {
-        return value.as(type);
-      }
-
       return value;
     }
 
@@ -147,7 +135,7 @@ export class Scope extends TypedValue {
     throw new Error(`No previous definition found for '${nameOrEvaluator}'`);
   }
 
-  transient(evaluator: Evaluator, type?: TypedConstructor<TypedValue>) {
+  transient(evaluator: Evaluator) {
     let value: Evaluator | TypedValue;
     value = evaluator;
 
@@ -156,11 +144,6 @@ export class Scope extends TypedValue {
     }
 
     CacheEntry.transient(value);
-
-    // enforce type if provided
-    if (type) {
-      return value.as(type);
-    }
 
     return value;
   }

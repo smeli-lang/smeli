@@ -31,7 +31,7 @@ export class NativeFunction extends TypedValue {
     return (scope: Scope) => {
       // evaluate arguments at the call site
       const argValues = this.argumentTypes.map((type, index) =>
-        scope.transient(args[index], type)
+        scope.transient(args[index]).as(type)
       );
 
       // call the native evaluator
