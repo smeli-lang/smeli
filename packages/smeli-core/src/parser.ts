@@ -369,6 +369,7 @@ export function parseExpression(state: ParserState) {
 
 export function parseComment(state: ParserState) {
   const currentLine = state.currentLine;
+  const startOffset = state.n;
 
   const prefix = state.match(COMMENT_PREFIX);
   if (!prefix) {
@@ -380,12 +381,19 @@ export function parseComment(state: ParserState) {
 
   const text = state.match(TEXT_LINE)?.trim() || "";
 
-  const comment = new Comment(currentLine, isMarker, headingLevel, text);
+  const comment = new Comment(
+    currentLine,
+    startOffset,
+    isMarker,
+    headingLevel,
+    text
+  );
   return comment;
 }
 
 export function parseBindingDefinition(state: ParserState) {
   const currentLine = state.currentLine;
+  const startOffset = state.n;
 
   const identifier = parseIdentifier(state);
   if (!identifier) {
@@ -411,7 +419,12 @@ export function parseBindingDefinition(state: ParserState) {
     return null;
   }
 
-  const assignment = new BindingDefinition(currentLine, identifier, expression);
+  const assignment = new BindingDefinition(
+    currentLine,
+    startOffset,
+    identifier,
+    expression
+  );
 
   return assignment;
 }

@@ -156,20 +156,28 @@ export class BinaryOperator implements Expression {
 
 export interface Statement {
   line: number;
+  startOffset: number;
   isMarker: boolean;
   binding: Binding | Binding[];
 }
 
 export class BindingDefinition implements Statement {
   line: number;
+  startOffset: number;
   isMarker: boolean = false;
   binding: Binding;
 
   identifier: Identifier;
   expression: Expression;
 
-  constructor(line: number, identifier: Identifier, expression: Expression) {
+  constructor(
+    line: number,
+    startOffset: number,
+    identifier: Identifier,
+    expression: Expression
+  ) {
     this.line = line;
+    this.startOffset = startOffset;
     this.identifier = identifier;
     this.expression = expression;
 
@@ -183,6 +191,7 @@ export class BindingDefinition implements Statement {
 
 export class Comment implements Statement {
   line: number;
+  startOffset: number;
   isMarker: boolean;
   binding: Binding;
 
@@ -191,11 +200,13 @@ export class Comment implements Statement {
 
   constructor(
     line: number,
+    startOffset: number,
     isMarker: boolean,
     headingLevel: number,
     text: string
   ) {
     this.line = line;
+    this.startOffset = startOffset;
     this.isMarker = isMarker;
 
     this.headingLevel = headingLevel;
