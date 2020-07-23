@@ -74,6 +74,24 @@ test("inline directive: simple case", () => {
   expect(result.compiledCode.trim()).toEqual("# hello");
 });
 
+test("error: no resolve callback", () => {
+  expect(() => compile()).toThrowError();
+});
+
+test("error: chunk resolve exception", () => {
+  const code: { [key: string]: string } = {
+    "index.smeli": `
+      @inline("lib")
+    `,
+  };
+
+  expect(() =>
+    compile({
+      resolveChunk: (filename) => code[filename],
+    })
+  ).toThrowError();
+});
+
 test("chunk cache: never resolve the same chunk twice", () => {
   const code: { [key: string]: string } = {
     "index.smeli": `

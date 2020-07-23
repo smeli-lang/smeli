@@ -114,7 +114,6 @@ function compileChunk(filename: string, context: CompileContext) {
   // cache the compiled chunk
   context.chunks.set(filename, chunk);
 
-  console.log(filename, chunk);
   return chunk;
 }
 
@@ -161,7 +160,9 @@ export type CompileResult = {
 
 export function compile({
   entry = "index.smeli",
-  resolveChunk = () => "",
+  resolveChunk = () => {
+    throw new Error("No resolveChunk() callback provided");
+  },
 }: CompileOptions = {}): CompileResult {
   const context = {
     plugins: [],
@@ -174,6 +175,6 @@ export function compile({
   return {
     plugins: context.plugins,
     compiledCode: entryChunk.compiledCode,
-    sourceMap: flattenSourceMap(entry, context, 0),
+    sourceMap: flattenSourceMap(entry, context),
   };
 }
