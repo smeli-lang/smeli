@@ -38,13 +38,19 @@ function compileChunk(filename: string, context: CompileContext) {
     return cachedChunk;
   }
 
+  // execute all directives in that chunk
   const code = context.resolveChunk(filename);
-  return code.replace(
+  const compiledCode = code.replace(
     compilerDirectiveRegex,
-    (match: string, name: string, parameter: string) => {
+    (match: string, name: string, parameter: string, offset: number) => {
       return executeDirective(name, parameter, context);
     }
   );
+
+  // cache the compiled chunk
+  context.chunks.set(filename, compiledCode);
+
+  return compiledCode;
 }
 
 export type CompileOptions = {
