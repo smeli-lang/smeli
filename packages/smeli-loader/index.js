@@ -1,10 +1,12 @@
 const fs = require("fs");
 const { compile } = require("@smeli/compiler");
 
-module.exports = function smeliLoader(source) {
-  const result = compile({
+module.exports = async function smeliLoader(source) {
+  const callback = this.async();
+
+  const result = await compile({
     entry: "mainChunk",
-    resolveChunk: (filename) => {
+    resolveChunk: async (filename) => {
       if (filename === "mainChunk") {
         return source;
       }
@@ -28,11 +30,11 @@ module.exports = function smeliLoader(source) {
       )}];
 
       return {
-        code: \`${result.fullCode}\`,
+        code: \`${result.compiledCode}\`,
         plugins,
       };
 		};
   `;
 
-  return output;
+  callback(null, output);
 };
