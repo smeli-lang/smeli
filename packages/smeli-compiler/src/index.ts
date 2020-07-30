@@ -20,14 +20,14 @@ type Chunk = {
 type CompileContext = {
   plugins: string[];
   chunks: Map<string, Chunk>;
-  resolveChunk: (filename: string) => string;
+  resolveChunk: (filename: string) => Promise<string>;
 };
 
-function executeDirective(
+async function executeDirective(
   name: string,
   parameter: string,
   context: CompileContext
-): Chunk | null {
+): Promise<Chunk | null> {
   switch (name) {
     case "plugin": {
       // accumulate the plugin in the shared list
@@ -48,14 +48,17 @@ function executeDirective(
   throw new Error("Unknown compiler directive: " + name);
 }
 
-function compileChunk(filename: string, context: CompileContext) {
+async function compileChunk(
+  filename: string,
+  context: CompileContext
+): Promise<Chunk> {
   // early out if that chunk has been compiled already
   const cachedChunk = context.chunks.get(filename);
   if (cachedChunk) {
     return cachedChunk;
   }
 
-  const code = context.resolveChunk(filename);
+  const code = await context.resolveChunk(filename);
 
   // initialize with a single source range covering the whole chunk
   const chunk: Chunk = {
@@ -70,11 +73,30 @@ function compileChunk(filename: string, context: CompileContext) {
     ],
   };
 
-  // execute all directives in that chunk
+  // stub execution to find all the matches, this is required
+  // because replace doesn't support async callbacks, so we
+  // need two passes
+  const matches: [string, string][] = [];
   chunk.compiledCode = code.replace(
     compilerDirectiveRegex,
     (match: string, name: string, parameter: string, offset: number) => {
-      const subChunk = executeDirective(name, parameter, context);
+      matches.push([name, parameter]);
+      return match;
+    }
+  );
+
+  // execute all directives in that chunk
+  const subChunks: (Chunk | null)[] = [];
+  for (const match of matches) {
+    const subChunk = await executeDirective(match[0], match[1], context);
+    subChunks.push(subChunk);
+  }
+
+  // actual replacement and source map update
+  chunk.compiledCode = code.replace(
+    compilerDirectiveRegex,
+    (match: string, name: string, parameter: string, offset: number) => {
+      const subChunk = subChunks.shift();
       const replacement = subChunk ? subChunk.compiledCode : "";
 
       // split ranges around the directive
@@ -149,7 +171,7 @@ function flattenSourceMap(
 
 export type CompileOptions = {
   entry?: string;
-  resolveChunk?: (filename: string) => string;
+  resolveChunk?: (filename: string) => Promise<string>;
 };
 
 export type CompileResult = {
@@ -158,19 +180,19 @@ export type CompileResult = {
   sourceMap: SourceMap;
 };
 
-export function compile({
+export async function compile({
   entry = "index.smeli",
   resolveChunk = () => {
     throw new Error("No resolveChunk() callback provided");
   },
-}: CompileOptions = {}): CompileResult {
+}: CompileOptions = {}): Promise<CompileResult> {
   const context = {
     plugins: [],
     chunks: new Map<string, Chunk>(),
     resolveChunk,
   };
 
-  const entryChunk = compileChunk(entry, context);
+  const entryChunk = await compileChunk(entry, context);
 
   return {
     plugins: context.plugins,

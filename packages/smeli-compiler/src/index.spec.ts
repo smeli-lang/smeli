@@ -1,62 +1,64 @@
 import { compile } from "./index";
 
-test("plugin directive: simple case", () => {
+test("plugin directive: simple case", async () => {
   const code: { [key: string]: string } = {
     "index.smeli": `
       @plugin("@smeli/plugin-ui")
       @plugin("hello")
     `,
   };
-  const result = compile({
-    resolveChunk: (filename) => code[filename],
+  const result = await compile({
+    resolveChunk: async (filename) => code[filename],
   });
 
   expect(result.plugins).toEqual(["@smeli/plugin-ui", "hello"]);
 });
 
-test("plugin directive: duplicates", () => {
+test("plugin directive: duplicates", async () => {
   const code: { [key: string]: string } = {
     "index.smeli": `
       @plugin("hello")
       @plugin("hello")
     `,
   };
-  const result = compile({
-    resolveChunk: (filename) => code[filename],
+  const result = await compile({
+    resolveChunk: async (filename) => code[filename],
   });
 
   expect(result.plugins).toEqual(["hello"]);
 });
 
-test("plugin directive: strips directive from output", () => {
+test("plugin directive: strips directive from output", async () => {
   const code: { [key: string]: string } = {
     "index.smeli": `
       @plugin("hello")
       a: 42
     `,
   };
-  const result = compile({
-    resolveChunk: (filename) => code[filename],
+  const result = await compile({
+    resolveChunk: async (filename) => code[filename],
   });
 
   expect(result.compiledCode.trim()).toEqual("a: 42");
 });
 
-test("unknown directive", () => {
+test("unknown directive", async () => {
   const code: { [key: string]: string } = {
     "index.smeli": `
       @dinosaur("meteorite")
     `,
   };
 
-  expect(() =>
+  expect.assertions(1);
+
+  await expect(
     compile({
-      resolveChunk: (filename) => code[filename],
+      resolveChunk: async (filename) => code[filename],
     })
-  ).toThrowError("Unknown compiler directive: dinosaur");
+  ).rejects.toEqual(new Error("Unknown compiler directive: dinosaur"));
 });
 
-test("inline directive: simple case", () => {
+test("inline directive: simple case", async () => {
   const code: { [key: string]: string } = {
     "index.smeli": `
       @inline("lib")
@@ -67,32 +69,37 @@ test("inline directive: simple case", () => {
     `,
   };
 
-  const result = compile({
-    resolveChunk: (filename) => code[filename],
+  const result = await compile({
+    resolveChunk: async (filename) => code[filename],
   });
 
   expect(result.compiledCode.trim()).toEqual("# hello");
 });
 
-test("error: no resolve callback", () => {
-  expect(() => compile()).toThrowError();
+test("error: no resolve callback", async () => {
+  expect.assertions(1);
+  await expect(compile()).rejects.toEqual(
+    new Error("No resolveChunk() callback provided")
+  );
 });
 
-test("error: chunk resolve exception", () => {
+test("error: chunk resolve exception", async () => {
   const code: { [key: string]: string } = {
     "index.smeli": `
       @inline("lib")
     `,
   };
 
-  expect(() =>
+  expect.assertions(1);
+
+  await expect(
     compile({
-      resolveChunk: (filename) => code[filename],
+      resolveChunk: async (filename) => code[filename],
     })
-  ).toThrowError();
+  ).rejects.toBeInstanceOf(Error);
 });
 
-test("chunk cache: never resolve the same chunk twice", () => {
+test("chunk cache: never resolve the same chunk twice", async () => {
   const code: { [key: string]: string } = {
     "index.smeli": `
       @inline("lib")
@@ -104,8 +111,8 @@ test("chunk cache: never resolve the same chunk twice", () => {
 
   const resolveCount: { [key: string]: number } = {};
 
-  const result = compile({
-    resolveChunk: (filename) => {
+  const result = await compile({
+    resolveChunk: async (filename) => {
       resolveCount[filename] = resolveCount[filename]
         ? resolveCount[filename] + 1
         : 1;
@@ -124,7 +131,7 @@ test("chunk cache: never resolve the same chunk twice", () => {
   expect(result.compiledCode.trim()).toEqual("# hello\n      # hello");
 });
 
-test("source map: simple inline", () => {
+test("source map: simple inline", async () => {
   const code: { [key: string]: string } = {
     "index.smeli": `
       # before inline
@@ -136,8 +143,8 @@ test("source map: simple inline", () => {
     "lib.smeli": `# inlined thing`,
   };
 
-  const result = compile({
-    resolveChunk: (filename) => code[filename],
+  const result = await compile({
+    resolveChunk: async (filename) => code[filename],
   });
 
   const expectedOutput = `
@@ -173,7 +180,7 @@ test("source map: simple inline", () => {
   });
 });
 
-test("source map: simple plugin", () => {
+test("source map: simple plugin", async () => {
   const code: { [key: string]: string } = {
     "index.smeli": `
       # before plugin
@@ -181,8 +188,8 @@ test("source map: simple plugin", () => {
       # after plugin`,
   };
 
-  const result = compile({
-    resolveChunk: (filename) => code[filename],
+  const result = await compile({
+    resolveChunk: async (filename) => code[filename],
   });
 
   const expectedOutput = `
@@ -210,7 +217,7 @@ test("source map: simple plugin", () => {
   });
 });
 
-test("source map: recursive inline", () => {
+test("source map: recursive inline", async () => {
   const code: { [key: string]: string } = {
     "index.smeli": `
       # main
@@ -225,8 +232,8 @@ test("source map: recursive inline", () => {
     "b.smeli": `# B`,
   };
 
-  const result = compile({
-    resolveChunk: (filename) => code[filename],
+  const result = await compile({
+    resolveChunk: async (filename) => code[filename],
   });
 
   const expectedOutput = `
