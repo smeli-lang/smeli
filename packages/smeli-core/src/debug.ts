@@ -6,7 +6,7 @@ export interface ResetCommand {
   code: string;
 }
 
-export interface PathCommand {
+export interface PatchCommand {
   type: "smeli:patch";
 
   offset: number;
@@ -37,7 +37,7 @@ export class DebugInterface {
     this.code = command.code;
   }
 
-  patch(command: PathCommand) {
+  patch(command: PatchCommand) {
     const statementIndex = this.findStatementFromOffset(command.offset);
 
     let reparseOffset = 0;
