@@ -103,8 +103,9 @@ class Preview extends vscode.Disposable {
       const textEditor = event.textEditor;
       const document = textEditor.document;
       if (document.languageId === "smeli") {
+        const filename = vscode.workspace.asRelativePath(document.uri, false);
         this.requestStep(
-          document.fileName,
+          filename,
           document.offsetAt(textEditor.selection.active)
         );
       }
@@ -118,8 +119,9 @@ class Preview extends vscode.Disposable {
     if (textEditor) {
       const document = textEditor.document;
       if (document.languageId === "smeli") {
+        const filename = vscode.workspace.asRelativePath(document.uri, false);
         const offset = document.offsetAt(textEditor.selection.active);
-        this.requestStep(document.fileName, offset);
+        this.requestStep(filename, offset);
       }
     }
   }
@@ -253,8 +255,8 @@ class Preview extends vscode.Disposable {
           }
 
           // simple diff to keep current program state in memory
-          const previousCode: string = this.lastCompileResult.compiledCode;
-          const newCode: string = result.compiledCode;
+          const previousCode = this.lastCompileResult.compiledCode;
+          const newCode = result.compiledCode;
           const minLength = Math.min(previousCode.length, newCode.length);
           let firstDifference = 0;
           for (let i = 0; i < minLength; i++) {
@@ -302,13 +304,25 @@ class Preview extends vscode.Disposable {
   executeStep() {
     this.needsStep = false;
 
-    // use source map to find the right output position
+    if (this.lastCompileResult === null) {
+      return;
+    }
 
-    const message = {
-      type: "smeli:step",
-      targetOffset: this.targetOffset,
-    };
-    this.panel.webview.postMessage(message);
+    // use source map to find the right output position
+    const sourceMap = this.lastCompileResult.sourceMap;
+    for (const range of sourceMap) {
+      if (this.targetFilename === range.sourceFile) {
+        const relativeOffset = this.targetOffset - range.sourceOffset;
+        if (relativeOffset >= 0 && relativeOffset < range.length) {
+          const message = {
+            type: "smeli:step",
+            targetOffset: range.start + relativeOffset,
+          };
+          this.panel.webview.postMessage(message);
+          break;
+        }
+      }
+    }
   }
 }
 
