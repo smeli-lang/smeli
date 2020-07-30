@@ -6,7 +6,7 @@ const run = () => {
 
   const templateOptions = {
     rootFile: path.resolve("index.smeli"),
-    outputPath: path.resolve("dist")
+    outputPath: path.resolve("dist"),
   };
 
   const webpackConfig = template(templateOptions);
@@ -18,6 +18,7 @@ const run = () => {
       console.log("failed!");
       console.log(err);
       console.log(stats);
+      process.exit(1);
     } else {
       console.log("output written to", templateOptions.outputPath);
     }

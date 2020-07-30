@@ -22,7 +22,8 @@
   ],
   "activationEvents": [
     "onLanguage:smeli",
-    "onCommand:smeli.openPreview"
+    "onCommand:smeli.openPreview",
+    "onWebviewPanel:smeli"
   ],
   "contributes": {
     "languages": [
@@ -52,5 +53,8 @@
         "category": "Smeli"
       }
     ]
+  },
+  "dependencies": {
+    "@smeli/compiler": "0.0.1"
   }
 }
