@@ -90,13 +90,7 @@ class Preview extends vscode.Disposable {
 
     this.cursorEvent = vscode.window.onDidChangeTextEditorSelection((event) => {
       const textEditor = event.textEditor;
-      const document = textEditor.document;
-      if (document.languageId === "smeli") {
-        const filename = vscode.workspace.asRelativePath(document.uri, false);
-        const cursor = textEditor.selection.active;
-        let offset = document.offsetAt(cursor);
-        this.requestStep(filename, offset);
-      }
+      this.requestStep(textEditor);
     });
 
     // kick off the build process
@@ -105,13 +99,7 @@ class Preview extends vscode.Disposable {
     // step where the cursor is, if the current editor is a smeli file
     const textEditor = vscode.window.activeTextEditor;
     if (textEditor) {
-      const document = textEditor.document;
-      if (document.languageId === "smeli") {
-        const filename = vscode.workspace.asRelativePath(document.uri, false);
-        const cursor = textEditor.selection.active;
-        const offset = document.offsetAt(cursor);
-        this.requestStep(filename, offset);
-      }
+      this.requestStep(textEditor);
     }
   }
 
@@ -283,7 +271,25 @@ class Preview extends vscode.Disposable {
       });
   }
 
-  requestStep(filename: string, offset: number) {
+  requestStep(textEditor: vscode.TextEditor) {
+    const document = textEditor.document;
+    if (document.languageId !== "smeli") {
+      return;
+    }
+
+    const filename = vscode.workspace.asRelativePath(document.uri, false);
+    const cursor = textEditor.selection.active;
+    let offset = document.offsetAt(cursor);
+
+    // the last position in a document is not part of the source range,
+    // move it back one character
+    const documentEnd = document.validatePosition(
+      new vscode.Position(document.lineCount + 1, 0)
+    );
+    if (cursor.isEqual(documentEnd)) {
+      offset -= 1;
+    }
+
     this.targetFilename = filename;
     this.targetOffset = offset;
     this.needsStep = true;
