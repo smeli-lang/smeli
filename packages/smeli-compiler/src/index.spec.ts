@@ -313,3 +313,41 @@ test("source map: recursive inline", async () => {
     ],
   });
 });
+
+test("source map: counts all types of newlines", async () => {
+  const code: { [key: string]: string } = {
+    "index.smeli": 'aaa\r\n@plugin("hello")\nbbb\r@inline("lib")',
+    "lib.smeli": "\nlib_stuff\r\nfff",
+  };
+
+  const result = await compile({
+    resolveChunk: async (filename) => code[filename],
+  });
+
+  const expectedOutput = "aaa\r\n\nbbb\r\nlib_stuff\r\nfff";
+
+  expect(result).toEqual({
+    plugins: ["hello"],
+    compiledCode: expectedOutput,
+    sourceMap: [
+      {
+        start: 0,
+        length: 5,
+        sourceFile: "index.smeli",
+        sourceOffset: 0,
+      },
+      {
+        start: 5,
+        length: 5,
+        sourceFile: "index.smeli",
+        sourceOffset: 21,
+      },
+      {
+        start: 10,
+        length: 15,
+        sourceFile: "lib.smeli",
+        sourceOffset: 0,
+      },
+    ],
+  });
+});
