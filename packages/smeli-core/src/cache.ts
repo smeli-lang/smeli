@@ -148,10 +148,17 @@ export class CacheEntry {
     }
 
     evaluationStack.push(this);
-    const value = this.computeValue();
-    evaluationStack.pop();
 
-    return value;
+    try {
+      const value = this.computeValue();
+      return value;
+    } catch (error) {
+      error.smeliStack = error.smeliStack || [];
+      error.smeliStack.push(this.binding.name);
+      throw error;
+    } finally {
+      evaluationStack.pop();
+    }
   }
 
   ast(): any {
@@ -205,31 +212,33 @@ export class CacheEntry {
     //console.log("start eval: " + this.binding.name);
 
     while (!this.value) {
-      //console.log("stage #" + this.currentStage);
-      const result = this.stages[this.currentStage].evaluate(this.scope);
+      try {
+        //console.log("stage #" + this.currentStage);
+        const result = this.stages[this.currentStage].evaluate(this.scope);
 
-      // clear out any owned transient values
-      for (let transientValue of CacheEntry.transients) {
-        CacheEntry.valueOwner.delete(transientValue);
-        if (transientValue.dispose) {
-          transientValue.dispose();
+        if (typeof result === "function") {
+          // move to the next evaluation stage
+          this.stages.push({
+            dependencies: new Set<CacheEntry>(),
+            evaluate: result,
+          });
+          this.currentStage++;
+        } else {
+          // this value might be owned by another entry
+          if (!CacheEntry.valueOwner.has(result)) {
+            CacheEntry.valueOwner.set(result, this);
+          }
+          this.value = result;
         }
-      }
-      CacheEntry.transients.length = 0;
-
-      if (typeof result === "function") {
-        // move to the next evaluation stage
-        this.stages.push({
-          dependencies: new Set<CacheEntry>(),
-          evaluate: result,
-        });
-        this.currentStage++;
-      } else {
-        // this value might be owned by another entry
-        if (!CacheEntry.valueOwner.has(result)) {
-          CacheEntry.valueOwner.set(result, this);
+      } finally {
+        // clear out any owned transient values
+        for (let transientValue of CacheEntry.transients) {
+          CacheEntry.valueOwner.delete(transientValue);
+          if (transientValue.dispose) {
+            transientValue.dispose();
+          }
         }
-        this.value = result;
+        CacheEntry.transients.length = 0;
       }
     }
 

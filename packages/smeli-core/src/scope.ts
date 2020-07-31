@@ -1,5 +1,5 @@
 import { CacheEntry } from "./cache";
-import { TypedConstructor, TypedValue } from "./types/value";
+import { TypedValue } from "./types/value";
 
 export type Evaluator = (scope: Scope) => TypedValue | Evaluator;
 

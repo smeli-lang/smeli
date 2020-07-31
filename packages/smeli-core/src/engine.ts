@@ -130,13 +130,23 @@ export class Engine {
     // things referenced from the cache root will not be garbage collected
     CacheEntry.pushRoot(this.cacheRoot);
 
-    // evaluate all the side effects
-    CacheEntry.evaluateRoot();
+    try {
+      // evaluate all the side effects
+      CacheEntry.evaluateRoot();
+    } catch (error) {
+      throw new Error(
+        error.message +
+          "\n" +
+          error.smeliStack
+            .map((bindingName: string) => "from: " + bindingName)
+            .join("\n")
+      );
+    } finally {
+      // dispose of all unreferenced cached values
+      CacheEntry.gc();
 
-    // dispose of all unreferenced cached values
-    CacheEntry.gc();
-
-    // reset to initial state
-    CacheEntry.popRoot();
+      // reset to initial state
+      CacheEntry.popRoot();
+    }
   }
 }
