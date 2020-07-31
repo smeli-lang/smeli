@@ -150,6 +150,7 @@ class Preview extends vscode.Disposable {
     this.isTaskRunning = true;
     this.needsBuild = false;
     this.buildSucceeded = false;
+    this.lastCompileResult = null;
 
     const webview = this.panel.webview;
     webview.html = "<p>Building " + this.workspaceFolder.name + "...</p>";
