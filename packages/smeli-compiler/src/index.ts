@@ -1,5 +1,3 @@
-import { assert } from "console";
-
 const compilerDirectiveRegex = /@([A-Za-z_][A-Za-z0-9_]*)\("([^"]*)"\)/g;
 
 export type SourceRange = {
@@ -77,7 +75,7 @@ async function compileChunk(
   // because replace doesn't support async callbacks, so we
   // need two passes
   const matches: [string, string][] = [];
-  chunk.compiledCode = code.replace(
+  code.replace(
     compilerDirectiveRegex,
     (match: string, name: string, parameter: string, offset: number) => {
       matches.push([name, parameter]);
