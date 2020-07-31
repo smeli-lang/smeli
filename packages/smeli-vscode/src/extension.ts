@@ -86,17 +86,6 @@ class Preview extends vscode.Disposable {
         // reposition cursor position after patching
         this.needsStep = true;
       }
-      /*if (event.document === this.document) {
-        event.contentChanges.forEach((change) => {
-          const message = {
-            type: "smeli:edit",
-            rangeOffset: change.rangeOffset,
-            rangeLength: change.rangeLength,
-            text: change.text,
-          };
-          webview.postMessage(message);
-        });
-      }*/
     });
 
     this.cursorEvent = vscode.window.onDidChangeTextEditorSelection((event) => {
@@ -104,10 +93,9 @@ class Preview extends vscode.Disposable {
       const document = textEditor.document;
       if (document.languageId === "smeli") {
         const filename = vscode.workspace.asRelativePath(document.uri, false);
-        this.requestStep(
-          filename,
-          document.offsetAt(textEditor.selection.active)
-        );
+        const cursor = textEditor.selection.active;
+        let offset = document.offsetAt(cursor);
+        this.requestStep(filename, offset);
       }
     });
 
@@ -120,7 +108,8 @@ class Preview extends vscode.Disposable {
       const document = textEditor.document;
       if (document.languageId === "smeli") {
         const filename = vscode.workspace.asRelativePath(document.uri, false);
-        const offset = document.offsetAt(textEditor.selection.active);
+        const cursor = textEditor.selection.active;
+        const offset = document.offsetAt(cursor);
         this.requestStep(filename, offset);
       }
     }
