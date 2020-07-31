@@ -1,8 +1,35 @@
 import { smeli, DebugInterface } from "@smeli/core";
 import makeSmeliConfig from "__root_smeli_file_alias__";
 
+import "./index.css";
+
+function makeRootDiv(id) {
+  const div = document.createElement("div");
+  document.body.appendChild(div);
+  div.id = id;
+
+  return div;
+}
+
+function showErrors(errors, text) {
+  errors.innerHTML = "<h3>Error</h3><pre>" + text + "</pre>";
+  errors.classList.add("visible");
+}
+
+function hideErrors(errors) {
+  errors.classList.remove("visible");
+}
+
 window.onload = () => {
-  const config = makeSmeliConfig();
+  const content = makeRootDiv("content");
+  const errors = makeRootDiv("errors");
+
+  const config = makeSmeliConfig({
+    "@smeli/plugin-ui": {
+      container: content,
+    },
+  });
+
   const engine = smeli(config);
   const debug = new DebugInterface(engine, config.code);
 
@@ -46,11 +73,13 @@ window.onload = () => {
     // check for compile errors
     // (this should probably be moved somewhere else)
     if (engine.messages.length > 0) {
-      document.body.innerHTML = engine.messages
+      const text = engine.messages
         .map(
           (message) => `${message.line}:${message.column}: ${message.message}`
         )
-        .join("<br />");
+        .join("\n");
+
+      showErrors(errors, text);
 
       requestAnimationFrame(update);
       return;
@@ -58,8 +87,9 @@ window.onload = () => {
 
     try {
       engine.update();
+      hideErrors(errors);
     } catch (e) {
-      document.body.innerHTML = "<pre>" + e.message + "</pre>";
+      showErrors(errors, e.message);
     }
 
     requestAnimationFrame(update);

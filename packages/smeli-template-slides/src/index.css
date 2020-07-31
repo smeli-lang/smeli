@@ -1,0 +1,32 @@
+#content {
+  margin: 0;
+  padding: 0;
+}
+
+#errors {
+  pointer-events: none;
+  background-color: #a11e;
+  position: absolute;
+  margin: 0;
+  padding: 0 32px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  opacity: 0;
+  transition: opacity 0.2s;
+
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+}
+
+#errors.visible {
+  pointer-events: all;
+  opacity: 1;
+}
+
+#errors h3 {
+  color: rgba(255, 255, 255, 0.87);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.38);
+}
