@@ -7,6 +7,7 @@ import {
   parseIdentifier,
   parseComment,
   parseStatement,
+  parseStatementList,
 } from "./parser";
 import { NumberValue, StringValue } from "./types";
 
@@ -450,4 +451,14 @@ test("parseStatement: single line", () => {
   const statement = parseStatement(state);
   expect(statement).not.toBeNull();
   expect(state.n).toBe(state.str.length);
+});
+
+test("parseStatement: multiple statements", () => {
+  const state = new ParserState("\r\na: 12 + 15\nb: a + 2");
+  const statements = parseStatementList(state);
+  expect(statements.length).toEqual(2);
+  expect(statements[0].line).toEqual(1);
+  expect(statements[0].startOffset).toEqual(2);
+  expect(statements[1].line).toEqual(2);
+  expect(statements[1].startOffset).toEqual(13);
 });
