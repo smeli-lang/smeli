@@ -1,5 +1,19 @@
 import { compile } from "./index";
 
+test("sanity: new lines stay untouched", async () => {
+  const manyLineEndings = "a\nb\r\nc\rd";
+  const code: { [key: string]: string } = {
+    "index.smeli": manyLineEndings,
+  };
+
+  const result = await compile({
+    resolveChunk: async (filename) => code[filename],
+  });
+
+  expect(result.compiledCode).toEqual(manyLineEndings);
+  expect(result.compiledCode.length).toEqual(8);
+});
+
 test("plugin directive: simple case", async () => {
   const code: { [key: string]: string } = {
     "index.smeli": `
