@@ -1,7 +1,19 @@
 import { compile } from "./index";
 
+// Important note: line endings are normalized to <LF> in
+// template string literals, regardless of the source file
+// EOL encoding.
+//
+// Spec: https://tc39.es/ecma262/#sec-static-semantics-tv-and-trv
+// (particularly the note at the bottom of that section)
+//
+// Thus, you may see a difference of one character per line
+// in all offsets if your current editor counts both <CR> and <LF>.
+
 test("sanity: new lines stay untouched", async () => {
+  // not a template literal, these EOL should be counted exactly
   const manyLineEndings = "a\nb\r\nc\rd";
+
   const code: { [key: string]: string } = {
     "index.smeli": manyLineEndings,
   };
