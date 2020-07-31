@@ -30,7 +30,11 @@ module.exports = async function smeliLoader(source) {
       )}];
 
       return {
-        code: \`${result.compiledCode}\`,
+        code: "${result.compiledCode.replace(
+          /\\|\n|\r|"/g,
+          (match) =>
+            ({ "\\": "\\\\", "\n": "\\n", "\r": "\\r", '"': '\\"' }[match])
+        )}",
         plugins,
       };
 		};
