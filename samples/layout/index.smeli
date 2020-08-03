@@ -6,7 +6,7 @@
 elevation_slider: ui.slider {
   min: 1
   max: 16
-  value: 2
+  value: 4
 }
 
 demo: ui.surface {
@@ -69,7 +69,6 @@ demo: ui.surface {
 ui: ui {
   page: page {
     item0: item0 {
-      color: "primary"
       elevation: 0
       fade: true
     }
@@ -83,9 +82,23 @@ demo: ui.surface {
   item0: ui.surface {}
   item1: ui.surface {
     color: "background"
-    item0: ui.surface {}
-    item1: ui.surface {
+    item0: ui.surface {
       color: "primary"
+    }
+    item1: ui.surface {
+      direction: "column"
+      item0: ui.surface {
+        color: "background"
+      }
+      item1: ui.surface {
+        color: "secondary"
+      }
+      item2: ui.surface {
+        color: "background"
+      }
+      item3: ui.surface {
+        color: "secondary"
+      }
     }
   }
 }

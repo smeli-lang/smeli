@@ -74,7 +74,7 @@ export const surface = {
           if (elevation.value !== 0) {
             // clamp height to reasonable limits
             const height = Math.min(Math.max(elevation.value, -16), 16);
-            node.style.boxShadow = `${height < 0 ? "inset" : ""} 0px 4px ${
+            node.style.boxShadow = `${height < 0 ? "inset" : ""} 0px 2px ${
               Math.abs(height) + 4
             }px #0004`;
             node.classList.add("elevated");
