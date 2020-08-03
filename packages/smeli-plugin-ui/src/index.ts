@@ -4,6 +4,7 @@ import { DomNode } from "./types";
 import { layout } from "./layout";
 import { plot } from "./plot";
 import { outline } from "./outline";
+import { surface } from "./surface";
 import { slider } from "./slider";
 import { styles, evaluateUiStyles } from "./styles";
 
@@ -61,10 +62,13 @@ export const loadPlugin = ({
           };
         },
       },
+
       layout,
       outline,
       plot,
+      surface,
       slider,
+
       styles,
     ],
   };

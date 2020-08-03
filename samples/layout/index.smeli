@@ -1,0 +1,91 @@
+@plugin("@smeli/plugin-ui")
+
+# Layout demo
+### Move the slider!
+
+elevation_slider: ui.slider {
+  min: 1
+  max: 16
+  value: 2
+}
+
+demo: ui.surface {
+  direction: "column"
+  item0: ui.surface {
+    color: "primary"
+    elevation: elevation_slider.value
+  }
+  item1: ui.surface {
+    elevation: 0 - elevation_slider.value
+    color: "secondary"
+  }
+  item2: ui.surface {
+    elevation: elevation_slider.value
+    item0: ui.outline {}
+  }
+}
+
+ui: ui {
+  page: ui.surface {
+    direction: "row"
+    responsive: true
+    item0: ui.surface {
+      direction: "column"
+      elevation: 16
+      item0: ui.outline {}
+      item1: elevation_slider
+    }
+    item1: demo
+  }
+}
+
+##> Fading panels
+demo: ui.surface {
+  direction: "column"
+  
+  item0: ui.surface {
+    color: "primary"
+    elevation: 0 - elevation_slider.value
+    fade: true
+  }
+  item1: ui.surface {
+    color: "secondary"
+    elevation: elevation_slider.value
+    fade: true
+  }
+  item2: ui.surface {
+    color: "background"
+    elevation: 0 - elevation_slider.value
+    fade: true
+  }
+  item3: ui.surface {
+    color: "secondary"
+    elevation: elevation_slider.value
+    fade: true
+  }
+}
+
+##> Flat style
+ui: ui {
+  page: page {
+    item0: item0 {
+      color: "primary"
+      elevation: 0
+      fade: true
+    }
+  }
+}
+
+demo: ui.surface {
+  direction: "column"
+  color: "secondary"
+  fade: true
+  item0: ui.surface {}
+  item1: ui.surface {
+    color: "background"
+    item0: ui.surface {}
+    item1: ui.surface {
+      color: "primary"
+    }
+  }
+}
