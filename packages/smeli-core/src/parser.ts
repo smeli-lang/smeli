@@ -11,6 +11,7 @@ import {
   LambdaExpression,
 } from "./ast";
 import { NumberValue, StringValue } from "./types";
+import { BoolValue } from "./types/bool";
 
 // grammar
 // program ::= block EOF
@@ -26,6 +27,7 @@ const LINE_END = /(\r\n|\r|\n)/y;
 const WHITESPACE = /[ \t]*/y;
 const NUMBER = /-?(([1-9]+[0-9]*)|([0-9]*\.[0-9]+)|(0b[01]+)|(0o[0-7]+)|(0x[0-9a-fA-F]+)|0)\b/y;
 const STRING = /"[^"]*"/y;
+const BOOL = /(true|false)\b/y;
 const NAME = /[_a-zA-Z&][_0-9a-zA-Z]*\b/y;
 const COMMENT_PREFIX = /#{1,6}>?/y;
 const TEXT_LINE = /[^\r\n]*/y;
@@ -175,6 +177,18 @@ export function parseStringLiteral(state: ParserState) {
   return new Literal(new StringValue(value));
 }
 
+export function parseBoolLiteral(state: ParserState) {
+  const boolValue = state.match(BOOL);
+
+  if (boolValue === "true") {
+    return new Literal(new BoolValue(true));
+  } else if (boolValue === "false") {
+    return new Literal(new BoolValue(false));
+  }
+
+  return null;
+}
+
 export function parseIdentifier(state: ParserState) {
   const names: string[] = [];
 
@@ -289,6 +303,7 @@ export function parseAtom(state: ParserState) {
   return (
     parseNumberLiteral(state) ||
     parseStringLiteral(state) ||
+    parseBoolLiteral(state) ||
     parseScopeExpression(state, null)
   );
 }

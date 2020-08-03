@@ -4,12 +4,13 @@ import {
   parseEndOfLine,
   parseNumberLiteral,
   parseStringLiteral,
+  parseBoolLiteral,
   parseIdentifier,
   parseComment,
   parseStatement,
   parseStatementList,
 } from "./parser";
-import { NumberValue, StringValue } from "./types";
+import { BoolValue, NumberValue, StringValue } from "./types";
 
 /**
  * Parser state
@@ -318,6 +319,39 @@ test("parseStringLiteral: stops at quote boundary", () => {
 test("parseStringLiteral: invalid (non-terminated)", () => {
   const state = new ParserState(`"hello`);
   const literal = parseStringLiteral(state);
+  expect(literal).toBeNull();
+  expect(state.n).toBe(0);
+});
+
+/**
+ * Bool literal
+ */
+test("parseBoolLiteral: true", () => {
+  const state = new ParserState("true");
+  const literal = parseBoolLiteral(state);
+  expect(literal).not.toBeNull();
+  expect(literal!.value).toEqual(new BoolValue(true));
+  expect(state.n).toBe(4);
+});
+
+test("parseBoolLiteral: false", () => {
+  const state = new ParserState("false");
+  const literal = parseBoolLiteral(state);
+  expect(literal).not.toBeNull();
+  expect(literal!.value).toEqual(new BoolValue(false));
+  expect(state.n).toBe(5);
+});
+
+test("parseBoolLiteral: invalid (truncated)", () => {
+  const state = new ParserState("tru");
+  const literal = parseBoolLiteral(state);
+  expect(literal).toBeNull();
+  expect(state.n).toBe(0);
+});
+
+test("parseBoolLiteral: invalid (extended)", () => {
+  const state = new ParserState("trueeee");
+  const literal = parseBoolLiteral(state);
   expect(literal).toBeNull();
   expect(state.n).toBe(0);
 });

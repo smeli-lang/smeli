@@ -1,4 +1,6 @@
 export { TypedConstructor, TypedValue } from "./value";
+
+export { BoolValue } from "./bool";
 export { ExpressionValue } from "./expression";
 export { Lambda } from "./lambda";
 export { NativeFunction } from "./nativefunction";
