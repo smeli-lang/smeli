@@ -4,6 +4,7 @@ import {
   StringValue,
   TypedValue,
   Vec2,
+  Vec3,
 } from "./types";
 import { Binding, Scope } from "./scope";
 
@@ -64,6 +65,19 @@ const vec2: Binding = {
     ),
 };
 
+const vec3: Binding = {
+  name: "vec3",
+  evaluate: (parentScope: Scope) =>
+    new NativeFunction(
+      parentScope,
+      [NumberValue, NumberValue, NumberValue],
+      (x: NumberValue, y: NumberValue, z: NumberValue): Vec3 => {
+        const result = new Vec3(x.value, y.value, z.value);
+        return result;
+      }
+    ),
+};
+
 class Timer extends TypedValue {
   static typeName = "timer";
 
@@ -102,4 +116,4 @@ const time: Binding = {
   },
 };
 
-export const builtins: Binding[] = [min, max, outline, sin, time, vec2];
+export const builtins: Binding[] = [min, max, outline, sin, time, vec2, vec3];

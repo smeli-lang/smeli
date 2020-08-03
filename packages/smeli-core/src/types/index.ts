@@ -7,3 +7,4 @@ export { NativeFunction } from "./nativefunction";
 export { NumberValue } from "./number";
 export { StringValue } from "./string";
 export { Vec2 } from "./vec2";
+export { Vec3 } from "./vec3";
