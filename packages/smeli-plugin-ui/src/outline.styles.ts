@@ -1,8 +1,7 @@
 import { Theme } from "./theme";
 
 export const outlineStyles = (theme: Theme) => ({
-  "border-left": "64px solid",
-  "border-color": theme.colors.primary,
+  "text-align": "center",
   padding: "32px",
   flex: 1,
   overflow: "hidden",
