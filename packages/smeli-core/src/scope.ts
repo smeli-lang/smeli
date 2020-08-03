@@ -1,5 +1,5 @@
 import { CacheEntry } from "./cache";
-import { TypedValue } from "./types/value";
+import { TypedValue, TypedConstructor } from "./types/value";
 
 export type Evaluator = (scope: Scope) => TypedValue | Evaluator;
 
@@ -7,6 +7,14 @@ export type Binding = {
   name: string;
   evaluate: Evaluator;
   ast?: any;
+};
+
+type NestedBindings = {
+  [key: string]: NestedBindings | TypedConstructor<TypedValue> | null;
+};
+
+type NestedValues = {
+  [key: string]: NestedValues | TypedValue;
 };
 
 export class Scope extends TypedValue {
@@ -167,6 +175,26 @@ export class Scope extends TypedValue {
     }
 
     throw new Error(`No previous definition found for '${name}'`);
+  }
+
+  evaluateNested(nestedBindings: NestedBindings): NestedValues {
+    const result: NestedValues = {};
+
+    for (const [name, rhs] of Object.entries(nestedBindings)) {
+      if (rhs === null) {
+        // evaluate as anything
+        result[name] = this.evaluate(name);
+      } else if (rhs.typeName !== undefined) {
+        const constructor = rhs as TypedConstructor<TypedValue>;
+        result[name] = this.evaluate(name).as(constructor);
+      } else {
+        const childBindings = rhs as NestedBindings;
+        const childScope = this.evaluate(name).as(Scope);
+        result[name] = childScope.evaluateNested(childBindings);
+      }
+    }
+
+    return result;
   }
 
   lookup(name: string, scope: Scope): Binding | null {
