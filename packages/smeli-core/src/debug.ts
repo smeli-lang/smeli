@@ -61,6 +61,15 @@ export class DebugInterface {
 
     // parse new statements
     this.engine.push(this.code, reparseOffset, reparseLine);
+
+    // if new statements were added, reexecute the first one immediately
+    // (this gives a better UX when live editing a single statement,
+    // as it removes the flickering due to the step command possibly
+    // arriving after an engine update, showing the previous statement
+    // for one frame)
+    if (this.engine.statements.length >= statementIndex) {
+      this.engine.step(1);
+    }
   }
 
   step(command: StepCommand) {
