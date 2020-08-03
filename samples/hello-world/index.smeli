@@ -1,6 +1,10 @@
 @plugin("@smeli/plugin-ui")
 @plugin("@smeli/plugin-ace")
 
+ui: ui {
+  theme: default_themes.dark
+}
+
 # Hello, world!
 ##> function plot
 

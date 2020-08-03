@@ -37,15 +37,15 @@ export const layoutStyles = (theme: Theme) => ({
 
   // surface colors
   "&.surface-background": {
-    "background-color": theme.colors.background,
-    color: theme.colors.onBackground,
+    "background-color": theme.colors.background.toCssColor(),
+    color: theme.colors.on_background.toCssColor(),
   },
   "&.surface-primary": {
-    "background-color": theme.colors.primary,
-    color: theme.colors.onPrimary,
+    "background-color": theme.colors.primary.toCssColor(),
+    color: theme.colors.on_primary.toCssColor(),
   },
   "&.surface-secondary": {
-    "background-color": theme.colors.secondary,
-    color: theme.colors.onSecondary,
+    "background-color": theme.colors.secondary.toCssColor(),
+    color: theme.colors.on_secondary.toCssColor(),
   },
 });

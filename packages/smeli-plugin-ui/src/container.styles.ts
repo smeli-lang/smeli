@@ -1,8 +1,8 @@
 import { Theme } from "./theme";
 
 export const containerStyles = (theme: Theme) => ({
-  "background-color": theme.colors.background,
-  color: theme.colors.onBackground,
+  "background-color": theme.colors.background.toCssColor(),
+  color: theme.colors.on_background.toCssColor(),
   "font-family": "verdana",
   "font-size": "32px",
   margin: 0,
@@ -13,5 +13,5 @@ export const containerStyles = (theme: Theme) => ({
   top: 0,
   bottom: 0,
   display: "flex",
-  "flex-direction": "column"
+  "flex-direction": "column",
 });

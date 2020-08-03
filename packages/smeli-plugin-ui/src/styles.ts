@@ -1,6 +1,6 @@
-import { Scope, Binding } from "@smeli/core";
+import { Binding, Scope } from "@smeli/core";
 import { DomStyles } from "./types";
-import { defaultThemeLight } from "./theme";
+import { evaluateTheme } from "./theme";
 
 import { containerStyles } from "./container.styles";
 import { layoutStyles } from "./layout.styles";
@@ -13,8 +13,7 @@ import { textStyles } from "./text.styles";
 export const styles: Binding = {
   name: "#styles",
   evaluate: (scope: Scope) => {
-    // next step: evaluate theme from scope here
-    const theme = defaultThemeLight;
+    const theme = evaluateTheme(scope);
 
     return new DomStyles({
       container: containerStyles(theme),

@@ -1,4 +1,4 @@
-import { Scope } from "@smeli/core";
+import { NativeFunction, Scope, StringValue, Vec3 } from "@smeli/core";
 import { DomNode } from "./types";
 
 import { layout } from "./layout";
@@ -7,6 +7,7 @@ import { outline } from "./outline";
 import { surface } from "./surface";
 import { slider } from "./slider";
 import { styles, evaluateUiStyles } from "./styles";
+import { themeCode } from "./theme";
 
 // this is temporary, it will be replaced by theme evaluation
 // on the global scope
@@ -31,6 +32,42 @@ export const loadPlugin = ({
       {
         name: "page",
         evaluate: (scope: Scope) => scope.evaluate("outline"),
+      },
+      {
+        name: "color_from_hex",
+        evaluate: (parentScope: Scope) =>
+          new NativeFunction(
+            parentScope,
+            [StringValue],
+            (hexString: StringValue): Vec3 => {
+              let hex = hexString.value;
+
+              if (hex.length === 0) {
+                throw new Error("Invalid color: empty string");
+              }
+
+              if (hex[0] === "#") {
+                hex = hex.substr(1);
+              }
+
+              hex = hex.toLowerCase();
+              if (hex.length === 3) {
+                hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+              }
+
+              if (!hex.match(/[0-9a-f]{6}/)) {
+                throw new Error(
+                  "Invalid color: must be exactly 3 or 6 hex digits"
+                );
+              }
+
+              const r = parseInt(hex.substr(0, 2), 16) / 255.0;
+              const g = parseInt(hex.substr(2, 2), 16) / 255.0;
+              const b = parseInt(hex.substr(4, 2), 16) / 255.0;
+
+              return new Vec3(r, g, b);
+            }
+          ),
       },
       {
         name: "#update",
@@ -71,5 +108,9 @@ export const loadPlugin = ({
 
       styles,
     ],
+
+    code: `
+    ${themeCode}
+    `,
   };
 };

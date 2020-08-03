@@ -1,13 +1,12 @@
 import { Scope, Binding } from "@smeli/core";
-import { defaultThemeLight, DomStyles } from "@smeli/plugin-ui";
+import { evaluateTheme, DomStyles } from "@smeli/plugin-ui";
 
 import { editorStyles } from "./editor.styles";
 
 export const styles: Binding = {
   name: "#styles",
   evaluate: (scope: Scope) => {
-    // next step: evaluate theme from scope here
-    const theme = defaultThemeLight;
+    const theme = evaluateTheme(scope);
 
     return new DomStyles({
       editor: editorStyles(theme),

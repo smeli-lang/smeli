@@ -1,29 +1,72 @@
-export type Theme = {
-  colors: {
-    background: string;
-    primary: string;
-    secondary: string;
+import { BoolValue, Scope, Vec3 } from "@smeli/core";
 
-    onBackground: string;
-    onPrimary: string;
-    onSecondary: string;
+export type Theme = {
+  is_dark: BoolValue;
+
+  colors: {
+    background: Vec3;
+    primary: Vec3;
+    secondary: Vec3;
+
+    on_background: Vec3;
+    on_primary: Vec3;
+    on_secondary: Vec3;
   };
 };
 
-export const defaultThemeLight: Theme = {
-  colors: {
-    background: "#ffffff",
-    primary: "#c5e1a5",
-    secondary: "#80cbc4",
+export const themeCode = `
+  default_themes: {
+    light: {
+      is_dark: false
 
-    onBackground: "#000000",
-    onPrimary: "#000000",
-    onSecondary: "#000000"
-  }
-};
+      colors: {
+        background: color_from_hex("#ffffff")
+        primary: color_from_hex("#c5e1a5")
+        secondary: color_from_hex("#80cbc4")
 
-/*export const defaultThemeDark: Theme = {
-  colors: {
-    background: "#121212"
+        on_background: color_from_hex("#000000")
+        on_primary: color_from_hex("#000000")
+        on_secondary: color_from_hex("#000000")
+      }
+    }
+
+    dark: {
+      is_dark: true
+
+      colors: {
+        background: color_from_hex("#121212")
+        primary: color_from_hex("#deab54")
+        secondary: color_from_hex("#2497c8")
+
+        on_background: color_from_hex("#ffffff")
+        on_primary: color_from_hex("#ffffff")
+        on_secondary: color_from_hex("#ffffff")
+      }
+    }
   }
-};*/
+
+  theme: default_themes.light
+`;
+
+export function evaluateTheme(scope: Scope): Theme {
+  const globalScope = scope.root();
+  const uiScope = globalScope.evaluate("ui").as(Scope);
+  const theme = uiScope
+    .evaluate("theme")
+    .as(Scope)
+    .evaluateNested({
+      is_dark: BoolValue,
+
+      colors: {
+        background: Vec3,
+        primary: Vec3,
+        secondary: Vec3,
+
+        on_background: Vec3,
+        on_primary: Vec3,
+        on_secondary: Vec3,
+      },
+    });
+
+  return theme as Theme;
+}
