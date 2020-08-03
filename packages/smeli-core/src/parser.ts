@@ -284,6 +284,11 @@ export function parseFunctionCall(state: ParserState, identifier: Identifier) {
 }
 
 export function parseAtom(state: ParserState) {
+  const boolValue = parseBoolLiteral(state);
+  if (boolValue) {
+    return boolValue;
+  }
+
   const identifier = parseIdentifier(state);
   if (identifier) {
     parseWhitespace(state);
@@ -303,7 +308,6 @@ export function parseAtom(state: ParserState) {
   return (
     parseNumberLiteral(state) ||
     parseStringLiteral(state) ||
-    parseBoolLiteral(state) ||
     parseScopeExpression(state, null)
   );
 }
