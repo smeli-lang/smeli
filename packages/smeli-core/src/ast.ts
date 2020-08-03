@@ -218,6 +218,10 @@ export class Comment implements Statement {
     this.binding = {
       name: "#outline",
       evaluate: (scope: Scope) => {
+        if (headingLevel === 1 && this.text !== "") {
+          return new StringValue(html);
+        }
+
         const previous = scope.evaluate("#outline").as(StringValue);
         return new StringValue(previous.value + html);
       },
