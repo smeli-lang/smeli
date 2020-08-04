@@ -1,7 +1,6 @@
 import { NativeFunction, Scope, StringValue, Vec3 } from "@smeli/core";
 import { DomNode } from "./types";
 
-import { layout } from "./layout";
 import { plot } from "./plot";
 import { outline } from "./outline";
 import { surface } from "./surface";
@@ -100,7 +99,6 @@ export const loadPlugin = ({
         },
       },
 
-      layout,
       outline,
       plot,
       surface,

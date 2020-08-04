@@ -27,22 +27,22 @@ offset_slider: ui.slider {
   step: 0.1
 }
 
-thing: ui.layout {
+thing: ui.surface {
   direction: "column"
-  surface: "secondary"
+  color: "secondary"
   elevation: 2
   item0: tex_formula
   item1: magic_slider
 }
 
-plot_card: ui.layout {
+plot_card: ui.surface {
   direction: "column"
-  surface: "primary"
+  color: "primary"
   elevation: 2
   item0: thing
-  item1: ui.layout {
+  item1: ui.surface {
     direction: "column"
-    surface: "background"
+    color: "background"
     elevation: 2
     item0: ui.plot {
       function: x => f(x + offset_slider.value + time)
@@ -53,8 +53,10 @@ plot_card: ui.layout {
 }
 
 ui: ui {
-  page: layout {
-    direction: "responsive_row"
+  page: surface {
+    direction: "row"
+    responsive: true
+    fade: true
     item0: outline
     item1: plot_card
   }
@@ -87,11 +89,13 @@ editor: ace.editor {
 }
 
 ui: ui {
-  page: layout {
-    direction: "responsive_row"
+  page: surface {
+    direction: "row"
+    responsive: true
+    fade: true
     item0: editor
-    item1: ui.layout {
-      surface: "secondary"
+    item1: ui.surface {
+      color: "secondary"
       elevation: 2
       item0: make_formula_card(editor.code)
     }

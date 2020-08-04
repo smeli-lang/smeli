@@ -1,8 +1,8 @@
 @plugin("@smeli/plugin-katex")
 
-make_formula_card: tex_code => ui.layout {
+make_formula_card: tex_code => ui.surface {
   direction: "column"
-  surface: "background"
+  color: "background"
   elevation: 2
   item0: katex.formula {
     code: tex_code

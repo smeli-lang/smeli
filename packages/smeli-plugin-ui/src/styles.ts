@@ -3,7 +3,6 @@ import { DomStyles } from "./types";
 import { evaluateTheme } from "./theme";
 
 import { containerStyles } from "./container.styles";
-import { layoutStyles } from "./layout.styles";
 import { outlineStyles } from "./outline.styles";
 import { plotStyles } from "./plot.styles";
 import { sliderStyles } from "./slider.styles";
@@ -17,7 +16,6 @@ export const styles: Binding = {
 
     return new DomStyles({
       container: containerStyles(theme),
-      layout: layoutStyles(theme),
       outline: outlineStyles(theme),
       plot: plotStyles(theme),
       slider: sliderStyles(theme),
