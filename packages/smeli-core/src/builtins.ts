@@ -34,6 +34,25 @@ const max: Binding = {
     ),
 };
 
+const str: Binding = {
+  name: "str",
+  evaluate: (parentScope: Scope) =>
+    new NativeFunction(
+      parentScope,
+      // should be an "any" type here
+      [NumberValue],
+      (value: TypedValue): StringValue => {
+        if (!value.__str__) {
+          throw new Error(
+            `Type '${value.type().typeName}' doesn't have the __str__ trait`
+          );
+        }
+        const result = value.__str__();
+        return new StringValue(result);
+      }
+    ),
+};
+
 const outline: Binding = {
   name: "#outline",
   evaluate: () => new StringValue(""),
@@ -116,4 +135,13 @@ const time: Binding = {
   },
 };
 
-export const builtins: Binding[] = [min, max, outline, sin, time, vec2, vec3];
+export const builtins: Binding[] = [
+  min,
+  max,
+  outline,
+  sin,
+  str,
+  time,
+  vec2,
+  vec3,
+];
