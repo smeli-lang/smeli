@@ -277,3 +277,49 @@ test("multi-stage evaluation: caches intermediate stages", () => {
   expect(stage0).toBe(1);
   expect(stage1).toBe(2);
 });
+
+test("multi-stage evaluation: invalidates intermediate stages correctly", () => {
+  const scope = new Scope();
+  scope.push([
+    {
+      name: "a",
+      evaluate: () => new NumberValue(10),
+    },
+    {
+      name: "b",
+      evaluate: () => new NumberValue(20),
+    },
+    {
+      name: "x",
+      evaluate: (scope: Scope) => {
+        const a = scope.evaluate("a").as(NumberValue);
+
+        return (scope: Scope) => {
+          // artificially add a second dependency to 'a'
+          // from a later stage
+          scope.evaluate("a");
+
+          const b = scope.evaluate("b").as(NumberValue);
+
+          return new NumberValue(a.value + b.value);
+        };
+      },
+    },
+  ]);
+
+  expect(scope.evaluate("x")).toEqual(new NumberValue(30));
+
+  // update one of the dependencies (should invalidate only stage 1)
+  scope.push({
+    name: "b",
+    evaluate: () => new NumberValue(200),
+  });
+
+  // update the other one (should invalidate everything)
+  scope.push({
+    name: "a",
+    evaluate: () => new NumberValue(100),
+  });
+
+  expect(scope.evaluate("x")).toEqual(new NumberValue(300));
+});

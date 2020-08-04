@@ -135,11 +135,13 @@ export class CacheEntry {
   evaluate(): TypedValue {
     const evaluationStack = CacheEntry.evaluationStack;
 
-    // keep track of cache dependencies
+    // keep track of new cache dependencies
     if (evaluationStack.length > 0) {
       const entry = evaluationStack[evaluationStack.length - 1];
-      entry.stages[entry.currentStage].dependencies.add(this);
-      this.addReference(entry);
+      if (!this.references.has(entry)) {
+        entry.stages[entry.currentStage].dependencies.add(this);
+        this.addReference(entry);
+      }
     }
 
     // early out if already cached
@@ -164,11 +166,13 @@ export class CacheEntry {
   ast(): any {
     const evaluationStack = CacheEntry.evaluationStack;
 
-    // keep track of cache dependencies
+    // keep track of new cache dependencies
     if (evaluationStack.length > 0) {
       const entry = evaluationStack[evaluationStack.length - 1];
-      entry.stages[entry.currentStage].dependencies.add(this);
-      this.addReference(entry);
+      if (!this.references.has(entry)) {
+        entry.stages[entry.currentStage].dependencies.add(this);
+        this.addReference(entry);
+      }
     }
 
     if (!this.binding.ast) {
