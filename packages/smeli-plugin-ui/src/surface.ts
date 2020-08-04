@@ -162,6 +162,9 @@ export const surface = {
                 }
               }
             });
+            for (let i = itemNodes.length; i < currentChildren.length; i++) {
+              node.removeChild(currentChildren[i]);
+            }
 
             return result;
           };
