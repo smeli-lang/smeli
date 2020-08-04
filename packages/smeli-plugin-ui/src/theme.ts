@@ -39,8 +39,8 @@ export const themeCode = `
         secondary: color_from_hex("#2497c8")
 
         on_background: color_from_hex("#ffffff")
-        on_primary: color_from_hex("#ffffff")
-        on_secondary: color_from_hex("#ffffff")
+        on_primary: color_from_hex("#000000")
+        on_secondary: color_from_hex("#000000")
       }
     }
   }
