@@ -10,6 +10,13 @@ elevation_slider: ui.slider {
   label: "Elevation"
 }
 
+size_slider: ui.slider {
+  min: 0
+  max: 4
+  step: 0.1
+  label: "Size Variation"
+}
+
 demo: ui.surface {
   direction: "column"
   item0: ui.surface {
@@ -20,6 +27,7 @@ demo: ui.surface {
     }
   }
   item1: ui.surface {
+    flex: size_slider.value
     elevation: 0 - elevation_slider.value
     color: "secondary"
     item0: ui.textbox {
@@ -41,8 +49,10 @@ ui: ui {
       elevation: 16
       item0: ui.outline {}
       item1: ui.surface {
+        direction: "column"
         flex: 0
         item0: elevation_slider
+        item1: size_slider
       }
     }
     item1: demo
@@ -61,6 +71,7 @@ demo: ui.surface {
   direction: "column"
   
   item0: fading_panel {
+    flex: size_slider.value
     color: "primary"
     elevation: 0 - elevation_slider.value
   }
@@ -69,6 +80,7 @@ demo: ui.surface {
     elevation: elevation_slider.value
   }
   item2: fading_panel {
+    flex: 4 - size_slider.value
     color: "background"
     elevation: 0 - elevation_slider.value
   }
@@ -96,6 +108,7 @@ demo: ui.surface {
   item1: ui.surface {
     color: "background"
     item0: ui.surface {
+      flex: size_slider.value / 4 + 1 / 4
       color: "primary"
     }
     item1: ui.surface {
@@ -104,12 +117,15 @@ demo: ui.surface {
         color: "background"
       }
       item1: ui.surface {
+        flex: size_slider.value
         color: "secondary"
       }
       item2: ui.surface {
+        flex: 4 - size_slider.value
         color: "background"
       }
       item3: ui.surface {
+        flex: size_slider.value * 2
         color: "secondary"
       }
     }
@@ -136,6 +152,7 @@ demo: ui.surface {
   item0: ui.surface {
     direction: "column"
     item0: elevation_panel {
+      flex: size_slider.value
       color: "background"
       elevation: elevation_slider.value - 8
     }
@@ -144,6 +161,7 @@ demo: ui.surface {
       elevation: elevation_slider.value - 4
     }
     item2: elevation_panel {
+      flex: 4 - size_slider.value
       color: "background"
       elevation: elevation_slider.value
     }
