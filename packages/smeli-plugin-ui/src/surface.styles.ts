@@ -39,18 +39,4 @@ export const surfaceStyles = (theme: Theme) => ({
     margin: "16px",
     "border-radius": "16px",
   },
-
-  // surface colors
-  "&.color-background": {
-    "background-color": theme.colors.background.toCssColor(),
-    color: theme.colors.on_background.toCssColor(),
-  },
-  "&.color-primary": {
-    "background-color": theme.colors.primary.toCssColor(),
-    color: theme.colors.on_primary.toCssColor(),
-  },
-  "&.color-secondary": {
-    "background-color": theme.colors.secondary.toCssColor(),
-    color: theme.colors.on_secondary.toCssColor(),
-  },
 });

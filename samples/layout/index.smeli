@@ -6,7 +6,6 @@
 elevation_slider: ui.slider {
   min: 1
   max: 16
-  step: 0.1
   value: 4
 }
 
@@ -109,9 +108,9 @@ ui: ui {
   theme: default_themes.dark
 }
 
-### Elevation light
+###> Elevation light
 elevation_slider: elevation_slider {
-  value: 2
+  value: 1
 }
 
 demo: ui.surface {
@@ -120,20 +119,20 @@ demo: ui.surface {
   item0: ui.surface {
     direction: "column"
     item0: ui.surface {
-      elevation: elevation_slider.value / 8
-      fade: true
+      color: "background"
+      elevation: elevation_slider.value - 8
     }
     item1: ui.surface {
-      elevation: elevation_slider.value / 4
-      fade: true
+      color: "background"
+      elevation: elevation_slider.value - 4
     }
     item2: ui.surface {
-      elevation: elevation_slider.value / 2
-      fade: true
+      color: "background"
+      elevation: elevation_slider.value
     }
     item3: ui.surface {
-      elevation: elevation_slider.value
-      fade: true
+      color: "background"
+      elevation: elevation_slider.value + 4
     }
   }
 }
