@@ -7,6 +7,7 @@ elevation_slider: ui.slider {
   min: 1
   max: 16
   value: 4
+  label: "Elevation"
 }
 
 demo: ui.surface {
@@ -14,10 +15,16 @@ demo: ui.surface {
   item0: ui.surface {
     color: "primary"
     elevation: elevation_slider.value
+    item0: ui.textbox {
+      text: str(elevation)
+    }
   }
   item1: ui.surface {
     elevation: 0 - elevation_slider.value
     color: "secondary"
+    item0: ui.textbox {
+      text: str(elevation)
+    }
   }
   item2: ui.surface {
     elevation: elevation_slider.value
@@ -33,35 +40,41 @@ ui: ui {
       direction: "column"
       elevation: 16
       item0: ui.outline {}
-      item1: elevation_slider
+      item1: ui.surface {
+        flex: 0
+        item0: elevation_slider
+      }
     }
     item1: demo
   }
 }
 
 ##> Fading panels
+fading_panel: ui.surface {
+  fade: true
+  item0: ui.textbox {
+    text: str(elevation)
+  }
+}
+
 demo: ui.surface {
   direction: "column"
   
-  item0: ui.surface {
+  item0: fading_panel {
     color: "primary"
     elevation: 0 - elevation_slider.value
-    fade: true
   }
-  item1: ui.surface {
+  item1: fading_panel {
     color: "secondary"
     elevation: elevation_slider.value
-    fade: true
   }
-  item2: ui.surface {
+  item2: fading_panel {
     color: "background"
     elevation: 0 - elevation_slider.value
-    fade: true
   }
-  item3: ui.surface {
+  item3: fading_panel {
     color: "secondary"
     elevation: elevation_slider.value
-    fade: true
   }
 }
 
@@ -113,26 +126,30 @@ elevation_slider: elevation_slider {
   value: 1
 }
 
+elevation_panel: fading_panel {
+  fade: false
+}
+
 demo: ui.surface {
   direction: "column"
   fade: true
   item0: ui.surface {
     direction: "column"
-    item0: ui.surface {
+    item0: elevation_panel {
       color: "background"
       elevation: elevation_slider.value - 8
     }
-    item1: ui.surface {
+    item1: elevation_panel {
       color: "background"
       elevation: elevation_slider.value - 4
     }
-    item2: ui.surface {
+    item2: elevation_panel {
       color: "background"
       elevation: elevation_slider.value
     }
-    item3: ui.surface {
+    item3: elevation_panel {
       color: "background"
-      elevation: elevation_slider.value + 4
+      elevation: min(elevation_slider.value + 4, 16)
     }
   }
 }

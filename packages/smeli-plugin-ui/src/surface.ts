@@ -13,6 +13,10 @@ export const surface = {
         evaluate: () => new StringValue("row"),
       },
       {
+        name: "flex",
+        evaluate: () => new NumberValue(1),
+      },
+      {
         name: "responsive",
         evaluate: () => new BoolValue(false),
       },
@@ -58,6 +62,7 @@ export const surface = {
           const theme = evaluateTheme(scope);
           const styles = evaluateUiStyles(scope);
           const direction = scope.evaluate("direction").as(StringValue);
+          const flex = scope.evaluate("flex").as(NumberValue);
           const responsive = scope.evaluate("responsive").as(BoolValue);
           const fade = scope.evaluate("fade").as(BoolValue);
           const color = scope.evaluate("color");
@@ -67,6 +72,10 @@ export const surface = {
           node.className = `${styles.surface} direction-${direction.value} ${
             responsive.value ? "responsive" : ""
           } ${fade.value ? "fade" : ""}`;
+
+          if (flex.value !== 0) {
+            node.style.flex = flex.value.toString();
+          }
 
           if (fade.value) {
             requestAnimationFrame(() => {
@@ -125,6 +134,8 @@ export const surface = {
                 new Vec3(1.0, 1.0, 1.0).__mul__(new NumberValue(brightenFactor))
               ) as Vec3;
             }
+          } else {
+            node.classList.add("container");
           }
 
           if (backgroundColor !== null) {

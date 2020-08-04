@@ -2,7 +2,7 @@ import { Theme } from "./theme";
 
 export const surfaceStyles = (theme: Theme) => ({
   display: "flex",
-  flex: 1,
+  "box-sizing": "border-box",
   overflow: "hidden",
 
   "&.direction-row": {
@@ -13,19 +13,17 @@ export const surfaceStyles = (theme: Theme) => ({
     "justify-content": "space-evenly",
   },
 
-  "@media(orientation: landscape)": {
+  "@media(orientation: portrait)": {
     "&.direction-column.responsive": {
       "flex-direction": "row",
     },
-  },
-  "@media(orientation: portrait)": {
     "&.direction-row.responsive": {
       "flex-direction": "column",
       "justify-content": "space-evenly",
     },
   },
 
-  margin: "0px",
+  padding: "8px",
   "border-radius": "0px",
 
   // optional fade animation
@@ -36,7 +34,7 @@ export const surfaceStyles = (theme: Theme) => ({
 
   // elevated surfaces get round corners and a shadow
   "&.elevated": {
-    margin: "16px",
+    margin: "8px",
     "border-radius": "16px",
   },
 });

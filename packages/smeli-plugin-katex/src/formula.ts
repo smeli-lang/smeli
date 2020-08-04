@@ -1,7 +1,7 @@
 import katex from "katex";
 
 import { Scope, StringValue } from "@smeli/core";
-import { DomNode, evaluateUiStyles } from "@smeli/plugin-ui";
+import { DomNode } from "@smeli/plugin-ui";
 
 import { evaluateKatexStyles } from "./styles";
 
@@ -17,21 +17,21 @@ export const formula = {
       {
         name: "#ui:node",
         evaluate: (scope: Scope) => {
-          const uiStyles = evaluateUiStyles(scope);
           const katexStyles = evaluateKatexStyles(scope);
 
           const code = scope.evaluate("code").as(StringValue);
 
           const element = document.createElement("div");
-          element.className = katexStyles.formula + " " + uiStyles.text;
+          element.className = "widget " + katexStyles.formula;
 
           try {
             katex.render(code.value, element);
 
             const katexRoot = element.querySelector(".katex") as HTMLElement;
-            katexRoot.className += " important";
+            katexRoot.classList.add("important");
           } catch (error) {
             element.innerHTML = "<p>" + error.message + "</p>";
+            element.classList.add("normal");
           }
 
           return new DomNode(element);

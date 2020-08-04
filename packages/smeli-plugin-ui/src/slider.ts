@@ -1,4 +1,4 @@
-import { Binding, NumberValue, Scope } from "@smeli/core";
+import { Binding, NumberValue, Scope, StringValue } from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
 
@@ -7,6 +7,10 @@ export const slider = {
   evaluate: (parentScope: Scope) => {
     const scope = new Scope(parentScope);
     scope.push([
+      {
+        name: "label",
+        evaluate: () => new StringValue(""),
+      },
       {
         name: "min",
         evaluate: () => new NumberValue(0),
@@ -28,16 +32,23 @@ export const slider = {
         evaluate: (scope: Scope) => {
           const styles = evaluateUiStyles(scope);
 
+          const widget = document.createElement("div");
+          widget.className = "widget " + styles.slider;
+
           const slider = document.createElement("input");
+          widget.appendChild(slider);
           slider.type = "range";
-          slider.className = styles.slider;
+
+          const labelDiv = document.createElement("div");
+          widget.appendChild(labelDiv);
+          labelDiv.className = "label normal";
 
           let override: Binding | null = null;
           let overrideActive = false;
 
           const result = scope.evaluate(
             () =>
-              new DomNode(slider, {
+              new DomNode(widget, {
                 input: (event: Event) => {
                   if (override && overrideActive) {
                     scope.pop(override);
@@ -93,6 +104,10 @@ export const slider = {
             slider.max = max.value.toString();
             slider.step = step.value.toString();
             slider.value = value.value.toString();
+
+            const label = scope.evaluate("label").as(StringValue);
+            labelDiv.innerHTML = label.value;
+            labelDiv.style.display = label.value !== "" ? "block" : "none";
 
             return result;
           };

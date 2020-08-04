@@ -18,8 +18,9 @@ function redraw(
   pointX: number,
   pointY: number
 ) {
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
+  const container = canvas.parentElement as HTMLElement;
+  const width = container.clientWidth;
+  const height = container.clientHeight;
 
   // avoid dividing by zero later; also there's no point
   // drawing in this case
@@ -114,13 +115,17 @@ export const plot = {
       {
         name: "#ui:node",
         evaluate: (scope: Scope) => {
+          const styles = evaluateUiStyles(scope);
+
+          const container = document.createElement("div");
+          container.className = "container " + styles.plot;
+
           const canvas = document.createElement("canvas");
+          container.appendChild(canvas);
+
           const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-          const styles = evaluateUiStyles(scope);
-          canvas.className = styles.plot;
-
-          const result = scope.evaluate(() => new DomNode(canvas));
+          const result = scope.evaluate(() => new DomNode(container));
 
           // cache DOM element
           return (scope: Scope) => {

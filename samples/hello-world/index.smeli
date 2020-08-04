@@ -19,25 +19,30 @@ magic_slider: ui.slider {
   max: 1
   step: 0.01
   value: f(time)
+  label: str(value)
 }
 
 offset_slider: ui.slider {
   min: -4
   max: 4
   step: 0.1
+  label: "x-offset"
 }
 
 thing: ui.surface {
   direction: "column"
-  color: "secondary"
+  color: "primary"
   elevation: 2
   item0: tex_formula
-  item1: magic_slider
+  item1: ui.surface {
+    flex: 0
+    item0: magic_slider
+  }
 }
 
 plot_card: ui.surface {
   direction: "column"
-  color: "primary"
+  color: "secondary"
   elevation: 2
   item0: thing
   item1: ui.surface {
@@ -48,7 +53,10 @@ plot_card: ui.surface {
       function: x => f(x + offset_slider.value + time)
       point: vec2(0 - offset_slider.value * 1, magic_slider.value)
     }
-    item1: offset_slider
+    item1: ui.surface {
+      flex: 0
+      item0: offset_slider
+    }
   }
 }
 
@@ -76,8 +84,11 @@ thing: thing {
   item0: ui.slider {
     min: 5
     value: 100
+    label: "Top Slider"
   }
-  item1: item0 {}
+  item1: item0 {
+    label: "Bottom Slider"
+  }
 }
 
 f: x => sin(x * 100 / thing.item1.value)
@@ -90,13 +101,12 @@ editor: ace.editor {
 
 ui: ui {
   page: surface {
-    direction: "row"
+    direction: "column"
     responsive: true
     fade: true
     item0: editor
     item1: ui.surface {
       color: "secondary"
-      elevation: 2
       item0: make_formula_card(editor.code)
     }
   }

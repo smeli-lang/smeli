@@ -7,7 +7,7 @@ import { outlineStyles } from "./outline.styles";
 import { plotStyles } from "./plot.styles";
 import { sliderStyles } from "./slider.styles";
 import { surfaceStyles } from "./surface.styles";
-import { textStyles } from "./text.styles";
+import { textboxStyles } from "./textbox.styles";
 
 export const styles: Binding = {
   name: "#styles",
@@ -20,7 +20,7 @@ export const styles: Binding = {
       plot: plotStyles(theme),
       slider: sliderStyles(theme),
       surface: surfaceStyles(theme),
-      text: textStyles(theme),
+      textbox: textboxStyles(theme),
     });
   },
 };

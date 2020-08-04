@@ -1,24 +1,35 @@
 import { Theme } from "./theme";
 
-export const sliderStyles = (theme: Theme) => {
-  const overlayColor = theme.is_dark.value ? "#fff2" : "#0002";
+export const sliderStyles = (theme: Theme) => ({
+  display: "flex",
+  "flex-direction": "column",
+  "justify-content": "center",
+  "align-items": "center",
 
-  return {
+  "& input": {
+    display: "block",
+    "box-sizing": "border-box",
+    margin: 0,
+    padding: "2px",
+    width: "100%",
+    height: "32px",
+    "min-height": "32px",
+
+    // browsers override the css color for range inputs
+    color: "inherit",
+
     // background
     "-webkit-appearance": "none",
     "-moz-appearance": "none",
-    margin: "12px",
-    padding: "4px",
-    height: "32px",
     background: "transparent",
     "border-radius": "16px",
-    "border-color": theme.colors.primary.toCssColor(0),
+    "border-color": theme.colors.secondary.toCssColor(0),
     transition: "background .2s, border-color .2s",
 
     "&.override": {
-      background: overlayColor,
-      margin: "10px",
-      border: "2px solid " + theme.colors.primary.toCssColor(),
+      background: theme.colors.on_background.toCssColor(0.1),
+      border: "2px solid " + theme.colors.secondary.toCssColor(1),
+      padding: 0,
     },
 
     "&:focus": {
@@ -32,40 +43,53 @@ export const sliderStyles = (theme: Theme) => {
     // thumb (handle)
     "&::-webkit-slider-thumb": {
       "-webkit-appearance": "none",
-      "margin-top": "-14px",
 
       background: theme.colors.secondary.toCssColor(),
-      border: "1px solid " + overlayColor,
-      "box-shadow": "0px 4px 8px #0008",
+      "box-shadow": "0px 2px 2px #0004",
+      "box-sizing": "border-box",
       width: "32px",
       height: "32px",
+      "margin-top": "-15px",
       "border-radius": "16px",
+      border: "none",
     },
 
     "&::-moz-range-thumb": {
       background: theme.colors.secondary.toCssColor(),
-      border: "1px solid " + overlayColor,
-      "box-shadow": "0px 4px 8px #0008",
+      "box-shadow": "0px 0px 2px #0004",
+      "box-sizing": "border-box",
       width: "32px",
       height: "32px",
       "border-radius": "16px",
+      border: "none",
     },
 
     // track
     "&::-webkit-slider-runnable-track": {
-      background: theme.colors.background.toCssColor(),
-      height: "8px",
-      border: "1px solid " + overlayColor,
-      "box-shadow": "0px 4px 4px #0004",
-      "border-radius": "4px",
+      background: theme.colors.on_background.toCssColor(0.6),
+      height: "2px",
+      "box-shadow": "0px 2px 2px #0002",
+      "border-radius": "2px",
     },
 
     "&::-moz-range-track": {
-      background: theme.colors.background.toCssColor(),
-      height: "8px",
-      border: "1px solid " + overlayColor,
-      "box-shadow": "0px 4px 4px #0004",
-      "border-radius": "4px",
+      background: theme.colors.on_background.toCssColor(0.6),
+      height: "2px",
+      "box-shadow": "0px 2px 2px #0002",
+      "border-radius": "2px",
     },
-  };
-};
+  },
+
+  // label
+  "& .label": {
+    "font-size": "0.6em",
+    "margin-top": "8px",
+    overflow: "hidden",
+    height: "24px",
+    "line-height": "24px",
+  },
+
+  "& .override + .label": {
+    opacity: 0.87,
+  },
+});

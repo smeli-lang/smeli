@@ -12,7 +12,7 @@ export const outline = {
         const styles = evaluateUiStyles(scope);
 
         const node = document.createElement("div");
-        node.className = styles.outline + " " + styles.text;
+        node.className = "widget " + styles.outline;
 
         const result = scope.evaluate(() => new DomNode(node));
 

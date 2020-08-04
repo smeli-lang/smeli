@@ -1,0 +1,11 @@
+{
+  "name": "@smeli-samples/widgets",
+  "version": "0.0.1",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "smeli"
+  },
+  "devDependencies": {
+    "@smeli/cli": "0.0.1"
+  }
+}

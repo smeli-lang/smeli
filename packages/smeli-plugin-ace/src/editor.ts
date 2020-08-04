@@ -23,7 +23,7 @@ export const editor = {
           const aceStyles = evaluateAceStyles(scope);
 
           const element = document.createElement("pre");
-          element.className = aceStyles.editor;
+          element.className = "container " + aceStyles.editor;
 
           const editor = ace.edit(element, {
             theme: "ace/theme/monokai",

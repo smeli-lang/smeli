@@ -5,6 +5,8 @@ import { plot } from "./plot";
 import { outline } from "./outline";
 import { surface } from "./surface";
 import { slider } from "./slider";
+import { textbox } from "./textbox";
+
 import { styles, evaluateUiStyles } from "./styles";
 import { themeCode } from "./theme";
 
@@ -103,6 +105,7 @@ export const loadPlugin = ({
       plot,
       surface,
       slider,
+      textbox,
 
       styles,
     ],
