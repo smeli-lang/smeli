@@ -1,7 +1,6 @@
 @plugin("@smeli/plugin-ui")
 
 # Shader demo
-## Moar sliderz :D
 
 glsl: "
   precision highp float;
@@ -9,14 +8,16 @@ glsl: "
   uniform float time;
   uniform vec2 resolution;
 
+  uniform float quantize;
+
   varying vec2 uv;
 
   void main()
   {
-    float quantize = sin(time) * 0.5 + 0.5;
+    //float quantize = sin(time) * 0.5 + 0.5;
 
     float limit = max(resolution.x, resolution.y);
-    float step = mix(limit, 1.0, quantize);
+    float step = limit / quantize;
     vec2 uv2 = floor(uv * step) / step;
 
     vec3 color = vec3(uv2 * 0.5 + 0.5, sin(time) * 0.5 + 0.5);
@@ -26,8 +27,40 @@ glsl: "
   }
 "
 
+glsl2: "
+  precision highp float;
+  
+  uniform float time;
+  uniform vec2 resolution;
+
+  uniform float power;
+  uniform float speed;
+
+  varying vec2 uv;
+
+  vec2 rotate(vec2 pos, float angle)
+  {
+    float c = cos(angle);
+    float s = sin(angle);
+    return mat2(c, s, -s, c) * pos;
+  }
+
+  void main()
+  {
+    vec2 uv2 = uv * (10.0 + sin(time * 0.3));
+    uv2 = rotate(uv2, sin(time * 0.2));
+    uv2 = abs(uv2);
+    uv2 = pow(uv2, vec2(power));
+    float value = cos(uv2.x * uv2.x + time * 3.7 * speed) + cos(uv2.y * uv2.y + time * speed);
+    vec3 color = vec3(value) + vec3(uv * 0.2 + 0.2, 0.0) * 2.0;
+    float alpha = 1.0;
+
+    gl_FragColor = vec4(color, alpha);
+  }
+"
+
 shader_panel: ui.surface {
-  shader_code: ""
+  shader: ui.shader {}
   controls: ui.surface {
   }
 
@@ -35,32 +68,79 @@ shader_panel: ui.surface {
   color: "background"
   elevation: 2
   fade: true
-  item0: ui.shader {
-    code: shader_code
-  }
+  item0: shader
   item1: ui.surface {
     flex: 0
     item0: controls
   }
 }
 
+left_panel: shader_panel {
+  speed_slider: ui.slider {
+    label: "Speed"
+    min: 1
+    max: 10
+    step: 0.01
+    value: 1
+  }
+
+  power_slider: ui.slider {
+    label: "Power"
+    min: 0.2
+    max: 1
+    step: 0.01
+    value: 0.5 + sin(time) * 0.2
+  }
+
+  shader: shader {
+    code: glsl2
+    uniforms: uniforms {
+      power: power_slider.value
+      speed: speed_slider.value
+    }
+  }
+
+  controls: controls {
+    item0: speed_slider
+    item1: power_slider
+  }
+}
+
+right_panel: shader_panel {
+  quantize_slider: ui.slider {
+    label: "Quantize"
+    min: 1
+    max: 100
+    step: 1
+    value: 1
+  }
+
+  shader: shader {
+    code: glsl
+    uniforms: uniforms {
+      quantize: quantize_slider.value
+    }
+  }
+
+  controls: controls {
+    item0: quantize_slider
+  }
+}
+
 ui: ui {
   theme: default_themes.dark
   page: ui.surface {
-    direction: "row"
-    responsive: true
+    direction: "column"
     color: "primary"
-    item0: ui.outline {}
-    item1: shader_panel {
-      shader_code: glsl
-      controls: controls {
-        item0: ui.slider {
-          label: "Quantize"
-        }
-      }
-      uniforms: {
-        quantize: controls.item0.value
-      }
+    item0: ui.surface {
+      flex: 0
+      item0: ui.outline {}
+    }
+    item1: ui.surface {
+      direction: "row"
+      responsive: true
+      item0: left_panel
+      item1: right_panel
     }
   }
 }

@@ -5,6 +5,7 @@ import {
   TypedValue,
   Vec2,
   Vec3,
+  TypedConstructor,
 } from "@smeli/core";
 
 import { DomNode } from "./types";
@@ -43,6 +44,12 @@ class GLDrawContext extends TypedValue {
 
   program: WebGLProgram | null = null;
   vbo: WebGLBuffer | null = null;
+
+  uniformInfo: {
+    name: string;
+    location: WebGLUniformLocation;
+    type: TypedConstructor<TypedValue>;
+  }[] = [];
 
   disposed: boolean = false;
 
@@ -104,6 +111,34 @@ class GLDrawContext extends TypedValue {
     }
 
     this.gl.bindAttribLocation(this.program, 0, "position");
+
+    // extract uniform locations and types
+    const uniformCount = this.gl.getProgramParameter(
+      this.program,
+      this.gl.ACTIVE_UNIFORMS
+    );
+
+    const uniformTypes = new Map<GLenum, TypedConstructor<TypedValue>>();
+    uniformTypes.set(this.gl.FLOAT, NumberValue);
+    uniformTypes.set(this.gl.FLOAT_VEC2, Vec2);
+    uniformTypes.set(this.gl.FLOAT_VEC3, Vec3);
+
+    for (let i = 0; i < uniformCount; i++) {
+      const info = this.gl.getActiveUniform(this.program, i) as WebGLActiveInfo;
+
+      if (!uniformTypes.has(info.type)) {
+        throw new Error("Unsupported uniform type: " + info.type);
+      }
+
+      this.uniformInfo.push({
+        name: info.name,
+        location: this.gl.getUniformLocation(
+          this.program,
+          info.name
+        ) as WebGLUniformLocation,
+        type: uniformTypes.get(info.type) as TypedConstructor<TypedValue>,
+      });
+    }
   }
 
   loadGeometry(data: number[]) {
@@ -138,7 +173,11 @@ class GLDrawContext extends TypedValue {
 
 function redraw(
   context: GLDrawContext,
-  uniforms: { [key: string]: TypedValue }
+  uniforms: {
+    name: string;
+    location: WebGLUniformLocation;
+    value: TypedValue;
+  }[]
 ) {
   // this function is one frame late
   if (context.disposed) {
@@ -161,8 +200,6 @@ function redraw(
   canvas.width = width;
   canvas.height = height;
 
-  uniforms["resolution"] = new Vec2(width, height);
-
   gl.clearColor(0.0, 0.0, 0.0, 0.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -170,19 +207,18 @@ function redraw(
 
   gl.useProgram(context.program);
 
-  for (const [name, value] of Object.entries(uniforms)) {
-    const location = gl.getUniformLocation(
-      context.program as WebGLProgram,
-      name
-    );
-    if (location !== null) {
-      if (value.is(NumberValue)) {
-        gl.uniform1f(location, value.value);
-      } else if (value.is(Vec2)) {
-        gl.uniform2f(location, value.x, value.y);
-      } else if (value.is(Vec3)) {
-        gl.uniform3f(location, value.x, value.y, value.z);
-      }
+  for (const { name, location, value } of uniforms) {
+    if (name === "resolution") {
+      gl.uniform2f(location, width, height);
+      continue;
+    }
+
+    if (value.is(NumberValue)) {
+      gl.uniform1f(location, value.value);
+    } else if (value.is(Vec2)) {
+      gl.uniform2f(location, value.x, value.y);
+    } else if (value.is(Vec3)) {
+      gl.uniform3f(location, value.x, value.y, value.z);
     }
   }
 
@@ -203,8 +239,31 @@ export const shader = {
         evaluate: (scope: Scope) => new StringValue(defaultFragmentShaderCode),
       },
       {
+        name: "uniforms",
+        evaluate: (parentScope: Scope) => {
+          const scope = new Scope(parentScope);
+          scope.push({
+            name: "time",
+            evaluate: () => {
+              const currentTime = scope.root().evaluate("time").as(NumberValue);
+              const startTime = scope
+                .evaluate("#gl:start_time")
+                .as(NumberValue);
+
+              return currentTime.__sub__(startTime);
+            },
+          });
+
+          return scope;
+        },
+      },
+      {
         name: "#gl:context",
         evaluate: (scope: Scope) => new GLDrawContext(),
+      },
+      {
+        name: "#gl:start_time",
+        evaluate: (scope: Scope) => new NumberValue(Date.now() * 0.001),
       },
       {
         name: "#ui:node",
@@ -222,22 +281,32 @@ export const shader = {
           const quadVertices = [-1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0];
           context.loadGeometry(quadVertices);
 
-          const startTime = new NumberValue(Date.now() * 0.001);
-
           // cache DOM element and GL context
           return (scope: Scope) => {
             const code = scope.evaluate("code").as(StringValue);
             context.loadProgram(vertexShaderCode, code.value);
 
+            const uniformScope = scope.evaluate("uniforms").as(Scope);
+
             // cache compiled code
             return (scope: Scope) => {
-              const time = scope
-                .evaluate("time")
-                .as(NumberValue)
-                .__sub__(startTime);
+              const uniforms = context.uniformInfo.map((info) => {
+                // special case here, layout information is resolved
+                // later, when rendering (see redraw())
+                const value =
+                  info.name === "resolution"
+                    ? new Vec2(1.0, 1.0)
+                    : uniformScope.evaluate(info.name).as(info.type);
+
+                return {
+                  name: info.name,
+                  location: info.location,
+                  value,
+                };
+              });
 
               // redraw next frame (ensures correct layout, aspect ratio, etc.)
-              requestAnimationFrame(() => redraw(context, { time }));
+              requestAnimationFrame(() => redraw(context, uniforms));
 
               return result;
             };
