@@ -5,6 +5,7 @@ import { evaluateTheme } from "./theme";
 import { containerStyles } from "./container.styles";
 import { outlineStyles } from "./outline.styles";
 import { plotStyles } from "./plot.styles";
+import { shaderStyles } from "./shader.styles";
 import { sliderStyles } from "./slider.styles";
 import { surfaceStyles } from "./surface.styles";
 import { textboxStyles } from "./textbox.styles";
@@ -18,6 +19,7 @@ export const styles: Binding = {
       container: containerStyles(theme),
       outline: outlineStyles(theme),
       plot: plotStyles(theme),
+      shader: shaderStyles(theme),
       slider: sliderStyles(theme),
       surface: surfaceStyles(theme),
       textbox: textboxStyles(theme),
