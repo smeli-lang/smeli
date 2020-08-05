@@ -92,7 +92,7 @@ function redraw(
 
   uniforms["resolution"] = new Vec2(width, height);
 
-  gl.clearColor(1.0, 1.0, 0.0, 0.0);
+  gl.clearColor(0.0, 0.0, 0.0, 0.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   gl.viewport(0, 0, width, height);
@@ -141,7 +141,7 @@ export const shader = {
           container.appendChild(canvas);
 
           const gl = canvas.getContext("webgl", {
-            alpha: true,
+            premultipliedAlpha: false,
           }) as WebGLRenderingContext;
 
           const result = scope.evaluate(() => new DomNode(container));
@@ -157,9 +157,14 @@ export const shader = {
             gl.STATIC_DRAW
           );
 
+          const startTime = new NumberValue(Date.now() * 0.001);
+
           // cache DOM element
           return (scope: Scope) => {
-            const time = scope.evaluate("time");
+            const time = scope
+              .evaluate("time")
+              .as(NumberValue)
+              .__sub__(startTime);
 
             // redraw next frame (ensures correct layout, aspect ratio, etc.)
             requestAnimationFrame(() =>

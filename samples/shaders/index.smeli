@@ -1,30 +1,66 @@
 @plugin("@smeli/plugin-ui")
 
 # Shader demo
+## Moar sliderz :D
 
 glsl: "
-  precision mediump float;
+  precision highp float;
   
   uniform float time;
+  uniform vec2 resolution;
+
+  varying vec2 uv;
 
   void main()
   {
-    gl_FragColor = vec4(gl_FragCoord.xy / 500.0, sin(time), 1.0);
+    float quantize = sin(time) * 0.5 + 0.5;
+
+    float limit = max(resolution.x, resolution.y);
+    float step = mix(limit, 1.0, quantize);
+    vec2 uv2 = floor(uv * step) / step;
+
+    vec3 color = vec3(uv2 * 0.5 + 0.5, sin(time) * 0.5 + 0.5);
+    float alpha = float(abs(uv2.x - sin(uv2.y + time)) < 0.5);
+
+    gl_FragColor = vec4(color, alpha);
   }
 "
+
+shader_panel: ui.surface {
+  shader_code: ""
+  controls: ui.surface {
+  }
+
+  direction: "column"
+  color: "background"
+  elevation: 2
+  fade: true
+  item0: ui.shader {
+    code: shader_code
+  }
+  item1: ui.surface {
+    flex: 0
+    item0: controls
+  }
+}
 
 ui: ui {
   theme: default_themes.dark
   page: ui.surface {
     direction: "row"
     responsive: true
-    item0: ui.shader {
-      code: glsl
-    }
-    item1: ui.surface {
-      direction: "column"
-      elevation: 2
-      item0: ui.outline {}
+    color: "primary"
+    item0: ui.outline {}
+    item1: shader_panel {
+      shader_code: glsl
+      controls: controls {
+        item0: ui.slider {
+          label: "Quantize"
+        }
+      }
+      uniforms: {
+        quantize: controls.item0.value
+      }
     }
   }
 }
