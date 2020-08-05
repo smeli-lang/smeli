@@ -1,0 +1,29 @@
+precision highp float;
+
+uniform float time;
+uniform vec2 resolution;
+
+uniform float power;
+uniform float speed;
+
+varying vec2 uv;
+
+vec2 rotate(vec2 pos, float angle)
+{
+  float c = cos(angle);
+  float s = sin(angle);
+  return mat2(c, s, -s, c) * pos;
+}
+
+void main()
+{
+  vec2 uv2 = uv * (10.0 + sin(time * 0.3));
+  uv2 = rotate(uv2, sin(time * 0.2));
+  uv2 = abs(uv2);
+  uv2 = pow(uv2, vec2(power));
+  float value = cos(uv2.x * uv2.x + time * 3.7 * speed) + cos(uv2.y * uv2.y + time * speed);
+  vec3 color = vec3(value) + vec3(uv * 0.2 + 0.2, 0.0) * 2.0;
+  float alpha = 1.0;
+
+  gl_FragColor = vec4(color, alpha);
+}
