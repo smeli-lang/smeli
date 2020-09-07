@@ -87,3 +87,14 @@ ui: ui {
     }
   }
 }
+
+#>
+
+left_panel: shader_panel {
+  shader: shader {
+    code: "@inline("effect3.glsl")"
+    uniforms: uniforms {
+      primary: ui.theme.colors.secondary
+    }
+  }
+}
