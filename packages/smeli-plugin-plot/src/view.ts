@@ -75,11 +75,13 @@ export const view = {
             };
 
             // convert to xmin, ymin, xmax, ymax
+            const halfWidth = Math.abs(viewport.size.x) * 0.5;
+            const halfHeight = Math.abs(viewport.size.y) * 0.5;
             renderer.viewport = [
-              viewport.center.x - viewport.size.x * 0.5,
-              viewport.center.y - viewport.size.y * 0.5,
-              viewport.center.x + viewport.size.x * 0.5,
-              viewport.center.y + viewport.size.y * 0.5,
+              viewport.center.x - halfWidth,
+              viewport.center.y - halfHeight,
+              viewport.center.x + halfWidth,
+              viewport.center.y + halfHeight,
             ];
 
             // cache view parameters
