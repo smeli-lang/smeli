@@ -51,8 +51,23 @@ plot_card: ui.surface {
     color: "background"
     elevation: 2
     item0: plot.view {
-      function: x => f(x + offset_slider.value + time)
-      point: vec2(0 - offset_slider.value * 1, magic_slider.value)
+      viewport: {
+        center: vec2(0 - offset_slider.value * 1, 0)
+        size: vec2(9, 5)
+      }
+      item0: plot.grid {}
+      item1: plot.point {
+        position: vec2(0, magic_slider.value)
+        guides: true
+        label: "f(x + time)"
+      }
+      item2: plot.function {
+        function: x => f(x + time)
+      }
+      item3: plot.function {
+        function: sin
+        color: vec3(0.4, 1, 0.8)
+      }
     }
     item1: ui.surface {
       flex: 0
