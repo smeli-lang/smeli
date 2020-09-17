@@ -1,0 +1,32 @@
+@plugin("@smeli/plugin-ui")
+@plugin("@smeli/plugin-plot")
+
+ui: ui {
+  theme: default_themes.dark
+}
+
+# Plot Demo
+
+demo_plot: plot.view {
+  viewport: {
+    center: vec2(sin(time), sin(time * 0.7))
+    size: vec2(10, 8)
+  }
+  item0: plot.grid {}
+}
+
+ui: ui {
+  page: ui.surface {
+    color: "primary"
+    direction: "row"
+    responsive: true
+    item0: ui.surface {
+      flex: 0
+      item0: ui.outline
+    }
+    item1: ui.surface {
+      elevation: 1
+      item0: demo_plot
+    }
+  }
+}
