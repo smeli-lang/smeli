@@ -1,6 +1,6 @@
-# @smeli/vscode README
+# vscode-smeli README
 
-This is the README for your extension "@smeli/vscode". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "vscode-smeli". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 

@@ -1,12 +1,12 @@
 {
-  "name": "@smeli/vscode",
+  "name": "@smeli-extensions/vscode",
   "displayName": "Smeli",
   "description": "Smeli language support for VS Code",
   "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/smeli-lang/smeli",
-    "directory": "packages/smeli-vscode"
+    "directory": "extensions/vscode-smeli"
   },
   "main": "dist/extension.js",
   "scripts": {

@@ -3,6 +3,7 @@
   "workspaces": {
     "packages": [
       "apps/*",
+      "extensions/*",
       "packages/*",
       "samples/*"
     ],
@@ -41,8 +42,9 @@
   },
   "scripts": {
     "clean": "lerna run --parallel clean",
-    "build": "yarn build:packages && yarn link:cli && yarn build:samples && yarn build:apps",
+    "build": "yarn build:packages && yarn link:cli && yarn build:extensions && yarn build:samples && yarn build:apps",
     "build:packages": "lerna run build --scope \"@smeli/*\"",
+    "build:extensions": "lerna run build --scope \"@smeli-extensions/*\"",
     "build:samples": "lerna run build --scope \"@smeli-samples/*\"",
     "build:apps": "lerna run build --scope \"@smeli-apps/*\"",
     "link:cli": "cd packages/smeli-cli && yarn link",
