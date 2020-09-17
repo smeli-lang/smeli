@@ -1,6 +1,6 @@
-import { Theme } from "./theme";
+import { Theme } from "@smeli/plugin-ui";
 
-export const plotStyles = (theme: Theme) => ({
+export const viewStyles = (theme: Theme) => ({
   display: "flex",
   flex: 1,
 

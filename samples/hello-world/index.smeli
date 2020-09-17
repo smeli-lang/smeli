@@ -1,4 +1,5 @@
 @plugin("@smeli/plugin-ui")
+@plugin("@smeli/plugin-plot")
 @plugin("@smeli/plugin-ace")
 
 ui: ui {
@@ -49,7 +50,7 @@ plot_card: ui.surface {
     direction: "column"
     color: "background"
     elevation: 2
-    item0: ui.plot {
+    item0: plot.view {
       function: x => f(x + offset_slider.value + time)
       point: vec2(0 - offset_slider.value * 1, magic_slider.value)
     }

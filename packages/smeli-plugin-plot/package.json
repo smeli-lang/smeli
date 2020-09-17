@@ -1,0 +1,32 @@
+{
+  "name": "@smeli/plugin-plot",
+  "version": "0.0.1",
+  "description": "2D plot plugin for Smeli",
+  "author": "Remi Papillie <remi.papillie@gmail.com>",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smeli-lang/smeli",
+    "directory": "packages/smeli-plugin-plot"
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "@smeli/core": "0.0.1"
+  },
+  "devDependencies": {
+    "@smeli/core": "0.0.1"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@smeli/plugin-ui": "0.0.1"
+  }
+}

@@ -7,8 +7,9 @@ import {
   NativeFunction,
 } from "@smeli/core";
 
-import { DomNode } from "./types";
-import { evaluateUiStyles } from "./styles";
+import { DomNode } from "@smeli/plugin-ui";
+
+import { evaluatePlotStyles } from "./styles";
 
 function redraw(
   canvas: HTMLCanvasElement,
@@ -99,8 +100,8 @@ function redraw(
   }
 }
 
-export const plot = {
-  name: "plot",
+export const view = {
+  name: "view",
   evaluate: (parentScope: Scope) => {
     const scope = new Scope(parentScope);
     scope.push([
@@ -115,10 +116,10 @@ export const plot = {
       {
         name: "#ui:node",
         evaluate: (scope: Scope) => {
-          const styles = evaluateUiStyles(scope);
+          const styles = evaluatePlotStyles(scope);
 
           const container = document.createElement("div");
-          container.className = "container " + styles.plot;
+          container.className = "container " + styles.view;
 
           const canvas = document.createElement("canvas");
           container.appendChild(canvas);

@@ -4,7 +4,6 @@ import { evaluateTheme } from "./theme";
 
 import { containerStyles } from "./container.styles";
 import { outlineStyles } from "./outline.styles";
-import { plotStyles } from "./plot.styles";
 import { shaderStyles } from "./shader.styles";
 import { sliderStyles } from "./slider.styles";
 import { surfaceStyles } from "./surface.styles";
@@ -18,7 +17,6 @@ export const styles: Binding = {
     return new DomStyles({
       container: containerStyles(theme),
       outline: outlineStyles(theme),
-      plot: plotStyles(theme),
       shader: shaderStyles(theme),
       slider: sliderStyles(theme),
       surface: surfaceStyles(theme),
