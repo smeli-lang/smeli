@@ -196,6 +196,14 @@ test("parseNumberLiteral: decimal number", () => {
   expect(state.n).toBe(3);
 });
 
+test("parseNumberLiteral: decimal number", () => {
+  const state = new ParserState("10.4");
+  const literal = parseNumberLiteral(state);
+  expect(literal).not.toBeNull();
+  expect(literal!.value).toEqual(new NumberValue(10.4));
+  expect(state.n).toBe(4);
+});
+
 test("parseNumberLiteral: decimal-only number", () => {
   const state = new ParserState(".2");
   const literal = parseNumberLiteral(state);

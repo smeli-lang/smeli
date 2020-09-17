@@ -25,7 +25,7 @@ import { BoolValue } from "./types/bool";
 // terminals
 const LINE_END = /(\r\n|\r|\n)/y;
 const WHITESPACE = /[ \t]*/y;
-const NUMBER = /-?(([1-9]+[0-9]*)|([0-9]*\.[0-9]+)|(0b[01]+)|(0o[0-7]+)|(0x[0-9a-fA-F]+)|0)\b/y;
+const NUMBER = /-?(([0-9]*\.?[0-9]+)|(0b[01]+)|(0o[0-7]+)|(0x[0-9a-fA-F]+))\b/y;
 const STRING = /"[^"]*"/y;
 const BOOL = /(true|false)\b/y;
 const NAME = /[_a-zA-Z&][_0-9a-zA-Z]*\b/y;
