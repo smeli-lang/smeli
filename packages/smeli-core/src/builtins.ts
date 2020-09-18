@@ -8,6 +8,19 @@ import {
 } from "./types";
 import { Binding, Scope } from "./scope";
 
+const cos: Binding = {
+  name: "cos",
+  evaluate: (parentScope: Scope) =>
+    new NativeFunction(
+      parentScope,
+      [NumberValue],
+      (x: NumberValue): NumberValue => {
+        const result = Math.cos(x.value);
+        return new NumberValue(result);
+      }
+    ),
+};
+
 const min: Binding = {
   name: "min",
   evaluate: (parentScope: Scope) =>
@@ -136,6 +149,7 @@ const time: Binding = {
 };
 
 export const builtins: Binding[] = [
+  cos,
   min,
   max,
   outline,
