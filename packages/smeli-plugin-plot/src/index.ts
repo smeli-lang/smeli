@@ -1,3 +1,4 @@
+import { angle } from "./angle";
 import { functionItem } from "./function";
 import { grid } from "./grid";
 import { point } from "./point";
@@ -9,5 +10,5 @@ export type PlotPluginOptions = {};
 
 export const loadPlugin = ({}: PlotPluginOptions = {}) => ({
   name: "plot",
-  bindings: [functionItem, grid, point, polygon, view, styles],
+  bindings: [angle, functionItem, grid, point, polygon, view, styles],
 });
