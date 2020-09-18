@@ -56,14 +56,11 @@ export class Renderer {
       const viewportHeight = this.viewport[3] - this.viewport[1];
 
       // transform from viewport space to canvas space in pixels
-      const scaleX = width / viewportWidth;
-      const scaleY = height / viewportHeight;
-      this.pixelTransformX = [scaleX, -this.viewport[0] * scaleX];
-      this.pixelTransformY = [scaleY, -this.viewport[1] * scaleY];
-
       // invert Y axis to match the math convention
-      this.context.scale(1, -1);
-      this.context.translate(0, -height);
+      const scaleX = width / viewportWidth;
+      const scaleY = -height / viewportHeight;
+      this.pixelTransformX = [scaleX, -this.viewport[0] * scaleX];
+      this.pixelTransformY = [scaleY, -this.viewport[3] * scaleY]; // use max because of axis inversion
 
       this.context.font = "16px verdana";
 
