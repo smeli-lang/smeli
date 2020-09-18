@@ -62,7 +62,7 @@ export class Renderer {
       this.pixelTransformX = [scaleX, -this.viewport[0] * scaleX];
       this.pixelTransformY = [scaleY, -this.viewport[3] * scaleY]; // use max because of axis inversion
 
-      this.context.font = "16px verdana";
+      this.context.font = "24px verdana";
 
       allDraws.forEach((draw) => draw(this.context));
     });

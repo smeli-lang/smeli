@@ -101,6 +101,9 @@ export const grid = {
                 context.fillStyle = color.toCssColor(0.38);
                 context.lineWidth = 2;
 
+                const oldFont = context.font;
+                context.font = "16px verdana";
+
                 // X markers
                 for (let x of quantize(
                   renderer.viewport[0],
@@ -132,6 +135,8 @@ export const grid = {
 
                   context.fillText(y.toString(), origin.x + 8, pixelY - 8);
                 }
+
+                context.font = oldFont;
               }
             });
           });
