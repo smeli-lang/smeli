@@ -45,6 +45,22 @@ export const view = {
         evaluate: () => new NumberValue(0),
       },
       {
+        name: "item4",
+        evaluate: () => new NumberValue(0),
+      },
+      {
+        name: "item5",
+        evaluate: () => new NumberValue(0),
+      },
+      {
+        name: "item6",
+        evaluate: () => new NumberValue(0),
+      },
+      {
+        name: "item7",
+        evaluate: () => new NumberValue(0),
+      },
+      {
         name: "#ui:node",
         evaluate: (scope: Scope) => {
           const styles = evaluatePlotStyles(scope);
@@ -86,7 +102,7 @@ export const view = {
 
             // cache view parameters
             return (scope: Scope) => {
-              for (let i = 0; i < 4; i++) {
+              for (let i = 0; i < 8; i++) {
                 const itemScope = scope.evaluate("item" + i);
 
                 if (itemScope.is(Scope)) {
