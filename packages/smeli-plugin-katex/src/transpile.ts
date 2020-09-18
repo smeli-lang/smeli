@@ -132,6 +132,8 @@ visitor.set(BinaryOperator, (operator: BinaryOperator) => {
 
 // transform a Smeli AST into a TEX expression
 function transpileExpression(value: ExpressionValue): string {
+  const name = texSymbols[value.name] || value.name;
+
   // if the root of the expression is a lambda, transform it to
   // the f(x) form as we have the function name here
   if (value.expression.constructor === LambdaExpression) {
@@ -140,14 +142,14 @@ function transpileExpression(value: ExpressionValue): string {
       (identifier: Identifier) => identifier.name
     );
     return (
-      value.name +
+      name +
       "(" +
       parameterNames.map((name) => texSymbols[name] || name).join(", ") +
       ") = " +
       traverse(lambda.body, visitor)
     );
   } else {
-    return value.name + " = " + traverse(value.expression, visitor);
+    return name + " = " + traverse(value.expression, visitor);
   }
 }
 
