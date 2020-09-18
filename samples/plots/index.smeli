@@ -39,13 +39,17 @@ demo_plot: plot.view {
   item5: plot.function {
     function: x => sin(x * sin(time)) * 0.4 - 2
   }
+  item6: plot.point {
+    position: vec2(-2, item5.function(-2))
+    guides: true
+    label: "f(-2)"
+  }
 }
 
 ui: ui {
   page: ui.surface {
     color: "primary"
-    direction: "row"
-    responsive: true
+    direction: "column"
     item0: ui.surface {
       flex: 0
       item0: ui.outline
