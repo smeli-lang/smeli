@@ -109,6 +109,10 @@ export const angle = {
                 context.textBaseline = "middle";
                 context.fillStyle = color.toCssColor(0.83);
                 context.fillText(label.value, textPosition.x, textPosition.y);
+
+                // restore defaults
+                context.textAlign = "start";
+                context.textBaseline = "alphabetic";
               }
             });
           });

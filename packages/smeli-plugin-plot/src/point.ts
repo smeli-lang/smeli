@@ -73,8 +73,8 @@ export const point = {
                 context.fillStyle = color.toCssColor(0.83);
                 context.fillText(
                   label.value,
-                  pixelPosition.x + 8,
-                  pixelPosition.y - 8
+                  pixelPosition.x + 16,
+                  pixelPosition.y - 16
                 );
               }
             });
