@@ -44,6 +44,11 @@ demo_plot: plot.view {
     guides: true
     label: "f(-2)"
   }
+  item7: plot.circle {
+    color: item4.color
+    center: vec2(3, -2)
+    slice: slice * sin(time * 0.3) * 0.5 + slice * 0.5
+  }
 }
 
 ui: ui {
