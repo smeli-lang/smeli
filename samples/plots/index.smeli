@@ -13,6 +13,16 @@ demo_plot: plot.view {
     size: vec2(10, 8)
   }
   item0: plot.grid {}
+  item1: plot.polygon {
+    point0: point0 + vec2(sin(time), 0)
+    point2: point2 + vec2(0, sin(time * 0.4))
+    point3: point2 + vec2(1, sin(time * 0.4))
+  }
+  item2: item1 {
+    color: ui.theme.colors.secondary
+    point1: point1 + vec2(0.5, 2.0)
+    point3: point3 - vec2(1, sin(time * 0.4))
+  }
 }
 
 ui: ui {
@@ -25,7 +35,7 @@ ui: ui {
       item0: ui.outline
     }
     item1: ui.surface {
-      elevation: 1
+      elevation: 2
       item0: demo_plot
     }
   }
