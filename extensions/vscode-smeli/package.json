@@ -52,6 +52,14 @@
         "title": "Open Preview",
         "category": "Smeli"
       }
+    ],
+    "keybindings": [
+      {
+        "command": "smeli.openPreview",
+        "key": "shift+ctrl+v",
+        "mac": "shift+cmd+v",
+        "when": "editorLangId == smeli"
+      }
     ]
   },
   "dependencies": {
