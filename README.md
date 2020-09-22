@@ -38,28 +38,8 @@ Each line is a step in your reasoning process, and because reasoning is an itera
 
 Let's look at a more comprehensive example:
 
-```
-# Let's start with a simple sine expression
-x: 42
-y: sin(x)
-
-# Add a slider to tweak the x value
-slider: dom.slider {
-  value: 0
-}
-x: slider.value
-
-# Expose the slider and display the result
-dom.contents = dom.vsplit {
-  top: slider,
-  bottom: dom.text {
-    text: y
-  }
-}
-
-#> Now let's show another expression
-y: x * x
-```
+![Code sample](assets/readme-sample.png)
+([full version](https://github.com/smeli-lang/smeli/tree/master/samples/readme))
 
 You may have noticed the special _marker comment_, starting with `#>`. This can be used to control execution flow.
 

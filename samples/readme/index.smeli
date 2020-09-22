@@ -1,0 +1,51 @@
+@plugin("@smeli/plugin-ui")
+@plugin("@smeli/plugin-plot")
+
+# Switch to dark theme
+ui: ui {
+  theme: default_themes.dark
+}
+
+# Let's start with a simple sine expression
+x: 42
+f: x => sin(1 - x)
+
+## Add a slider to tweak the x value
+x_slider: ui.slider {
+  min: -1
+  max: 1
+  step: 0.01
+  value: 0.4
+}
+x: x_slider.value
+
+## Display the slider and a plot
+ui: ui {
+  page: ui.surface {
+    item0: ui.outline
+    item1: ui.surface {
+      direction: "column"
+      elevation: -2
+      item0: plot.view {
+        viewport: viewport {
+          size: vec2(4, 6)
+        }
+        item0: plot.grid {}
+        item1: plot.function {
+          function: f
+        }
+        item2: plot.point {
+          position: vec2(0 + x * 1, f(x))
+          label: "(x, f(x))"
+        }
+      }
+      item1: ui.surface {
+        flex: 0
+        item0: x_slider
+      }
+    }
+  }
+}
+
+#> Now let's show another expression
+f: x => x * x
