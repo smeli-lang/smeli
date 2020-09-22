@@ -47,11 +47,11 @@ For instance, it is very easy to use a slide clicker to go directly to the next 
 
 ## Interactivity
 
-In the previous example, we bound a slider object from the dom plugin. This is a good example of how Smeli manages interaction and side-effects.
+In the previous example, we bound a slider object from the ui plugin. This is a good example of how Smeli manages interaction and side-effects.
 
 All Smeli expressions are strictly pure from a mathematical point of view. That allows to define clean relationships between the various parts of your models.
 
-Plugins, however, can watch scopes and trigger side-effects on expression or evaluation updates (to update the UI, for instance). They can also inject new expression bindings when required (typically for user interaction).
+Plugins, however, can trigger side-effects on expression evaluation (to update the UI, for instance). They can also inject new expression bindings when required (typically for user interaction).
 
 This hybrid model allows the Smeli code to remain clean and maintainable, while plugins are free to create a rich user experience without the constraint of purity, as long as they behave _as if_ everything is pure from the interpreter point of view.
 
@@ -59,7 +59,7 @@ This hybrid model allows the Smeli code to remain clean and maintainable, while 
 
 The easiest way to get started is to try the sandbox (TODO).
 
-For a more complete development environment, check out the VS Code plugin (TODO).
+For a more complete development environment, check out the [VS Code plugin](https://github.com/smeli-lang/smeli/tree/master/extensions/vscode-smeli).
 
 # License
 
