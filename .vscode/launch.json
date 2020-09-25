@@ -20,7 +20,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Jest Tests",
+      "name": "vscode-jest-tests",
       "program": "${workspaceRoot}\\node_modules\\jest\\bin\\jest.js",
       "args": ["-i"],
       "internalConsoleOptions": "openOnSessionStart"
