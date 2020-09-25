@@ -108,7 +108,7 @@ demo: ui.surface {
   item1: ui.surface {
     color: "background"
     item0: ui.surface {
-      flex: size_slider.value / 4 + 1 / 4
+      flex: (size_slider.value + 1) / 4
       color: "primary"
     }
     item1: ui.surface {

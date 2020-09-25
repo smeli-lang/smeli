@@ -310,6 +310,25 @@ export function parseAtom(state: ParserState) {
     }
   }
 
+  // sub-expressions in parenthesis
+  if (state.match("(")) {
+    parseWhitespace(state);
+
+    const subExpression = parseExpression(state);
+    if (!subExpression) {
+      state.reportError("Invalid nested expression");
+      return null;
+    }
+
+    parseWhitespace(state);
+    if (!state.match(")")) {
+      state.reportError("Unterminated nested expression, missing ')'");
+      return null;
+    }
+
+    return subExpression;
+  }
+
   return (
     parseNumberLiteral(state) ||
     parseStringLiteral(state) ||
@@ -354,7 +373,7 @@ export function parseTerm(state: ParserState) {
   return expr;
 }
 
-export function parseExpression(state: ParserState) {
+export function parseExpression(state: ParserState): Expression | null {
   let expr: Expression | null = parseTerm(state);
   if (!expr) {
     return null;
