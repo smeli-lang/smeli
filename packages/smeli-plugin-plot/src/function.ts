@@ -41,7 +41,7 @@ export const functionItem = {
             return new PlotItem((renderer: Renderer) => {
               const resolution = 256;
 
-              const evaluators: Evaluator[] = [];
+              const dataPoints: number[] = [];
               const step =
                 (renderer.viewport[2] - renderer.viewport[0]) /
                 (resolution - 1);
@@ -53,13 +53,11 @@ export const functionItem = {
                   scope,
                   [() => argumentValue]
                 );
-                evaluators.push(callSiteEvaluator);
+                const value = scope
+                  .transient(callSiteEvaluator)
+                  .as(NumberValue);
+                dataPoints.push(value.value);
               }
-
-              const dataPoints = evaluators.map((evaluator) => {
-                const value = scope.transient(evaluator).as(NumberValue);
-                return value.value;
-              });
 
               renderer.queueDraw((context: CanvasRenderingContext2D) => {
                 // data points
