@@ -35,7 +35,7 @@ ui: ui {
           function: f
         }
         item2: plot.point {
-          position: vec2(0 + x * 1, f(x))
+          position: vec2(x, f(x))
           label: "(x, f(x))"
         }
       }

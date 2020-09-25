@@ -297,8 +297,13 @@ export function parseAtom(state: ParserState) {
         return parseScopeExpression(state, identifier);
       case "(":
         return parseFunctionCall(state, identifier);
+
+      // disable lambdas with multiple arguments for now, because
+      // of the grammar ambiguity with function calls
+      // (all this will go away when tuples/arrays are implemented)
+      //case ",":
+
       case "=": // first character of the arrow "=>"
-      case ",":
         return parseLambdaExpression(state, identifier);
       default:
         return identifier;

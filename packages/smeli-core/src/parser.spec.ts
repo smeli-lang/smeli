@@ -6,6 +6,7 @@ import {
   parseStringLiteral,
   parseBoolLiteral,
   parseIdentifier,
+  parseExpression,
   parseComment,
   parseStatement,
   parseStatementList,
@@ -389,6 +390,83 @@ test("parseIdentifier: expression-of operator", () => {
   expect(id).not.toBeNull();
   expect(id!.name).toBe("&name");
   expect(state.n).toBe(5);
+});
+
+test("parseIdentifier: stops at comma", () => {
+  const state = new ParserState("plop,");
+  const id = parseIdentifier(state);
+  expect(id).not.toBeNull();
+  expect(id!.name).toBe("plop");
+  expect(state.n).toBe(4);
+});
+
+/**
+ * Expression
+ */
+
+test("parseExpression: number atom", () => {
+  const state = new ParserState("12");
+  const expr = parseExpression(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(2);
+});
+
+test("parseExpression: string atom", () => {
+  const state = new ParserState('"hello"');
+  const expr = parseExpression(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(7);
+});
+
+test("parseExpression: boolean atom", () => {
+  const state = new ParserState("true");
+  const expr = parseExpression(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(4);
+});
+
+test("parseExpression: identifier atom", () => {
+  const state = new ParserState("variable_name");
+  const expr = parseExpression(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(13);
+});
+
+test("parseExpression: compound atom", () => {
+  const state = new ParserState("variable_name.member");
+  const expr = parseExpression(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(20);
+});
+
+test("parseExpression: simple addition", () => {
+  const state = new ParserState("1 + 2");
+  const expr = parseExpression(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(5);
+});
+
+test("parseExpression: function call", () => {
+  const state = new ParserState("function_name(1, 2)");
+  const expr = parseExpression(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(19);
+});
+
+test("parseExpression: function call with nested expressions", () => {
+  const state = new ParserState("function_name(1, scope.member)");
+  const expr = parseExpression(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(30);
+});
+
+test("parseExpression: function call with more nested expressions", () => {
+  const state = new ParserState(
+    "function_name(scope.member, 42 * other_function(12))"
+  );
+  const expr = parseExpression(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(52);
 });
 
 /**

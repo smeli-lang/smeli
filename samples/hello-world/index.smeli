@@ -52,7 +52,7 @@ plot_card: ui.surface {
     elevation: 2
     item0: plot.view {
       viewport: {
-        center: vec2(0 - offset_slider.value * 1, 0)
+        center: vec2(offset_slider.value, 0)
         size: vec2(9, 5)
       }
       item0: plot.grid {}
