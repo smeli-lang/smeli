@@ -1,0 +1,15 @@
+{
+  "name": "@smeli-samples/minimal-plugin",
+  "version": "0.0.1",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "smeli"
+  },
+  "peerDependencies": {
+    "@smeli/core": "0.0.1"
+  },
+  "devDependencies": {
+    "@smeli/cli": "0.0.1",
+    "@smeli/core": "0.0.1"
+  }
+}

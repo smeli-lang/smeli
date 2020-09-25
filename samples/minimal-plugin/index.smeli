@@ -1,0 +1,15 @@
+# Minimal plugin demo
+
+@plugin("@smeli/plugin-ui")
+@plugin("./hello-plugin")
+
+ui: ui {
+  theme: default_themes.dark
+  page: surface {
+    direction: "column"
+    item0: outline
+    item1: ui.textbox {
+      text: "hello.answer = " + str(hello.answer)
+    }
+  }
+}
