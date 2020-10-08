@@ -6,6 +6,7 @@ import { containerStyles } from "./container.styles";
 import { outlineStyles } from "./outline.styles";
 import { shaderStyles } from "./shader.styles";
 import { sliderStyles } from "./slider.styles";
+import { stackStyles } from "./stack.styles";
 import { surfaceStyles } from "./surface.styles";
 import { textboxStyles } from "./textbox.styles";
 
@@ -19,6 +20,7 @@ export const styles: Binding = {
       outline: outlineStyles(theme),
       shader: shaderStyles(theme),
       slider: sliderStyles(theme),
+      stack: stackStyles(theme),
       surface: surfaceStyles(theme),
       textbox: textboxStyles(theme),
     });

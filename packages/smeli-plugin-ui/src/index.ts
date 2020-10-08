@@ -3,6 +3,7 @@ import { DomNode } from "./types";
 
 import { outline } from "./outline";
 import { shader } from "./shader";
+import { stack } from "./stack";
 import { surface } from "./surface";
 import { slider } from "./slider";
 import { textbox } from "./textbox";
@@ -103,6 +104,7 @@ export const loadPlugin = ({
 
       outline,
       shader,
+      stack,
       surface,
       slider,
       textbox,
