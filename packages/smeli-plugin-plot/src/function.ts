@@ -1,11 +1,4 @@
-import {
-  Lambda,
-  NativeFunction,
-  NumberValue,
-  Evaluator,
-  Scope,
-  Vec3,
-} from "@smeli/core";
+import { Lambda, NativeFunction, NumberValue, Scope, Vec3 } from "@smeli/core";
 
 import { evaluateTheme } from "@smeli/plugin-ui";
 
