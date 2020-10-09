@@ -3,6 +3,7 @@ import { PluginDefinition } from "./plugins";
 
 export * from "./ast";
 export * from "./debug";
+export * from "./override";
 export * from "./scope";
 export * from "./types";
 

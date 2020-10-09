@@ -1,4 +1,10 @@
-import { Binding, NumberValue, Scope, StringValue } from "@smeli/core";
+import {
+  Binding,
+  NumberValue,
+  Scope,
+  ScopeOverride,
+  StringValue,
+} from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
 
@@ -45,43 +51,31 @@ export const slider = {
 
           let override: Binding | null = null;
           let overrideActive = false;
+          const valueOverride = new ScopeOverride(
+            scope,
+            "value",
+            (activated: boolean) => {
+              if (activated) {
+                slider.classList.add("override");
+              } else {
+                slider.classList.remove("override");
+              }
+            }
+          );
 
           const result = scope.evaluate(
             () =>
               new DomNode(widget, {
                 input: (event: Event) => {
-                  if (override && overrideActive) {
-                    scope.pop(override);
-                  } else {
-                    slider.classList.add("override");
-                  }
-
                   const inputValue = parseFloat(slider.value);
-
-                  override = {
-                    name: "value",
-                    evaluate: () => new NumberValue(inputValue),
-                  };
-                  scope.push(override);
-                  overrideActive = true;
+                  valueOverride.bind(() => new NumberValue(inputValue));
                 },
 
                 mousedown: ((event: MouseEvent) => {
                   // toggle override on right click
                   if (event.button === 2) {
                     event.preventDefault();
-
-                    if (override) {
-                      if (overrideActive) {
-                        overrideActive = false;
-                        scope.pop(override);
-                        slider.classList.remove("override");
-                      } else {
-                        overrideActive = true;
-                        scope.push(override);
-                        slider.classList.add("override");
-                      }
-                    }
+                    valueOverride.toggle();
                   }
                 }) as EventListener,
 
