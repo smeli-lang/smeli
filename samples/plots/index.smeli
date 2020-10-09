@@ -60,7 +60,8 @@ ui: ui {
       item0: ui.outline
     }
     item1: ui.surface {
-      elevation: 2
+      color: "background"
+      elevation: -2
       item0: demo_plot
     }
   }
