@@ -1,10 +1,4 @@
-import {
-  Binding,
-  NumberValue,
-  Scope,
-  ScopeOverride,
-  StringValue,
-} from "@smeli/core";
+import { NumberValue, Scope, ScopeOverride, StringValue } from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
 
@@ -49,8 +43,6 @@ export const slider = {
           widget.appendChild(labelDiv);
           labelDiv.className = "label normal";
 
-          let override: Binding | null = null;
-          let overrideActive = false;
           const valueOverride = new ScopeOverride(
             scope,
             "value",
