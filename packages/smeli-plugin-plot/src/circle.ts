@@ -2,7 +2,6 @@ import { BoolValue, NumberValue, Scope, Vec2, Vec3 } from "@smeli/core";
 
 import { evaluateTheme } from "@smeli/plugin-ui";
 
-import { Renderer } from "./renderer";
 import { PlotItem } from "./types";
 
 export const circle = {
@@ -39,49 +38,44 @@ export const circle = {
           const color = scope.evaluate("color").as(Vec3);
           const fill = scope.evaluate("fill").as(BoolValue);
 
-          return new PlotItem((renderer: Renderer) => {
-            renderer.queueDraw((context: CanvasRenderingContext2D) => {
-              const pixelCenter = renderer.viewportPositionToPixels(
-                center.x,
-                center.y
-              );
+          return new PlotItem(({ context, viewport }) => {
+            const pixelCenter = viewport.toPixels(center.x, center.y);
 
-              context.strokeStyle = color.toCssColor(0.83);
-              context.lineWidth = 2;
+            context.strokeStyle = color.toCssColor(0.83);
+            context.lineWidth = 2;
 
-              context.beginPath();
-              context.ellipse(
-                pixelCenter.x,
-                pixelCenter.y,
-                radius.value * renderer.pixelTransformX[0],
-                -radius.value * renderer.pixelTransformY[0],
-                0,
-                -slice.y,
-                -slice.x
-              );
+            context.beginPath();
+            context.ellipse(
+              pixelCenter.x,
+              pixelCenter.y,
+              radius.value * viewport.pixelTransformX[0],
+              -radius.value * viewport.pixelTransformY[0],
+              0,
+              -slice.y,
+              -slice.x
+            );
 
-              const twoPi = 2.0 * Math.PI;
-              let angleDifference =
-                (((slice.y - slice.x) % twoPi) + twoPi) % twoPi;
+            const twoPi = 2.0 * Math.PI;
+            let angleDifference =
+              (((slice.y - slice.x) % twoPi) + twoPi) % twoPi;
 
-              if (angleDifference > Math.PI) {
-                angleDifference = twoPi - angleDifference;
-              }
+            if (angleDifference > Math.PI) {
+              angleDifference = twoPi - angleDifference;
+            }
 
-              const threshold = (1 / 360) * twoPi;
-              if (angleDifference >= threshold) {
-                context.lineTo(pixelCenter.x, pixelCenter.y);
-              }
+            const threshold = (1 / 360) * twoPi;
+            if (angleDifference >= threshold) {
+              context.lineTo(pixelCenter.x, pixelCenter.y);
+            }
 
-              context.closePath();
+            context.closePath();
 
-              context.stroke();
+            context.stroke();
 
-              if (fill.value) {
-                context.fillStyle = color.toCssColor(0.38);
-                context.fill();
-              }
-            });
+            if (fill.value) {
+              context.fillStyle = color.toCssColor(0.38);
+              context.fill();
+            }
           });
         },
       },

@@ -1,17 +1,23 @@
 import { TypedValue } from "@smeli/core";
 
-import { Renderer } from "./renderer";
+import { Viewport } from "./viewport";
 
-export type PrepareFunction = (renderer: Renderer) => void;
+export type RenderOptions = {
+  canvas: HTMLCanvasElement;
+  context: CanvasRenderingContext2D;
+  viewport: Viewport;
+};
+
+export type RenderFunction = (options: RenderOptions) => void;
 
 export class PlotItem extends TypedValue {
   static typeName = "plot_item";
 
-  prepareFunction: PrepareFunction;
+  render: RenderFunction;
 
-  constructor(prepareFunction: PrepareFunction) {
+  constructor(render: RenderFunction) {
     super();
 
-    this.prepareFunction = prepareFunction;
+    this.render = render;
   }
 }

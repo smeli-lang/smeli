@@ -2,7 +2,6 @@ import { Lambda, NativeFunction, NumberValue, Scope, Vec3 } from "@smeli/core";
 
 import { evaluateTheme } from "@smeli/plugin-ui";
 
-import { Renderer } from "./renderer";
 import { PlotItem } from "./types";
 
 export const functionItem = {
@@ -31,15 +30,14 @@ export const functionItem = {
           return (scope: Scope) => {
             const color = scope.evaluate("color").as(Vec3);
 
-            return new PlotItem((renderer: Renderer) => {
+            return new PlotItem(({ context, viewport }) => {
               const resolution = 256;
 
               const dataPoints: number[] = [];
               const step =
-                (renderer.viewport[2] - renderer.viewport[0]) /
-                (resolution - 1);
+                (viewport.bounds[2] - viewport.bounds[0]) / (resolution - 1);
               for (let i = 0; i < resolution; i++) {
-                const input = renderer.viewport[0] + i * step;
+                const input = viewport.bounds[0] + i * step;
 
                 const argumentValue = new NumberValue(input);
                 const callSiteEvaluator = (functionValue.__call_site__ as any)(
@@ -52,30 +50,19 @@ export const functionItem = {
                 dataPoints.push(value.value);
               }
 
-              renderer.queueDraw((context: CanvasRenderingContext2D) => {
-                // data points
-                context.lineWidth = 4;
-                context.strokeStyle = color.toCssColor(0.83);
+              // data points
+              context.lineWidth = 4;
+              context.strokeStyle = color.toCssColor(0.83);
 
-                const step =
-                  (renderer.viewport[2] - renderer.viewport[0]) /
-                  (dataPoints.length - 1);
-                const startY = renderer.viewportPositionToPixels(
-                  0,
-                  dataPoints[0]
-                ).y;
-                context.beginPath();
-                context.moveTo(0, startY);
-                for (let i = 0; i < dataPoints.length; i++) {
-                  const x = renderer.viewport[0] + i * step;
-                  const pixelPosition = renderer.viewportPositionToPixels(
-                    x,
-                    dataPoints[i]
-                  );
-                  context.lineTo(pixelPosition.x, pixelPosition.y);
-                }
-                context.stroke();
-              });
+              const startY = viewport.toPixels(0, dataPoints[0]).y;
+              context.beginPath();
+              context.moveTo(0, startY);
+              for (let i = 0; i < dataPoints.length; i++) {
+                const x = viewport.bounds[0] + i * step;
+                const pixelPosition = viewport.toPixels(x, dataPoints[i]);
+                context.lineTo(pixelPosition.x, pixelPosition.y);
+              }
+              context.stroke();
             });
           };
         },

@@ -9,16 +9,26 @@ export class DomNode extends TypedValue {
 
   node: HTMLElement;
   eventListeners: EventListenerMap;
+  observers: any[]; // will be updated when the official TS DOM declarations include observers
 
-  constructor(node: HTMLElement, eventListeners: EventListenerMap = {}) {
+  constructor(
+    node: HTMLElement,
+    eventListeners: EventListenerMap = {},
+    observers: any[] = []
+  ) {
     super();
 
     this.node = node;
     this.eventListeners = eventListeners;
+    this.observers = observers;
 
     for (let eventName of Object.keys(this.eventListeners)) {
       const listener = this.eventListeners[eventName];
       this.node.addEventListener(eventName, listener);
+    }
+
+    for (const observer of this.observers) {
+      observer.observe(this.node);
     }
   }
 
@@ -26,6 +36,10 @@ export class DomNode extends TypedValue {
     for (let eventName of Object.keys(this.eventListeners)) {
       const listener = this.eventListeners[eventName];
       this.node.removeEventListener(eventName, listener);
+    }
+
+    for (const observer of this.observers) {
+      observer.unobserve(this.node);
     }
   }
 

@@ -3,12 +3,14 @@ import { Theme } from "@smeli/plugin-ui";
 export const viewStyles = (theme: Theme) => ({
   display: "flex",
   flex: 1,
-
-  "background-color": theme.colors.background.toCssColor(),
+  position: "relative",
 
   "& canvas": {
     display: "block",
-    margin: 0,
-    padding: 0,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
 });

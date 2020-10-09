@@ -1,10 +1,16 @@
-import { NumberValue, Scope, Vec2 } from "@smeli/core";
+import { NumberValue, Scope, ScopeOverride, Vec2 } from "@smeli/core";
 
 import { DomNode } from "@smeli/plugin-ui";
-import { Renderer } from "./renderer";
+import { Viewport } from "./viewport";
 
 import { evaluatePlotStyles } from "./styles";
 import { PlotItem } from "./types";
+
+// temporary polyfill until Observers are added to the
+// official DOM declarations
+declare class ResizeObserver {
+  constructor(callback: Function);
+}
 
 export const view = {
   name: "view",
@@ -61,6 +67,10 @@ export const view = {
         evaluate: () => new NumberValue(0),
       },
       {
+        name: "#pixel_size",
+        evaluate: () => new Vec2(0.0, 0.0),
+      },
+      {
         name: "#ui:node",
         evaluate: (scope: Scope) => {
           const styles = evaluatePlotStyles(scope);
@@ -71,47 +81,56 @@ export const view = {
           const canvas = document.createElement("canvas");
           container.appendChild(canvas);
 
-          const renderer = new Renderer(canvas);
+          const pixelSizeOverride = new ScopeOverride(scope, "#pixel_size");
+          const resizeObserver = new ResizeObserver((entries: any) => {
+            // use only the latest update
+            const entry = entries[entries.length - 1];
+            const { width, height } = entry.contentRect;
+            pixelSizeOverride.bind(() => new Vec2(width, height));
+          });
 
-          const result = scope.evaluate(() => new DomNode(container));
+          const result = scope.evaluate(
+            () => new DomNode(container, {}, [resizeObserver])
+          );
 
           // cache DOM element
           return (scope: Scope) => {
-            // viewport parameters
-            const { viewport } = scope.evaluateNested({
-              viewport: {
-                center: Vec2,
-                size: Vec2,
-              },
-            }) as {
-              viewport: {
-                center: Vec2;
-                size: Vec2;
-              };
-            };
+            // actual pixel size of the canvas
+            const pixelSize = scope.evaluate("#pixel_size").as(Vec2);
+            if (pixelSize.x === 0 || pixelSize.y === 0) {
+              return result;
+            }
+            canvas.width = pixelSize.x;
+            canvas.height = pixelSize.y;
 
-            // convert to xmin, ymin, xmax, ymax
-            const halfWidth = Math.abs(viewport.size.x) * 0.5;
-            const halfHeight = Math.abs(viewport.size.y) * 0.5;
-            renderer.viewport = [
-              viewport.center.x - halfWidth,
-              viewport.center.y - halfHeight,
-              viewport.center.x + halfWidth,
-              viewport.center.y + halfHeight,
-            ];
+            // viewport parameters
+            const viewportScope = scope.evaluate("viewport").as(Scope);
+            const viewport = new Viewport(viewportScope, pixelSize);
 
             // cache view parameters
             return (scope: Scope) => {
+              const context = canvas.getContext(
+                "2d"
+              ) as CanvasRenderingContext2D;
+
+              // initial context setup
+              context.font = "24px verdana";
+
+              // clear everything
+              context.clearRect(0, 0, pixelSize.x, pixelSize.y);
+
               for (let i = 0; i < 8; i++) {
                 const itemScope = scope.evaluate("item" + i);
 
                 if (itemScope.is(Scope)) {
                   const item = itemScope.evaluate("#plot:item").as(PlotItem);
-                  item.prepareFunction(renderer);
+                  item.render({
+                    canvas,
+                    context,
+                    viewport,
+                  });
                 }
               }
-
-              renderer.renderAsync();
 
               return result;
             };

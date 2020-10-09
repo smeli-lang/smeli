@@ -2,7 +2,6 @@ import { BoolValue, NumberValue, Scope, Vec2, Vec3 } from "@smeli/core";
 
 import { evaluateTheme } from "@smeli/plugin-ui";
 
-import { Renderer } from "./renderer";
 import { PlotItem } from "./types";
 
 export const polygon = {
@@ -56,37 +55,35 @@ export const polygon = {
           const color = scope.evaluate("color").as(Vec3);
           const fill = scope.evaluate("fill").as(BoolValue);
 
-          return new PlotItem((renderer: Renderer) => {
-            renderer.queueDraw((context: CanvasRenderingContext2D) => {
-              const pixelPoints = points.map((point) =>
-                renderer.viewportPositionToPixels(point.x, point.y)
-              );
+          return new PlotItem(({ context, viewport }) => {
+            const pixelPoints = points.map((point) =>
+              viewport.toPixels(point.x, point.y)
+            );
 
-              context.fillStyle = color.toCssColor(1.0);
+            context.fillStyle = color.toCssColor(1.0);
 
-              for (const { x, y } of pixelPoints) {
-                context.beginPath();
-                context.arc(x, y, 4, 0, 2.0 * Math.PI);
-                context.fill();
-              }
-
-              context.strokeStyle = color.toCssColor(0.83);
-              context.fillStyle = color.toCssColor(0.6);
-              context.lineWidth = 2;
-
+            for (const { x, y } of pixelPoints) {
               context.beginPath();
-              context.moveTo(pixelPoints[0].x, pixelPoints[0].y);
-              for (const { x, y } of pixelPoints.slice(1)) {
-                context.lineTo(x, y);
-              }
-              context.lineTo(pixelPoints[0].x, pixelPoints[0].y);
+              context.arc(x, y, 4, 0, 2.0 * Math.PI);
+              context.fill();
+            }
 
-              context.stroke();
+            context.strokeStyle = color.toCssColor(0.83);
+            context.fillStyle = color.toCssColor(0.6);
+            context.lineWidth = 2;
 
-              if (fill.value) {
-                context.fill();
-              }
-            });
+            context.beginPath();
+            context.moveTo(pixelPoints[0].x, pixelPoints[0].y);
+            for (const { x, y } of pixelPoints.slice(1)) {
+              context.lineTo(x, y);
+            }
+            context.lineTo(pixelPoints[0].x, pixelPoints[0].y);
+
+            context.stroke();
+
+            if (fill.value) {
+              context.fill();
+            }
           });
         },
       },
