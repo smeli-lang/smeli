@@ -92,7 +92,8 @@ ui: ui {
 #>
 
 left_panel: ui.surface {
-  elevation: 2
+  color: "background"
+  elevation: -2
   item0: ui.stack {
     item0: plot.view {
       viewport: {
