@@ -1,4 +1,5 @@
 import {
+  Lambda,
   NativeFunction,
   NumberValue,
   StringValue,
@@ -7,6 +8,51 @@ import {
   Vec3,
 } from "./types";
 import { Binding, Scope } from "./scope";
+
+const animate: Binding = {
+  name: "animate",
+  evaluate: (parentScope: Scope) =>
+    new Lambda(parentScope, ["start", "end", "duration"], (scope: Scope) => {
+      const duration = scope.evaluate("duration").as(NumberValue).value;
+      let finished = false;
+      let startTime: number | null = null;
+
+      return (scope: Scope) => {
+        const endValue = scope.evaluate("end");
+
+        // stop evaluating when animation is over
+        if (finished) {
+          return endValue;
+        }
+
+        const startValue = scope.evaluate("start");
+
+        if (!startValue.__mul__ || !endValue.__mul__) {
+          throw new Error("start and end values cannot be interpolated");
+        }
+
+        const currentTime = scope.evaluate("time").as(NumberValue).value;
+        if (startTime === null) {
+          startTime = currentTime;
+        }
+
+        let t = (currentTime - startTime) / duration;
+        if (t >= 1.0) {
+          t = 1.0;
+          finished = true;
+        }
+
+        const weightedStart = startValue.__mul__(new NumberValue(1.0 - t));
+        const weightedEnd = endValue.__mul__(new NumberValue(t));
+
+        if (!weightedStart.__add__) {
+          throw new Error("start and end values cannot be interpolated");
+        }
+
+        return weightedStart.__add__(weightedEnd);
+      };
+    }),
+};
 
 const cos: Binding = {
   name: "cos",
@@ -149,6 +195,7 @@ const time: Binding = {
 };
 
 export const builtins: Binding[] = [
+  animate,
   cos,
   min,
   max,
