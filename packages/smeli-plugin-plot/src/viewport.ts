@@ -1,4 +1,4 @@
-import { Scope, Vec2 } from "@smeli/core";
+import { Scope, StringValue, Vec2 } from "@smeli/core";
 
 // handles all view-space transforms, to and from
 // actual pixels
@@ -13,10 +13,37 @@ export class Viewport {
   constructor(scope: Scope, pixelSize: Vec2) {
     const center = scope.evaluate("center").as(Vec2);
     const size = scope.evaluate("size").as(Vec2);
+    const ratio = scope.evaluate("ratio").as(Vec2);
+    const mode = scope.evaluate("mode").as(StringValue).value;
+
+    let viewportWidth = Math.abs(size.x);
+    let viewportHeight = Math.abs(size.y);
+
+    const viewportRatio =
+      (viewportWidth * ratio.x) / (viewportHeight * ratio.y);
+    const pixelRatio = pixelSize.x / pixelSize.y;
+
+    if (mode === "fit") {
+      if (pixelRatio > viewportRatio) {
+        viewportWidth = pixelRatio * viewportHeight;
+      } else {
+        viewportHeight = viewportWidth / pixelRatio;
+      }
+    } else if (mode === "fill") {
+      if (pixelRatio > viewportRatio) {
+        viewportHeight = viewportWidth / pixelRatio;
+      } else {
+        viewportWidth = pixelRatio * viewportHeight;
+      }
+    } else if (mode !== "stretch") {
+      throw new Error(
+        `Invalid mode: '${mode}', should be "fit", "fill" or "stretch"`
+      );
+    }
 
     // convert to xmin, ymin, xmax, ymax
-    const halfWidth = Math.abs(size.x) * 0.5;
-    const halfHeight = Math.abs(size.y) * 0.5;
+    const halfWidth = viewportWidth * 0.5;
+    const halfHeight = viewportHeight * 0.5;
     this.bounds = [
       center.x - halfWidth,
       center.y - halfHeight,
@@ -26,8 +53,8 @@ export class Viewport {
 
     // transform from viewport space to canvas space in pixels
     // invert Y axis to match the math convention
-    const scaleX = pixelSize.x / size.x;
-    const scaleY = -pixelSize.y / size.y;
+    const scaleX = pixelSize.x / viewportWidth;
+    const scaleY = -pixelSize.y / viewportHeight;
     this.pixelTransformX = [scaleX, -this.bounds[0] * scaleX];
     this.pixelTransformY = [scaleY, -this.bounds[3] * scaleY]; // use max because of axis inversion
   }

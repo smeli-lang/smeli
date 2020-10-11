@@ -51,9 +51,9 @@ plot_card: ui.surface {
     color: "background"
     elevation: 2
     item0: plot.view {
-      viewport: {
+      viewport: viewport {
         center: vec2(offset_slider.value, 0)
-        size: vec2(9, 5)
+        size: vec2(4, 4)
       }
       item0: plot.grid {}
       item1: plot.point {
@@ -81,7 +81,10 @@ ui: ui {
     direction: "row"
     responsive: true
     fade: true
-    item0: outline
+    item0: ui.surface {
+      flex: 0
+      item0: outline
+    }
     item1: plot_card
   }
 }

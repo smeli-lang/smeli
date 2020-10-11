@@ -8,9 +8,9 @@ ui: ui {
 # Plot Demo
 
 demo_plot: plot.view {
-  viewport: {
+  viewport: viewport {
     center: vec2(sin(time), sin(time * 0.7))
-    size: vec2(10, 8)
+    size: vec2(8, 8)
   }
   item0: plot.grid {}
   item1: plot.polygon {

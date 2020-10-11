@@ -1,4 +1,10 @@
-import { NumberValue, Scope, ScopeOverride, Vec2 } from "@smeli/core";
+import {
+  NumberValue,
+  Scope,
+  ScopeOverride,
+  StringValue,
+  Vec2,
+} from "@smeli/core";
 
 import { DomNode } from "@smeli/plugin-ui";
 import { Viewport } from "./viewport";
@@ -29,6 +35,14 @@ export const view = {
             {
               name: "size",
               evaluate: () => new Vec2(2, 2),
+            },
+            {
+              name: "ratio",
+              evaluate: () => new Vec2(1, 1),
+            },
+            {
+              name: "mode",
+              evaluate: () => new StringValue("fit"),
             },
           ]);
           return scope;
