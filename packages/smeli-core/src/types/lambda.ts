@@ -43,7 +43,12 @@ export class Lambda extends TypedValue {
     });
 
     // closure expression is evaluated against its evaluation scope
-    return () => this.evaluate(evaluationScope);
+    evaluationScope.push({
+      name: "#return",
+      evaluate: this.evaluate,
+    });
+
+    return () => evaluationScope.evaluate("#return");
   }
 
   __str__() {
