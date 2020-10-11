@@ -1,6 +1,7 @@
 import {
   NumberValue,
   Scope,
+  ScopeOverride,
   StringValue,
   TypedValue,
   Vec2,
@@ -11,6 +12,11 @@ import {
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
 
+// temporary polyfill until Observers are added to the
+// official DOM declarations
+declare class ResizeObserver {
+  constructor(callback: Function);
+}
 const vertexShaderCode = `
   uniform vec2 resolution;
   attribute vec2 position;
@@ -50,8 +56,6 @@ class GLDrawContext extends TypedValue {
     location: WebGLUniformLocation;
     type: TypedConstructor<TypedValue>;
   }[] = [];
-
-  disposed: boolean = false;
 
   constructor() {
     super();
@@ -166,53 +170,28 @@ class GLDrawContext extends TypedValue {
       this.gl.deleteBuffer(this.vbo);
       this.vbo = null;
     }
-
-    this.disposed = true;
   }
 }
 
 function redraw(
   context: GLDrawContext,
+  pixelSize: Vec2,
   uniforms: {
     name: string;
     location: WebGLUniformLocation;
     value: TypedValue;
   }[]
 ) {
-  // this function is one frame late
-  if (context.disposed) {
-    return;
-  }
-
-  const canvas = context.canvas;
   const gl = context.gl;
-
-  const container = canvas.parentElement as HTMLElement;
-  const width = container.clientWidth;
-  const height = container.clientHeight;
-
-  // avoid dividing by zero later; also there's no point
-  // drawing in this case
-  if (width === 0 || height === 0) {
-    return;
-  }
-
-  canvas.width = width;
-  canvas.height = height;
 
   gl.clearColor(0.0, 0.0, 0.0, 0.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  gl.viewport(0, 0, width, height);
+  gl.viewport(0, 0, pixelSize.x, pixelSize.y);
 
   gl.useProgram(context.program);
 
   for (const { name, location, value } of uniforms) {
-    if (name === "resolution") {
-      gl.uniform2f(location, width, height);
-      continue;
-    }
-
     if (value.is(NumberValue)) {
       gl.uniform1f(location, value.value);
     } else if (value.is(Vec2)) {
@@ -266,6 +245,10 @@ export const shader = {
         evaluate: (scope: Scope) => new NumberValue(Date.now() * 0.001),
       },
       {
+        name: "#pixel_size",
+        evaluate: () => new Vec2(0.0, 0.0),
+      },
+      {
         name: "#ui:node",
         evaluate: (scope: Scope) => {
           const styles = evaluateUiStyles(scope);
@@ -276,7 +259,17 @@ export const shader = {
           const context = scope.evaluate("#gl:context").as(GLDrawContext);
           container.appendChild(context.canvas);
 
-          const result = scope.evaluate(() => new DomNode(container));
+          const pixelSizeOverride = new ScopeOverride(scope, "#pixel_size");
+          const resizeObserver = new ResizeObserver((entries: any) => {
+            // use only the latest update
+            const entry = entries[entries.length - 1];
+            const { width, height } = entry.contentRect;
+            pixelSizeOverride.bind(() => new Vec2(width, height));
+          });
+
+          const result = scope.evaluate(
+            () => new DomNode(container, {}, [resizeObserver])
+          );
 
           const quadVertices = [-1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0];
           context.loadGeometry(quadVertices);
@@ -290,12 +283,18 @@ export const shader = {
 
             // cache compiled code
             return (scope: Scope) => {
+              // actual pixel size of the canvas
+              const pixelSize = scope.evaluate("#pixel_size").as(Vec2);
+              if (pixelSize.x === 0 || pixelSize.y === 0) {
+                return result;
+              }
+              context.canvas.width = pixelSize.x;
+              context.canvas.height = pixelSize.y;
+
               const uniforms = context.uniformInfo.map((info) => {
-                // special case here, layout information is resolved
-                // later, when rendering (see redraw())
                 const value =
                   info.name === "resolution"
-                    ? new Vec2(1.0, 1.0)
+                    ? pixelSize
                     : uniformScope.evaluate(info.name).as(info.type);
 
                 return {
@@ -305,8 +304,7 @@ export const shader = {
                 };
               });
 
-              // redraw next frame (ensures correct layout, aspect ratio, etc.)
-              requestAnimationFrame(() => redraw(context, uniforms));
+              redraw(context, pixelSize, uniforms);
 
               return result;
             };
