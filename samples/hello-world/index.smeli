@@ -99,7 +99,7 @@ f: x => sin(time * 0.7) / sin(time + x)
 thing: thing {
   item0: ui.slider {
     min: 5
-    value: 100
+    value: animate(50 + sin(time * 10) * 20, 50, 4)
     label: "Top Slider"
   }
   item1: item0 {
