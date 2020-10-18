@@ -1,18 +1,18 @@
 import {
   traverse,
   BinaryOperator,
-  Binding,
   Expression,
   ExpressionValue,
   FunctionCall,
   Identifier,
   LambdaExpression,
   Literal,
-  NativeFunction,
-  Scope,
+  OverloadedFunction,
   StringValue,
   Visitor,
   Vec2,
+  nativeBinding,
+  traits,
 } from "@smeli/core";
 
 const texSymbols: { [key: string]: string } = {
@@ -64,11 +64,10 @@ const texSymbols: { [key: string]: string } = {
   Omega: "\\Omega",
 };
 
-const texOperators: { [key: string]: string } = {
-  __add__: "+",
-  __sub__: "-",
-  __mul__: "\\times",
-};
+const texOperators = new Map<OverloadedFunction, string>();
+texOperators.set(traits.add, "+");
+texOperators.set(traits.sub, "-");
+texOperators.set(traits.mul, "\\times");
 
 const visitor: Visitor<string> = new Map();
 
@@ -83,12 +82,7 @@ visitor.set(Literal, (literal: Literal) => {
       \\end{array} \\right) \\]`;
   }
 
-  if (value.__str__) {
-    // generic fallback
-    return value.__str__();
-  }
-
-  throw new Error("Unimplemented literal transpilation to TeX");
+  return traits.str.call(value).as(StringValue).value;
 });
 
 visitor.set(Identifier, (identifier: Identifier) => {
@@ -123,11 +117,11 @@ visitor.set(BinaryOperator, (operator: BinaryOperator) => {
   const rhs = traverse(operator.rhs, visitor);
 
   // turn division into a fraction
-  if (operator.operatorName === "__div__") {
+  if (operator.trait === traits.div) {
     return "\\frac{" + lhs + "}{" + rhs + "}";
   }
 
-  return lhs + " " + texOperators[operator.operatorName] + " " + rhs;
+  return lhs + " " + texOperators.get(operator.trait) + " " + rhs;
 });
 
 // transform a Smeli AST into a TEX expression
@@ -153,15 +147,13 @@ function transpileExpression(value: ExpressionValue): string {
   }
 }
 
-export const transpile: Binding = {
-  name: "transpile",
-  evaluate: (parentScope: Scope) =>
-    new NativeFunction(
-      parentScope,
-      [ExpressionValue],
-      (expression: ExpressionValue): StringValue => {
-        const transpiledTexCode = transpileExpression(expression);
-        return new StringValue(transpiledTexCode);
-      }
-    ),
-};
+export const transpile = nativeBinding("transpile", [
+  {
+    argumentTypes: [ExpressionValue],
+    returnType: StringValue,
+    call: (expression: ExpressionValue): StringValue => {
+      const transpiledTexCode = transpileExpression(expression);
+      return new StringValue(transpiledTexCode);
+    },
+  },
+])

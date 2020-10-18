@@ -1,3 +1,5 @@
+import { StringValue } from "./string";
+import { traits } from "./traits";
 import { TypedValue } from "./value";
 
 export class NumberValue extends TypedValue {
@@ -10,24 +12,34 @@ export class NumberValue extends TypedValue {
 
     this.value = value;
   }
-
-  __add__(rhs: TypedValue): TypedValue {
-    return new NumberValue(this.value + rhs.as(NumberValue).value);
-  }
-
-  __sub__(rhs: TypedValue): TypedValue {
-    return new NumberValue(this.value - rhs.as(NumberValue).value);
-  }
-
-  __mul__(rhs: TypedValue): TypedValue {
-    return new NumberValue(this.value * rhs.as(NumberValue).value);
-  }
-
-  __div__(rhs: TypedValue): TypedValue {
-    return new NumberValue(this.value / rhs.as(NumberValue).value);
-  }
-
-  __str__() {
-    return this.value.toString();
-  }
 }
+
+traits.add.implement({
+  argumentTypes: [NumberValue, NumberValue],
+  returnType: StringValue,
+  call: (lhs: NumberValue, rhs: NumberValue) => new NumberValue(lhs.value + rhs.value),
+});
+
+traits.sub.implement({
+  argumentTypes: [NumberValue, NumberValue],
+  returnType: StringValue,
+  call: (lhs: NumberValue, rhs: NumberValue) => new NumberValue(lhs.value - rhs.value),
+});
+
+traits.mul.implement({
+  argumentTypes: [NumberValue, NumberValue],
+  returnType: StringValue,
+  call: (lhs: NumberValue, rhs: NumberValue) => new NumberValue(lhs.value * rhs.value),
+});
+
+traits.div.implement({
+  argumentTypes: [NumberValue, NumberValue],
+  returnType: StringValue,
+  call: (lhs: NumberValue, rhs: NumberValue) => new NumberValue(lhs.value / rhs.value),
+});
+
+traits.str.implement({
+  argumentTypes: [NumberValue],
+  returnType: StringValue,
+  call: (number: NumberValue) => new StringValue(number.value.toString()),
+});

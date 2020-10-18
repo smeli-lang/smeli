@@ -1,3 +1,4 @@
+import { OverloadedFunction } from "./overload";
 import { Binding, Evaluator, Scope } from "./scope";
 import {
   ExpressionValue,
@@ -119,19 +120,17 @@ export class FunctionCall implements Expression {
   }
 }
 
-export type BinaryOperatorType = "__add__" | "__sub__" | "__mul__" | "__div__";
-
 export class BinaryOperator implements Expression {
-  operatorName: BinaryOperatorType;
+  trait: OverloadedFunction;
   lhs: Expression;
   rhs: Expression;
 
   constructor(
-    operatorName: BinaryOperatorType,
+    trait: OverloadedFunction,
     lhs: Expression,
     rhs: Expression
   ) {
-    this.operatorName = operatorName;
+    this.trait = trait;
     this.lhs = lhs;
     this.rhs = rhs;
   }
@@ -140,17 +139,7 @@ export class BinaryOperator implements Expression {
     const lvalue = scope.transient((scope: Scope) => this.lhs.evaluate(scope));
     const rvalue = scope.transient((scope: Scope) => this.rhs.evaluate(scope));
 
-    if (!(this.operatorName in lvalue)) {
-      throw new Error(
-        `Operator ${this.operatorName} not defined for type ${
-          lvalue.type().typeName
-        }`
-      );
-    }
-
-    return (lvalue[this.operatorName] as (rhs: TypedValue) => TypedValue)(
-      rvalue
-    );
+    return this.trait.call(lvalue, rvalue);
   }
 }
 

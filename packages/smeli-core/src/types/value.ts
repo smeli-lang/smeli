@@ -4,15 +4,8 @@ export interface TypedConstructor<T extends TypedValue> {
 }
 
 export abstract class TypedValue {
-  // type traits
+  // called when the value is garbage collected
   dispose?(): void;
-
-  __add__?(rhs: TypedValue): TypedValue;
-  __sub__?(rhs: TypedValue): TypedValue;
-  __mul__?(rhs: TypedValue): TypedValue;
-  __div__?(rhs: TypedValue): TypedValue;
-
-  __str__?(): string;
 
   type(): TypedConstructor<TypedValue> {
     const typedConstructor = this.constructor as TypedConstructor<TypedValue>;

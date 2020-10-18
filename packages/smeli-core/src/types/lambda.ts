@@ -1,5 +1,7 @@
 import { TypedValue } from "./value";
 import { Scope, Evaluator } from "../scope";
+import { traits } from "./traits";
+import { StringValue } from "./string";
 
 export class Lambda extends TypedValue {
   static typeName = "lambda";
@@ -50,8 +52,10 @@ export class Lambda extends TypedValue {
 
     return () => evaluationScope.evaluate("#return");
   }
-
-  __str__() {
-    return `lambda(${this.argumentNames.join(", ")})`;
-  }
 }
+
+traits.str.implement({
+  argumentTypes: [Lambda],
+  returnType: StringValue,
+  call: (lambda: Lambda) => new StringValue(`lambda(${lambda.argumentNames.join(", ")})`),
+})

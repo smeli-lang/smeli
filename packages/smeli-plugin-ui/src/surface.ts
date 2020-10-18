@@ -1,4 +1,4 @@
-import { Scope, StringValue, NumberValue, BoolValue, Vec3 } from "@smeli/core";
+import { Scope, StringValue, NumberValue, BoolValue, traits, Vec3 } from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
 import { evaluateTheme } from "./theme";
@@ -130,9 +130,10 @@ export const surface = {
                 // darken slower
                 brightenFactor /= 2;
               }
-              backgroundColor = backgroundColor.__add__(
-                new Vec3(1.0, 1.0, 1.0).__mul__(new NumberValue(brightenFactor))
-              ) as Vec3;
+              backgroundColor = traits.add.call(
+                backgroundColor,
+                traits.mul.call(new Vec3(1.0, 1.0, 1.0), new NumberValue(brightenFactor))
+              ).as(Vec3);
             }
           } else {
             node.classList.add("container");

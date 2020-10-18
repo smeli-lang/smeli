@@ -10,7 +10,7 @@ import {
   FunctionCall,
   LambdaExpression,
 } from "./ast";
-import { NumberValue, StringValue } from "./types";
+import { NumberValue, StringValue, traits } from "./types";
 import { BoolValue } from "./types/bool";
 
 // grammar
@@ -362,9 +362,9 @@ export function parseTerm(state: ParserState) {
     }
 
     if (operator == "*") {
-      expr = new BinaryOperator("__mul__", expr, factor);
+      expr = new BinaryOperator(traits.mul, expr, factor);
     } else if (operator == "/") {
-      expr = new BinaryOperator("__div__", expr, factor);
+      expr = new BinaryOperator(traits.div, expr, factor);
     }
 
     parseWhitespace(state);
@@ -399,9 +399,9 @@ export function parseExpression(state: ParserState): Expression | null {
     }
 
     if (operator == "+") {
-      expr = new BinaryOperator("__add__", expr, term);
+      expr = new BinaryOperator(traits.add, expr, term);
     } else if (operator == "-") {
-      expr = new BinaryOperator("__sub__", expr, term);
+      expr = new BinaryOperator(traits.sub, expr, term);
     }
 
     parseWhitespace(state);

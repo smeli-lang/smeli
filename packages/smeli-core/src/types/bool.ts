@@ -1,3 +1,5 @@
+import { StringValue } from "./string";
+import { traits } from "./traits";
 import { TypedValue } from "./value";
 
 export class BoolValue extends TypedValue {
@@ -9,8 +11,10 @@ export class BoolValue extends TypedValue {
     super();
     this.value = value;
   }
-
-  __str__() {
-    return this.value ? "true" : "false";
-  }
 }
+
+traits.str.implement({
+  argumentTypes: [BoolValue],
+  returnType: StringValue,
+  call: (value: BoolValue) => new StringValue(value.value ? "true" : "false"),
+})

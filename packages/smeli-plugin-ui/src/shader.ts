@@ -7,6 +7,7 @@ import {
   Vec2,
   Vec3,
   TypedConstructor,
+  traits,
 } from "@smeli/core";
 
 import { DomNode } from "./types";
@@ -229,7 +230,7 @@ export const shader = {
                 .evaluate("#gl:start_time")
                 .as(NumberValue);
 
-              return currentTime.__sub__(startTime);
+              return traits.sub.call(currentTime, startTime);
             },
           });
 

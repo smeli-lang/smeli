@@ -1,41 +1,42 @@
-import { TypedConstructor, TypedValue } from "./value";
-import { Scope, Evaluator } from "../scope";
+import { Overload, OverloadedFunction } from "../overload";
+import { Binding, Evaluator, Scope } from "../scope";
+import { TypedValue } from "./value";
 
 export class NativeFunction extends TypedValue {
   static typeName = "native_function";
 
   parentScope: Scope;
-  argumentTypes: TypedConstructor<TypedValue>[];
-  compute: (...args: any[]) => TypedValue;
+  overloadedFunction: OverloadedFunction;
 
   constructor(
     parentScope: Scope,
-    argumentTypes: TypedConstructor<TypedValue>[],
-    compute: (...args: any[]) => TypedValue
+    overloadedFunction: OverloadedFunction,
   ) {
     super();
 
     this.parentScope = parentScope;
-    this.argumentTypes = argumentTypes;
-    this.compute = compute;
+    this.overloadedFunction = overloadedFunction;
   }
 
   __call_site__(scope: Scope, args: Evaluator[]): Evaluator {
-    // simple signature check (length only)
-    if (this.argumentTypes.length !== args.length) {
-      throw new Error(
-        `Mismatched number of arguments, expected ${this.argumentTypes.length} but got ${args.length}`
-      );
-    }
-
     return (scope: Scope) => {
       // evaluate arguments at the call site
-      const argValues = this.argumentTypes.map((type, index) =>
-        scope.transient(args[index]).as(type)
-      );
+      const argValues = args.map(arg => scope.transient(arg));
 
       // call the native evaluator
-      return this.compute(...argValues);
-    };
+      return this.overloadedFunction.call(...argValues);
+    }
   }
+}
+
+export function nativeBinding(name: string, overloads: Overload[]): Binding {
+  const overloadedFunction = new OverloadedFunction(name);
+  overloads.forEach(overload => overloadedFunction.implement(overload));
+
+  const binding: Binding = {
+    name,
+    evaluate: (parentScope: Scope) =>  new NativeFunction(parentScope, overloadedFunction),
+  };
+
+  return binding;
 }

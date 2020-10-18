@@ -1,5 +1,7 @@
 import { TypedValue } from "./value";
 import { NumberValue } from "./number";
+import { traits } from "./traits";
+import { StringValue } from "./string";
 
 export class Vec3 extends TypedValue {
   static typeName = "vec3";
@@ -25,28 +27,106 @@ export class Vec3 extends TypedValue {
       return `rgb(${this.x * 255.0}, ${this.y * 255.0}, ${this.z * 255.0})`;
     }
   }
-
-  __add__(rhs: TypedValue): TypedValue {
-    const vec3 = rhs.as(Vec3);
-    return new Vec3(this.x + vec3.x, this.y + vec3.y, this.z + vec3.z);
-  }
-
-  __sub__(rhs: TypedValue): TypedValue {
-    const vec3 = rhs.as(Vec3);
-    return new Vec3(this.x - vec3.x, this.y - vec3.y, this.z - vec3.z);
-  }
-
-  __mul__(rhs: TypedValue): TypedValue {
-    const factor = rhs.as(NumberValue).value;
-    return new Vec3(this.x * factor, this.y * factor, this.z * factor);
-  }
-
-  __div__(rhs: TypedValue): TypedValue {
-    const factor = 1.0 / rhs.as(NumberValue).value;
-    return new Vec3(this.x * factor, this.y * factor, this.z * factor);
-  }
-
-  __str__() {
-    return `vec3(${this.x}, ${this.y}, ${this.z})`;
-  }
 }
+
+traits.add.implement({
+  argumentTypes: [Vec3, Vec3],
+  returnType: Vec3,
+  call(lhs: Vec3, rhs: Vec3): Vec3 {
+    return new Vec3(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.y);
+  },
+});
+
+traits.add.implement({
+  argumentTypes: [NumberValue, Vec3],
+  returnType: Vec3,
+  call(lhs: NumberValue, rhs: Vec3): Vec3 {
+    return new Vec3(lhs.value + rhs.x, lhs.value + rhs.y, lhs.value + rhs.z);
+  },
+});
+
+traits.add.implement({
+  argumentTypes: [Vec3, NumberValue],
+  returnType: Vec3,
+  call(lhs: Vec3, rhs: NumberValue): Vec3 {
+    return new Vec3(lhs.x + rhs.value, lhs.y + rhs.value, lhs.z + rhs.value);
+  },
+});
+
+traits.sub.implement({
+  argumentTypes: [Vec3, Vec3],
+  returnType: Vec3,
+  call(lhs: Vec3, rhs: Vec3): Vec3 {
+    return new Vec3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.y);
+  },
+});
+
+traits.sub.implement({
+  argumentTypes: [NumberValue, Vec3],
+  returnType: Vec3,
+  call(lhs: NumberValue, rhs: Vec3): Vec3 {
+    return new Vec3(lhs.value - rhs.x, lhs.value - rhs.y, lhs.value - rhs.z);
+  },
+});
+
+traits.sub.implement({
+  argumentTypes: [Vec3, NumberValue],
+  returnType: Vec3,
+  call(lhs: Vec3, rhs: NumberValue): Vec3 {
+    return new Vec3(lhs.x - rhs.value, lhs.y - rhs.value, lhs.z - rhs.value);
+  },
+});
+
+traits.mul.implement({
+  argumentTypes: [Vec3, Vec3],
+  returnType: Vec3,
+  call(lhs: Vec3, rhs: Vec3): Vec3 {
+    return new Vec3(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.y);
+  },
+});
+
+traits.mul.implement({
+  argumentTypes: [NumberValue, Vec3],
+  returnType: Vec3,
+  call(lhs: NumberValue, rhs: Vec3): Vec3 {
+    return new Vec3(lhs.value * rhs.x, lhs.value * rhs.y, lhs.value * rhs.z);
+  },
+});
+
+traits.mul.implement({
+  argumentTypes: [Vec3, NumberValue],
+  returnType: Vec3,
+  call(lhs: Vec3, rhs: NumberValue): Vec3 {
+    return new Vec3(lhs.x * rhs.value, lhs.y * rhs.value, lhs.z * rhs.value);
+  },
+});
+
+traits.div.implement({
+  argumentTypes: [Vec3, Vec3],
+  returnType: Vec3,
+  call(lhs: Vec3, rhs: Vec3): Vec3 {
+    return new Vec3(lhs.x / rhs.x, lhs.y / rhs.y, lhs.z / rhs.y);
+  },
+});
+
+traits.div.implement({
+  argumentTypes: [NumberValue, Vec3],
+  returnType: Vec3,
+  call(lhs: NumberValue, rhs: Vec3): Vec3 {
+    return new Vec3(lhs.value / rhs.x, lhs.value / rhs.y, lhs.value / rhs.z);
+  },
+});
+
+traits.div.implement({
+  argumentTypes: [Vec3, NumberValue],
+  returnType: Vec3,
+  call(lhs: Vec3, rhs: NumberValue): Vec3 {
+    return new Vec3(lhs.x / rhs.value, lhs.y / rhs.value, lhs.z / rhs.value);
+  },
+});
+
+traits.str.implement({
+  argumentTypes: [Vec3],
+  returnType: StringValue,
+  call: (vec: Vec3) => new StringValue(`vec3(${vec.x}, ${vec.y}, ${vec.z})`),
+});
