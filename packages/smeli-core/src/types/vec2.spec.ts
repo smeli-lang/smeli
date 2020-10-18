@@ -1,4 +1,4 @@
-import { NumberValue } from "./index";
+import { NumberValue } from "./number";
 import { StringValue } from "./string";
 import { traits } from "./traits";
 import { Vec2 } from "./vec2";
