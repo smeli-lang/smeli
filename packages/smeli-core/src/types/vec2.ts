@@ -2,6 +2,7 @@ import { TypedValue } from "./value";
 import { NumberValue } from "./number";
 import { traits } from "./traits";
 import { StringValue } from "./string";
+import { AnyType } from "./overload";
 
 export class Vec2 extends TypedValue {
   static typeName = "vec2";
@@ -14,6 +15,24 @@ export class Vec2 extends TypedValue {
 
     this.x = x;
     this.y = y;
+  }
+
+  swizzle(members: string) {
+    const values = Array.from(members).map(name => {
+      switch (name) {
+        case "x":
+        case "r":
+          return this.x;
+
+        case "y":
+        case "g":
+          return this.y;
+
+        default: throw new Error(`Vec2 has no member named '${name}'`);
+      }
+    });
+
+    return values;
   }
 }
 
@@ -112,6 +131,20 @@ traits.div.implement({
     return new Vec2(lhs.x / rhs.value, lhs.y / rhs.value);
   },
 });
+
+traits.index.implement({
+  argumentTypes: [Vec2, StringValue],
+  returnType: AnyType,
+  call: (vec: Vec2, members: StringValue) => {
+    const values = vec.swizzle(members.value);
+    switch (values.length) {
+      case 1: return new NumberValue(values[0]);
+      case 2: return new Vec2(values[0], values[1]);
+    }
+
+    throw new Error("Exceeded maximum vector swizzling size");
+  }
+})
 
 traits.str.implement({
   argumentTypes: [Vec2],
