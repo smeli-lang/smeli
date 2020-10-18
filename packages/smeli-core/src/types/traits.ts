@@ -1,6 +1,6 @@
-import { Overload, OverloadedFunction } from "../overload";
-import { StringValue } from "./string";
 import { TypedConstructor, TypedValue } from "./value";
+import { StringValue } from "./string";
+import { Overload, OverloadedFunction } from "./overload";
 
 type Validator = (traitName: string, overload: Overload) => void;
 
@@ -15,6 +15,12 @@ const validate = (traitName: string, validators: Validator[]) => {
 const argumentCount = (count: number) => (traitName: string, overload: Overload) => {
   if (overload.argumentTypes.length !== count) {
     throw new Error(`Trait '${traitName}' always takes ${count} arguments`);
+  }
+}
+
+const argumentType = (index: number, type: TypedConstructor<TypedValue>) => (traitName: string, overload: Overload) => {
+  if (overload.argumentTypes[index] !== type) {
+    throw new Error(`Trait '${traitName}' always takes a '${overload.argumentTypes[index].typeName}' argument at position ${index}`);
   }
 }
 
@@ -43,6 +49,11 @@ export const traits = {
 
   div: defineTrait("div", [
     argumentCount(2),
+  ]),
+
+  index: defineTrait("index", [
+    argumentCount(2),
+    argumentType(1, StringValue),
   ]),
 
   str: defineTrait("str", [

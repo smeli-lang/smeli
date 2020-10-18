@@ -1,6 +1,6 @@
-import { Overload, OverloadedFunction } from "../overload";
-import { Binding, Evaluator, Scope } from "../scope";
 import { TypedValue } from "./value";
+import { Overload, OverloadedFunction } from "./overload";
+import { Binding, Evaluator, Scope } from "../scope";
 
 export class NativeFunction extends TypedValue {
   static typeName = "native_function";

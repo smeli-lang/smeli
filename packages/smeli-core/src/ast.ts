@@ -1,11 +1,12 @@
-import { OverloadedFunction } from "./overload";
 import { Binding, Evaluator, Scope } from "./scope";
 import {
   ExpressionValue,
   Lambda,
   NativeFunction,
+  OverloadedFunction,
   TypedValue,
   StringValue,
+  traits,
 } from "./types";
 
 export type ParameterList = { [key: string]: TypedValue };
@@ -27,26 +28,29 @@ export class Literal implements Expression {
 }
 
 export class Identifier implements Expression {
-  scopeNames: string[];
+  scopeNames: StringValue[];
   name: string;
+  nameValue: StringValue;
 
   constructor(names: string[]) {
-    this.scopeNames = names.slice(0, names.length - 1);
+    this.scopeNames = names.slice(0, names.length - 1).map(name => new StringValue(name));
     this.name = names[names.length - 1];
+    this.nameValue = new StringValue(this.name);
   }
 
   evaluate(scope: Scope) {
+    let container: TypedValue = scope;
     for (let i = 0; i < this.scopeNames.length; i++) {
-      scope = scope.evaluate(this.scopeNames[i]).as(Scope);
+      container = traits.index.call(container, this.scopeNames[i]);
     }
 
     if (this.name[0] === "&") {
       // return expression AST instead of the evaluated result
       const symbolName = this.name.substr(1);
-      return new ExpressionValue(symbolName, scope.ast(symbolName));
+      return new ExpressionValue(symbolName, container.as(Scope).ast(symbolName));
     }
 
-    return scope.evaluate(this.name);
+    return traits.index.call(container, this.nameValue);
   }
 }
 

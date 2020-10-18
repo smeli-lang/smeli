@@ -1,5 +1,5 @@
 import { CacheEntry } from "./cache";
-import { TypedValue, TypedConstructor } from "./types/value";
+import { AnyType, StringValue, traits, TypedValue, TypedConstructor } from "./types";
 
 export type Evaluator = (scope: Scope) => TypedValue | Evaluator;
 
@@ -250,3 +250,9 @@ export class Scope extends TypedValue {
     return this.parent?.root() || this;
   }
 }
+
+traits.index.implement({
+  argumentTypes: [Scope, StringValue],
+  returnType: AnyType,
+  call: (scope: Scope, name: StringValue) => scope.evaluate(name.value),
+})

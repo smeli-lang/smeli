@@ -1,4 +1,5 @@
 import {
+  AnyType,
   Lambda,
   nativeBinding,
   NumberValue,
@@ -9,7 +10,6 @@ import {
   Vec3,
 } from "./types";
 import { Binding, Scope } from "./scope";
-import { AnyType } from "./overload";
 
 const animate: Binding = {
   name: "animate",

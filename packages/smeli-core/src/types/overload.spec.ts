@@ -1,5 +1,6 @@
+import { NumberValue } from "./number";
 import { OverloadedFunction } from "./overload"
-import { NumberValue, StringValue } from "./types";
+import { StringValue } from "./string";
 
 test("basic call", () => {
   const f = new OverloadedFunction("f");

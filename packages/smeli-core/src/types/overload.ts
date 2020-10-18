@@ -1,4 +1,4 @@
-import { TypedConstructor, TypedValue } from "./types";
+import { TypedConstructor, TypedValue } from "./value";
 
 export class AnyType extends TypedValue {
   static typeName = "any";
