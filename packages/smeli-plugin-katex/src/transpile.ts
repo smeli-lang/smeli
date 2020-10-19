@@ -1,18 +1,22 @@
 import {
+  AddTrait,
   traverse,
   BinaryOperator,
+  DivTrait,
   Expression,
   ExpressionValue,
   FunctionCall,
   Identifier,
   LambdaExpression,
   Literal,
+  MulTrait,
   OverloadedFunction,
   StringValue,
+  SubTrait,
+  StrTrait,
   Visitor,
   Vec2,
   nativeBinding,
-  traits,
 } from "@smeli/core";
 
 const texSymbols: { [key: string]: string } = {
@@ -65,9 +69,9 @@ const texSymbols: { [key: string]: string } = {
 };
 
 const texOperators = new Map<OverloadedFunction, string>();
-texOperators.set(traits.add, "+");
-texOperators.set(traits.sub, "-");
-texOperators.set(traits.mul, "\\times");
+texOperators.set(AddTrait, "+");
+texOperators.set(SubTrait, "-");
+texOperators.set(MulTrait, "\\times");
 
 const visitor: Visitor<string> = new Map();
 
@@ -82,7 +86,7 @@ visitor.set(Literal, (literal: Literal) => {
       \\end{array} \\right) \\]`;
   }
 
-  return traits.str.call(value).as(StringValue).value;
+  return StrTrait.call(value).as(StringValue).value;
 });
 
 visitor.set(Identifier, (identifier: Identifier) => {
@@ -117,7 +121,7 @@ visitor.set(BinaryOperator, (operator: BinaryOperator) => {
   const rhs = traverse(operator.rhs, visitor);
 
   // turn division into a fraction
-  if (operator.trait === traits.div) {
+  if (operator.trait === DivTrait) {
     return "\\frac{" + lhs + "}{" + rhs + "}";
   }
 

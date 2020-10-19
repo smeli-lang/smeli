@@ -4,11 +4,11 @@ import {
   nativeBinding,
   NumberValue,
   StringValue,
-  traits,
   TypedValue,
   Vec2,
   Vec3,
 } from "./types";
+import { AddTrait, MulTrait, StrTrait } from "./traits";
 import { Binding, Scope } from "./scope";
 
 const animate: Binding = {
@@ -40,10 +40,10 @@ const animate: Binding = {
           finished = true;
         }
 
-        const weightedStart = traits.mul.call(startValue, new NumberValue(1.0 - t));
-        const weightedEnd = traits.mul.call(endValue, new NumberValue(t));
+        const weightedStart = MulTrait.call(startValue, new NumberValue(1.0 - t));
+        const weightedEnd = MulTrait.call(endValue, new NumberValue(t));
 
-        return traits.add.call(weightedStart, weightedEnd);
+        return AddTrait.call(weightedStart, weightedEnd);
       };
     }),
 };
@@ -86,7 +86,7 @@ const str = nativeBinding("str", [
     argumentTypes: [AnyType],
     returnType: StringValue,
     call: (value: TypedValue): StringValue => {
-      return traits.str.call(value).as(StringValue);
+      return StrTrait.call(value).as(StringValue);
     },
   },
 ])

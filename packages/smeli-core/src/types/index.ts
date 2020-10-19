@@ -1,6 +1,5 @@
 export { TypedConstructor, TypedValue } from "./value";
-export { AnyType, OverloadedFunction } from "./overload";
-export { traits } from "./traits";
+export { AnyType, Overload, OverloadedFunction } from "./overload";
 
 export { BoolValue } from "./bool";
 export { ExpressionValue } from "./expression";

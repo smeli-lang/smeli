@@ -3,11 +3,11 @@ import {
   Scope,
   ScopeOverride,
   StringValue,
+  SubTrait,
   TypedValue,
   Vec2,
   Vec3,
   TypedConstructor,
-  traits,
 } from "@smeli/core";
 
 import { DomNode } from "./types";
@@ -230,7 +230,7 @@ export const shader = {
                 .evaluate("#gl:start_time")
                 .as(NumberValue);
 
-              return traits.sub.call(currentTime, startTime);
+              return SubTrait.call(currentTime, startTime);
             },
           });
 

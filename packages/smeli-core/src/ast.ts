@@ -6,8 +6,8 @@ import {
   OverloadedFunction,
   TypedValue,
   StringValue,
-  traits,
 } from "./types";
+import { IndexTrait } from "./traits";
 
 export type ParameterList = { [key: string]: TypedValue };
 
@@ -41,7 +41,7 @@ export class Identifier implements Expression {
   evaluate(scope: Scope) {
     let container: TypedValue = scope;
     for (let i = 0; i < this.scopeNames.length; i++) {
-      container = traits.index.call(container, this.scopeNames[i]);
+      container = IndexTrait.call(container, this.scopeNames[i]);
     }
 
     if (this.name[0] === "&") {
@@ -50,7 +50,7 @@ export class Identifier implements Expression {
       return new ExpressionValue(symbolName, container.as(Scope).ast(symbolName));
     }
 
-    return traits.index.call(container, this.nameValue);
+    return IndexTrait.call(container, this.nameValue);
   }
 }
 

@@ -6,6 +6,7 @@ export * from "./debug";
 export * from "./override";
 export * from "./scope";
 export * from "./types";
+export * from "./traits";
 
 export { PluginDefinition } from "./plugins";
 
