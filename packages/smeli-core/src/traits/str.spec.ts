@@ -1,4 +1,4 @@
-import { BoolValue, NumberValue, StringValue, Vec2 } from "../types";
+import { BoolValue, StringValue, Vec2 } from "../types";
 import { StrTrait } from "./str";
 
 test("str(bool)", () => {

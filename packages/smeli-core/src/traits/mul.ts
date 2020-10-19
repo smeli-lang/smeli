@@ -1,14 +1,13 @@
 import { NumberValue, StringValue, Vec2, Vec3 } from "../types";
 import { argumentCount, defineTrait } from "./validation";
 
-export const MulTrait = defineTrait("mul", [
-  argumentCount(2),
-]);
+export const MulTrait = defineTrait("mul", [argumentCount(2)]);
 
 MulTrait.implement({
   argumentTypes: [NumberValue, NumberValue],
   returnType: StringValue,
-  call: (lhs: NumberValue, rhs: NumberValue) => new NumberValue(lhs.value * rhs.value),
+  call: (lhs: NumberValue, rhs: NumberValue) =>
+    new NumberValue(lhs.value * rhs.value),
 });
 
 MulTrait.implement({

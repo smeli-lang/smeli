@@ -40,7 +40,10 @@ const animate: Binding = {
           finished = true;
         }
 
-        const weightedStart = MulTrait.call(startValue, new NumberValue(1.0 - t));
+        const weightedStart = MulTrait.call(
+          startValue,
+          new NumberValue(1.0 - t)
+        );
         const weightedEnd = MulTrait.call(endValue, new NumberValue(t));
 
         return AddTrait.call(weightedStart, weightedEnd);
@@ -57,7 +60,7 @@ const cos = nativeBinding("cos", [
       return new NumberValue(result);
     },
   },
-])
+]);
 
 const min = nativeBinding("min", [
   {
@@ -68,7 +71,7 @@ const min = nativeBinding("min", [
       return new NumberValue(result);
     },
   },
-])
+]);
 
 const max = nativeBinding("max", [
   {
@@ -79,7 +82,7 @@ const max = nativeBinding("max", [
       return new NumberValue(result);
     },
   },
-])
+]);
 
 const str = nativeBinding("str", [
   {
@@ -89,7 +92,7 @@ const str = nativeBinding("str", [
       return StrTrait.call(value).as(StringValue);
     },
   },
-])
+]);
 
 const outline: Binding = {
   name: "#outline",
@@ -105,7 +108,7 @@ const sin = nativeBinding("sin", [
       return new NumberValue(result);
     },
   },
-])
+]);
 
 const vec2 = nativeBinding("vec2", [
   {
@@ -113,15 +116,16 @@ const vec2 = nativeBinding("vec2", [
     returnType: Vec2,
     call: (x: NumberValue, y: NumberValue) => new Vec2(x.value, y.value),
   },
-])
+]);
 
 const vec3 = nativeBinding("vec3", [
   {
     argumentTypes: [NumberValue, NumberValue, NumberValue],
     returnType: Vec3,
-    call: (x: NumberValue, y: NumberValue, z: NumberValue) => new Vec3(x.value, y.value, z.value),
+    call: (x: NumberValue, y: NumberValue, z: NumberValue) =>
+      new Vec3(x.value, y.value, z.value),
   },
-])
+]);
 
 class Timer extends TypedValue {
   static typeName = "timer";

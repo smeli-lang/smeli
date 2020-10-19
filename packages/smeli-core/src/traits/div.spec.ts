@@ -8,7 +8,7 @@ test("div(number, number)", () => {
   const v3 = DivTrait.call(v1, v2).as(NumberValue);
   expect(v3.value).toBe(-2.5);
 });
-  
+
 test("div(vec2, vec2)", () => {
   const v1 = new Vec2(6.0, 5.0);
   const v2 = new Vec2(3.0, -5.0);

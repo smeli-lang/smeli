@@ -1,4 +1,11 @@
-import { BoolValue, Lambda, NumberValue, StringValue, Vec2, Vec3 } from "../types";
+import {
+  BoolValue,
+  Lambda,
+  NumberValue,
+  StringValue,
+  Vec2,
+  Vec3,
+} from "../types";
 import { argumentCount, defineTrait, returnType } from "./validation";
 
 export const StrTrait = defineTrait("str", [
@@ -10,13 +17,14 @@ StrTrait.implement({
   argumentTypes: [BoolValue],
   returnType: StringValue,
   call: (value: BoolValue) => new StringValue(value.value ? "true" : "false"),
-})
+});
 
 StrTrait.implement({
   argumentTypes: [Lambda],
   returnType: StringValue,
-  call: (lambda: Lambda) => new StringValue(`lambda(${lambda.argumentNames.join(", ")})`),
-})
+  call: (lambda: Lambda) =>
+    new StringValue(`lambda(${lambda.argumentNames.join(", ")})`),
+});
 
 StrTrait.implement({
   argumentTypes: [NumberValue],

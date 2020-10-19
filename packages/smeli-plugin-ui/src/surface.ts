@@ -1,4 +1,12 @@
-import { AddTrait, Scope, StringValue, MulTrait, NumberValue, BoolValue, Vec3 } from "@smeli/core";
+import {
+  AddTrait,
+  Scope,
+  StringValue,
+  MulTrait,
+  NumberValue,
+  BoolValue,
+  Vec3,
+} from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
 import { evaluateTheme } from "./theme";
@@ -132,7 +140,10 @@ export const surface = {
               }
               backgroundColor = AddTrait.call(
                 backgroundColor,
-                MulTrait.call(new Vec3(1.0, 1.0, 1.0), new NumberValue(brightenFactor))
+                MulTrait.call(
+                  new Vec3(1.0, 1.0, 1.0),
+                  new NumberValue(brightenFactor)
+                )
               ).as(Vec3);
             }
           } else {

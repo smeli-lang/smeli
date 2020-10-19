@@ -1,14 +1,13 @@
 import { NumberValue, StringValue, Vec2, Vec3 } from "../types";
 import { argumentCount, defineTrait } from "./validation";
 
-export const DivTrait = defineTrait("div", [
-  argumentCount(2),
-]);
+export const DivTrait = defineTrait("div", [argumentCount(2)]);
 
 DivTrait.implement({
   argumentTypes: [NumberValue, NumberValue],
   returnType: StringValue,
-  call: (lhs: NumberValue, rhs: NumberValue) => new NumberValue(lhs.value / rhs.value),
+  call: (lhs: NumberValue, rhs: NumberValue) =>
+    new NumberValue(lhs.value / rhs.value),
 });
 
 DivTrait.implement({

@@ -1,4 +1,11 @@
-import { AnyType, NumberValue, StringValue, TypedValue, Vec2, Vec3 } from "../types";
+import {
+  AnyType,
+  NumberValue,
+  StringValue,
+  TypedValue,
+  Vec2,
+  Vec3,
+} from "../types";
 import { Scope } from "../scope";
 import { argumentCount, argumentType, defineTrait } from "./validation";
 
@@ -9,9 +16,12 @@ export const IndexTrait = defineTrait("index", [
 
 function arrayToVectorType(values: number[]): TypedValue {
   switch (values.length) {
-    case 1: return new NumberValue(values[0]);
-    case 2: return new Vec2(values[0], values[1]);
-    case 3: return new Vec3(values[0], values[1], values[2]);
+    case 1:
+      return new NumberValue(values[0]);
+    case 2:
+      return new Vec2(values[0], values[1]);
+    case 3:
+      return new Vec3(values[0], values[1], values[2]);
   }
 
   throw new Error("Exceeded maximum vector swizzling size");
@@ -23,8 +33,8 @@ IndexTrait.implement({
   call: (vec: Vec2, members: StringValue) => {
     const values = vec.swizzle(members.value);
     return arrayToVectorType(values);
-  }
-})
+  },
+});
 
 IndexTrait.implement({
   argumentTypes: [Vec3, StringValue],
@@ -32,11 +42,11 @@ IndexTrait.implement({
   call: (vec: Vec3, members: StringValue) => {
     const values = vec.swizzle(members.value);
     return arrayToVectorType(values);
-  }
-})
+  },
+});
 
 IndexTrait.implement({
   argumentTypes: [Scope, StringValue],
   returnType: AnyType,
   call: (scope: Scope, name: StringValue) => scope.evaluate(name.value),
-})
+});

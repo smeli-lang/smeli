@@ -160,4 +160,4 @@ export const transpile = nativeBinding("transpile", [
       return new StringValue(transpiledTexCode);
     },
   },
-])
+]);

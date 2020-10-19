@@ -1,14 +1,13 @@
 import { NumberValue, StringValue, Vec2, Vec3 } from "../types";
 import { argumentCount, defineTrait } from "./validation";
 
-export const SubTrait = defineTrait("sub", [
-  argumentCount(2),
-]);
+export const SubTrait = defineTrait("sub", [argumentCount(2)]);
 
 SubTrait.implement({
   argumentTypes: [NumberValue, NumberValue],
   returnType: StringValue,
-  call: (lhs: NumberValue, rhs: NumberValue) => new NumberValue(lhs.value - rhs.value),
+  call: (lhs: NumberValue, rhs: NumberValue) =>
+    new NumberValue(lhs.value - rhs.value),
 });
 
 SubTrait.implement({

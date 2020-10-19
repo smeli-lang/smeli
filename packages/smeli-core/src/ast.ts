@@ -33,7 +33,9 @@ export class Identifier implements Expression {
   nameValue: StringValue;
 
   constructor(names: string[]) {
-    this.scopeNames = names.slice(0, names.length - 1).map(name => new StringValue(name));
+    this.scopeNames = names
+      .slice(0, names.length - 1)
+      .map((name) => new StringValue(name));
     this.name = names[names.length - 1];
     this.nameValue = new StringValue(this.name);
   }
@@ -47,7 +49,10 @@ export class Identifier implements Expression {
     if (this.name[0] === "&") {
       // return expression AST instead of the evaluated result
       const symbolName = this.name.substr(1);
-      return new ExpressionValue(symbolName, container.as(Scope).ast(symbolName));
+      return new ExpressionValue(
+        symbolName,
+        container.as(Scope).ast(symbolName)
+      );
     }
 
     return IndexTrait.call(container, this.nameValue);
@@ -129,11 +134,7 @@ export class BinaryOperator implements Expression {
   lhs: Expression;
   rhs: Expression;
 
-  constructor(
-    trait: OverloadedFunction,
-    lhs: Expression,
-    rhs: Expression
-  ) {
+  constructor(trait: OverloadedFunction, lhs: Expression, rhs: Expression) {
     this.trait = trait;
     this.lhs = lhs;
     this.rhs = rhs;

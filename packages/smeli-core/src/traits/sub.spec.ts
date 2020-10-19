@@ -8,7 +8,7 @@ test("sub(number, number)", () => {
   const v3 = SubTrait.call(v1, v2).as(NumberValue);
   expect(v3.value).toBe(22.0);
 });
-  
+
 test("sub(vec2, vec2)", () => {
   const v1 = new Vec2(2.0, 3.0);
   const v2 = new Vec2(12.0, -5.0);

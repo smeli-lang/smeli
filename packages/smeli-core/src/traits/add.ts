@@ -1,20 +1,20 @@
 import { NumberValue, StringValue, Vec2, Vec3 } from "../types";
 import { argumentCount, defineTrait } from "./validation";
 
-export const AddTrait = defineTrait("add", [
-  argumentCount(2),
-]);
+export const AddTrait = defineTrait("add", [argumentCount(2)]);
 
 AddTrait.implement({
   argumentTypes: [NumberValue, NumberValue],
   returnType: StringValue,
-  call: (lhs: NumberValue, rhs: NumberValue) => new NumberValue(lhs.value + rhs.value),
+  call: (lhs: NumberValue, rhs: NumberValue) =>
+    new NumberValue(lhs.value + rhs.value),
 });
 
 AddTrait.implement({
   argumentTypes: [StringValue, StringValue],
   returnType: StringValue,
-  call: (lhs: StringValue, rhs: StringValue) => new StringValue(lhs.value + rhs.value),
+  call: (lhs: StringValue, rhs: StringValue) =>
+    new StringValue(lhs.value + rhs.value),
 });
 
 AddTrait.implement({
