@@ -132,6 +132,24 @@ const sin = nativeBinding("sin", [
   },
 ]);
 
+const smoothstep = nativeBinding("smoothstep", [
+  {
+    argumentTypes: [NumberValue, NumberValue, NumberValue],
+    returnType: NumberValue,
+    call: (
+      edge0: NumberValue,
+      edge1: NumberValue,
+      x: NumberValue
+    ): NumberValue => {
+      let t = (x.value - edge0.value) / (edge1.value - edge0.value);
+      t = Math.max(t, 0.0);
+      t = Math.min(t, 1.0);
+      const result = t * t * (3 - 2 * t);
+      return new NumberValue(result);
+    },
+  },
+]);
+
 const step = nativeBinding("step", [
   {
     argumentTypes: [NumberValue, NumberValue],
@@ -218,6 +236,7 @@ export const builtins: Binding[] = [
   max,
   outline,
   sin,
+  smoothstep,
   step,
   str,
   tan,
