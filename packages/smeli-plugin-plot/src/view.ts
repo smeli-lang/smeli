@@ -85,6 +85,17 @@ export const view = {
         evaluate: () => new Vec2(0.0, 0.0),
       },
       {
+        name: "ratio",
+        evaluate: (scope: Scope) => {
+          const pixelSize = scope.evaluate("#pixel_size").as(Vec2);
+          if (pixelSize.x === 0 || pixelSize.y === 0) {
+            return new NumberValue(0);
+          } else {
+            return new NumberValue(pixelSize.x / pixelSize.y);
+          }
+        },
+      },
+      {
         name: "#ui:node",
         evaluate: (scope: Scope) => {
           const styles = evaluatePlotStyles(scope);
