@@ -207,7 +207,10 @@ export class Comment implements Statement {
     this.text = text;
 
     const cssClass = headingLevel === 1 ? "important" : "normal";
-    const html = `<h${headingLevel} class=${cssClass}>${text}</h${headingLevel}>`;
+    const html =
+      this.text !== ""
+        ? `<h${headingLevel} class=${cssClass}>${text}</h${headingLevel}>`
+        : "";
 
     this.binding = {
       name: "#outline",
