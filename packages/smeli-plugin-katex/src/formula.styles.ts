@@ -10,6 +10,6 @@ export const formulaStyles = (theme: Theme) => ({
   "text-align": "center",
 
   "& .katex": {
-    "font-size": "48px",
+    "font-size": "32px",
   },
 });
