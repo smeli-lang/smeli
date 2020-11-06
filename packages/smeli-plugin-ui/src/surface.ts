@@ -63,6 +63,22 @@ export const surface = {
         name: "item3",
         evaluate: () => new NumberValue(0),
       },
+      {
+        name: "item4",
+        evaluate: () => new NumberValue(0),
+      },
+      {
+        name: "item5",
+        evaluate: () => new NumberValue(0),
+      },
+      {
+        name: "item6",
+        evaluate: () => new NumberValue(0),
+      },
+      {
+        name: "item7",
+        evaluate: () => new NumberValue(0),
+      },
 
       {
         name: "#ui:node",
@@ -168,6 +184,10 @@ export const surface = {
               scope.evaluate("item1"),
               scope.evaluate("item2"),
               scope.evaluate("item3"),
+              scope.evaluate("item4"),
+              scope.evaluate("item5"),
+              scope.evaluate("item6"),
+              scope.evaluate("item7"),
             ];
             const itemNodes = items
               .filter((item) => item.is(Scope))
