@@ -51,12 +51,34 @@ const animate: Binding = {
     }),
 };
 
+const ceil = nativeBinding("ceil", [
+  {
+    argumentTypes: [NumberValue],
+    returnType: NumberValue,
+    call: (x: NumberValue): NumberValue => {
+      const result = Math.ceil(x.value);
+      return new NumberValue(result);
+    },
+  },
+]);
+
 const cos = nativeBinding("cos", [
   {
     argumentTypes: [NumberValue],
     returnType: NumberValue,
     call: (x: NumberValue): NumberValue => {
       const result = Math.cos(x.value);
+      return new NumberValue(result);
+    },
+  },
+]);
+
+const floor = nativeBinding("floor", [
+  {
+    argumentTypes: [NumberValue],
+    returnType: NumberValue,
+    call: (x: NumberValue): NumberValue => {
+      const result = Math.floor(x.value);
       return new NumberValue(result);
     },
   },
@@ -105,6 +127,28 @@ const sin = nativeBinding("sin", [
     returnType: NumberValue,
     call: (x: NumberValue): NumberValue => {
       const result = Math.sin(x.value);
+      return new NumberValue(result);
+    },
+  },
+]);
+
+const step = nativeBinding("step", [
+  {
+    argumentTypes: [NumberValue, NumberValue],
+    returnType: NumberValue,
+    call: (edge: NumberValue, x: NumberValue): NumberValue => {
+      const result = x.value < edge.value ? 0 : 1;
+      return new NumberValue(result);
+    },
+  },
+]);
+
+const tan = nativeBinding("tan", [
+  {
+    argumentTypes: [NumberValue],
+    returnType: NumberValue,
+    call: (x: NumberValue): NumberValue => {
+      const result = Math.tan(x.value);
       return new NumberValue(result);
     },
   },
@@ -167,12 +211,16 @@ const time: Binding = {
 
 export const builtins: Binding[] = [
   animate,
+  ceil,
   cos,
+  floor,
   min,
   max,
   outline,
   sin,
+  step,
   str,
+  tan,
   time,
   vec2,
   vec3,
