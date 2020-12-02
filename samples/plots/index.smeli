@@ -78,5 +78,10 @@ ui: ui {
 demo_plot: demo_plot {
   viewport: viewport {
     center: animate(center, center + vec2(4, 0), 0.5)
+    size: animate(size, size * 2, 0.5)
+  }
+
+  item5: item5 {
+    start: animate(start, start + vec2(15, 0), 0.5)
   }
 }
