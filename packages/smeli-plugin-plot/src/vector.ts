@@ -105,8 +105,11 @@ export const vector = {
             };
 
             if (label.value != "") {
+              const boldPrefix = "bold ";
+
               context.textAlign = labelOffset.x > 0 ? "start" : "end";
               context.textBaseline = "middle";
+              context.font = boldPrefix + context.font;
 
               context.fillStyle = color.toCssColor(0.83);
               context.fillText(label.value, labelPosition.x, labelPosition.y);
@@ -114,6 +117,7 @@ export const vector = {
               // restore defaults
               context.textAlign = "start";
               context.textBaseline = "alphabetic";
+              context.font = context.font.substr(boldPrefix.length);
             }
           });
         },
