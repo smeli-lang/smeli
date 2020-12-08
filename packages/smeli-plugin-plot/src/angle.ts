@@ -1,4 +1,4 @@
-import { Scope, StringValue, Vec2, Vec3 } from "@smeli/core";
+import { BoolValue, Scope, StringValue, Vec2, Vec3 } from "@smeli/core";
 
 import { evaluateTheme } from "@smeli/plugin-ui";
 
@@ -22,6 +22,10 @@ export const angle = {
         evaluate: () => new Vec2(-0.2, -0.9),
       },
       {
+        name: "right",
+        evaluate: () => new BoolValue(false),
+      },
+      {
         name: "color",
         evaluate: (scope: Scope) => evaluateTheme(scope).colors.primary,
       },
@@ -37,6 +41,7 @@ export const angle = {
             const point = scope.evaluate("point" + i).as(Vec2);
             points.push(point);
           }
+          const right = scope.evaluate("right").as(BoolValue);
 
           const color = scope.evaluate("color").as(Vec3);
           const label = scope.evaluate("label").as(StringValue);
@@ -60,28 +65,53 @@ export const angle = {
             const endAngle = Math.atan2(edge1.y, edge1.x);
 
             context.strokeStyle = color.toCssColor(0.83);
-            context.setLineDash([4, 4]);
+            context.fillStyle = color.toCssColor(0.38);
             context.lineWidth = 2;
 
-            context.fillStyle = color.toCssColor(0.38);
+            if (right.value) {
+              const corners = [
+                {
+                  x: pixelPoints[1].x + edge0.x * 0.2,
+                  y: pixelPoints[1].y + edge0.y * 0.2,
+                },
+                {
+                  x: pixelPoints[1].x + (edge0.x + edge1.x) * 0.2,
+                  y: pixelPoints[1].y + (edge0.y + edge1.y) * 0.2,
+                },
+                {
+                  x: pixelPoints[1].x + edge1.x * 0.2,
+                  y: pixelPoints[1].y + edge1.y * 0.2,
+                },
+              ];
 
-            context.beginPath();
-            context.arc(
-              pixelPoints[1].x,
-              pixelPoints[1].y,
-              32,
-              startAngle,
-              endAngle
-            );
-            context.stroke();
+              context.beginPath();
+              context.moveTo(pixelPoints[1].x, pixelPoints[1].y);
+              for (const corner of corners) {
+                context.lineTo(corner.x, corner.y);
+              }
+              context.closePath();
+            } else {
+              context.setLineDash([4, 4]);
 
-            context.lineTo(pixelPoints[1].x, pixelPoints[1].y);
-            context.closePath();
+              context.beginPath();
+              context.arc(
+                pixelPoints[1].x,
+                pixelPoints[1].y,
+                32,
+                startAngle,
+                endAngle
+              );
+              context.stroke();
+
+              context.setLineDash([]);
+
+              context.lineTo(pixelPoints[1].x, pixelPoints[1].y);
+              context.closePath();
+            }
 
             context.fill();
 
             context.strokeStyle = color.toCssColor(0.6);
-            context.setLineDash([]);
             context.lineWidth = 2;
 
             context.beginPath();
