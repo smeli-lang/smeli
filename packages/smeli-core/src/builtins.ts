@@ -106,6 +106,18 @@ const max = nativeBinding("max", [
   },
 ]);
 
+const mod = nativeBinding("mod", [
+  {
+    argumentTypes: [NumberValue, NumberValue],
+    returnType: NumberValue,
+    call: (lhs: NumberValue, rhs: NumberValue): NumberValue => {
+      // apply a double modulo to match GLSL behavior for negative input values
+      const result = ((lhs.value % rhs.value) + rhs.value) % rhs.value;
+      return new NumberValue(result);
+    },
+  },
+]);
+
 const str = nativeBinding("str", [
   {
     argumentTypes: [AnyType],
@@ -234,6 +246,7 @@ export const builtins: Binding[] = [
   floor,
   min,
   max,
+  mod,
   outline,
   sin,
   smoothstep,
