@@ -186,6 +186,11 @@ const tan = nativeBinding("tan", [
 
 const vec2 = nativeBinding("vec2", [
   {
+    argumentTypes: [NumberValue],
+    returnType: Vec2,
+    call: (xy: NumberValue) => new Vec2(xy.value, xy.value),
+  },
+  {
     argumentTypes: [NumberValue, NumberValue],
     returnType: Vec2,
     call: (x: NumberValue, y: NumberValue) => new Vec2(x.value, y.value),
@@ -193,6 +198,11 @@ const vec2 = nativeBinding("vec2", [
 ]);
 
 const vec3 = nativeBinding("vec3", [
+  {
+    argumentTypes: [NumberValue],
+    returnType: Vec3,
+    call: (xyz: NumberValue) => new Vec3(xyz.value, xyz.value, xyz.value),
+  },
   {
     argumentTypes: [NumberValue, NumberValue, NumberValue],
     returnType: Vec3,
