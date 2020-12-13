@@ -1,15 +1,15 @@
 import webpack from "webpack";
 import path from "path";
 
-const run = () => {
-  const template = require("@smeli/template-slides");
+import { makeWebpackConfig } from "./template";
 
+const run = () => {
   const templateOptions = {
     rootFile: path.resolve("index.smeli"),
     outputPath: path.resolve("dist"),
   };
 
-  const webpackConfig = template(templateOptions);
+  const webpackConfig = makeWebpackConfig(templateOptions);
 
   const compiler = webpack(webpackConfig);
 

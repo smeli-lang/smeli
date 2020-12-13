@@ -16,15 +16,23 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "tsc && chmod +x dist/cli.js",
+    "test": "cd test && node ../dist/cli.js",
     "watch": "tsc -w"
   },
   "files": [
-    "dist"
+    "dist",
+    "public"
   ],
   "dependencies": {
     "@smeli/core": "0.0.1",
+    "@smeli/loader": "0.0.1",
     "@smeli/plugin-ui": "0.0.1",
-    "@smeli/template-slides": "0.0.1",
+    "css-loader": "^3.5.3",
+    "file-loader": "^6.0.0",
+    "filter-chunk-webpack-plugin": "^2.1.0",
+    "html-webpack-inline-source-plugin": "^1.0.0-beta.2",
+    "html-webpack-plugin": "^4.0.4",
+    "style-loader": "^1.2.0",
     "webpack": "^4.42.1"
   },
   "devDependencies": {

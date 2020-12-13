@@ -1,12 +1,20 @@
-const path = require("path");
+import path from "path";
 
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const HtmlWebpackInlineSourcePlugin = require("html-webpack-inline-source-plugin");
-const FilterChunkWebpackPlugin = require("filter-chunk-webpack-plugin");
+import webpack from "webpack";
 
-module.exports = ({ rootFile, outputPath }) => ({
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import HtmlWebpackInlineSourcePlugin from "html-webpack-inline-source-plugin";
+import FilterChunkWebpackPlugin from "filter-chunk-webpack-plugin";
+
+export const makeWebpackConfig = ({
+  rootFile,
+  outputPath,
+}: {
+  rootFile: string;
+  outputPath: string;
+}): webpack.Configuration => ({
   mode: "production",
-  entry: path.join(__dirname, "src/index.js"),
+  entry: path.join(__dirname, "../public/index.js"),
   output: {
     path: outputPath,
   },
@@ -44,7 +52,7 @@ module.exports = ({ rootFile, outputPath }) => ({
       title: "Smeli Slides",
       inlineSource: ".(js|css)$", // embed all javascript and css inline
     }),
-    new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin),
+    new (HtmlWebpackInlineSourcePlugin as any)(HtmlWebpackPlugin),
     new FilterChunkWebpackPlugin({
       patterns: ["*.js", "*.css"], // remove all javascript and css from the output folder
     }),
