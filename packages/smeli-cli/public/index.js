@@ -22,7 +22,11 @@ function hideErrors(errors) {
 
 window.onload = () => {
   const content = makeRootDiv("content");
+  const navigation = makeRootDiv("navigation");
   const errors = makeRootDiv("errors");
+
+  navigation.innerHTML =
+    '<span id="previous" class="arrow">&lt;----</span><span class="title">Smeli Slides</span><span id="next" class="arrow">----&gt;</span>';
 
   const config = makeSmeliConfig({
     "@smeli/plugin-ui": {
@@ -54,6 +58,14 @@ window.onload = () => {
         break;
     }
   });
+
+  document
+    .querySelector("#next")
+    .addEventListener("click", () => engine.next());
+
+  document
+    .querySelector("#previous")
+    .addEventListener("click", () => engine.previous());
 
   // debug connection for the vs code extension
   window.addEventListener("message", (event) => {
