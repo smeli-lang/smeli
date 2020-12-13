@@ -23,7 +23,7 @@ export const surfaceStyles = (theme: Theme) => ({
     },
   },
 
-  padding: "8px",
+  padding: "var(--gutter)",
   "border-radius": "0px",
 
   // optional fade animation
@@ -34,7 +34,7 @@ export const surfaceStyles = (theme: Theme) => ({
 
   // elevated surfaces get round corners and a shadow
   "&.elevated": {
-    margin: "8px",
+    margin: "var(--gutter)",
     "border-radius": "16px",
   },
 });

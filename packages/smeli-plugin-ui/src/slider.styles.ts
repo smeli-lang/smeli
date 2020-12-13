@@ -82,11 +82,11 @@ export const sliderStyles = (theme: Theme) => ({
 
   // label
   "& .label": {
-    "font-size": "0.6em",
-    "margin-top": "8px",
+    "font-size": "0.9em",
+    padding: "0.4em",
     overflow: "hidden",
-    height: "24px",
-    "line-height": "24px",
+    height: "1em",
+    "line-height": "1em",
   },
 
   "& .override + .label": {
