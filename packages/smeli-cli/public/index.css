@@ -19,40 +19,58 @@ body {
   left: 0;
   height: var(--footer-height);
 
+  box-shadow: inset 0px 2px 8px #000b;
+
   background-color: #222;
+  font-family: "verdana";
 
   display: flex;
   flex-direction: row;
 
   line-height: var(--footer-height);
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.87);
+  color: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.6);
   text-align: center;
 }
 
 #navigation .arrow {
-  font-weight: bold;
   flex: 2;
   cursor: pointer;
 }
 
 #navigation .arrow:hover {
   background-color: #444;
+  color: rgba(255, 255, 255, 0.87);
 }
 
 #navigation #previous {
   border-radius: 0px 0px 16px 0px;
-  border-right: 2px solid #444;
+  border-right: 1px solid;
 }
 
 #navigation #next {
   border-radius: 16px 0px 0px 0px;
-  border-left: 2px solid #444;
+  border-left: 1px solid;
 }
 
-#navigation .title {
+/*#navigation .title {
   flex: 1;
   overflow: hidden;
+}*/
+
+#navigation #fullscreen {
+  width: 42px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  margin: 10px 24px;
+
+  cursor: pointer;
+}
+
+#navigation #fullscreen:hover {
+  background-color: #444;
+  border-color: rgba(255, 255, 255, 0.87);
 }
 
 #errors {

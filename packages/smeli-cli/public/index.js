@@ -26,7 +26,7 @@ window.onload = () => {
   const errors = makeRootDiv("errors");
 
   navigation.innerHTML =
-    '<span id="previous" class="arrow">&lt;----</span><span class="title">Smeli Slides</span><span id="next" class="arrow">----&gt;</span>';
+    '<span id="previous" class="arrow">&lt;----</span><span id="fullscreen"></span><span id="next" class="arrow">----&gt;</span>';
 
   const config = makeSmeliConfig({
     "@smeli/plugin-ui": {
@@ -56,6 +56,20 @@ window.onload = () => {
         engine.previous();
         //requestAnimationFrame(update);
         break;
+
+      case "KeyF":
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          content.requestFullscreen();
+        }
+        break;
+
+      case "Escape":
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        }
+        break;
     }
   });
 
@@ -66,6 +80,10 @@ window.onload = () => {
   document
     .querySelector("#previous")
     .addEventListener("click", () => engine.previous());
+
+  document
+    .querySelector("#fullscreen")
+    .addEventListener("click", () => content.requestFullscreen());
 
   // debug connection for the vs code extension
   window.addEventListener("message", (event) => {
