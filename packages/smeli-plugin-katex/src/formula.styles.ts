@@ -8,8 +8,4 @@ export const formulaStyles = (theme: Theme) => ({
   "justify-content": "center",
   "align-items": "center",
   "text-align": "center",
-
-  "& .katex": {
-    "font-size": "1.4em",
-  },
 });
