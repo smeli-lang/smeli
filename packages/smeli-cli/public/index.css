@@ -42,6 +42,7 @@ body {
 #navigation .arrow:hover {
   background-color: #444;
   color: rgba(255, 255, 255, 0.87);
+  box-shadow: inset 0px 2px 8px #000b;
 }
 
 #navigation #previous {
