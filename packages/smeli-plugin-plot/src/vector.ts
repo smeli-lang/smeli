@@ -76,7 +76,7 @@ export const vector = {
             context.fill();
 
             context.strokeStyle = color.toCssColor(0.83);
-            context.lineWidth = 2;
+            context.lineWidth = 4;
 
             context.beginPath();
 
