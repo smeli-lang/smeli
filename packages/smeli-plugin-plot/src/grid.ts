@@ -100,7 +100,7 @@ export const grid = {
               context.lineWidth = 2;
 
               const oldFont = context.font;
-              context.font = "16px verdana";
+              context.font = "0.9em verdana";
 
               // X markers
               for (let x of quantize(
