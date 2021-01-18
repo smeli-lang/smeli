@@ -99,7 +99,7 @@ window.onload = () => {
     //console.log(engine);
   });
 
-  function update() {
+  function update(time) {
     // check for compile errors
     // (this should probably be moved somewhere else)
     if (engine.messages.length > 0) {
@@ -116,7 +116,7 @@ window.onload = () => {
     }
 
     try {
-      engine.update();
+      engine.update(time);
       hideErrors(errors);
     } catch (e) {
       showErrors(errors, e.message);

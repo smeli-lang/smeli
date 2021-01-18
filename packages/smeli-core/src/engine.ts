@@ -5,6 +5,7 @@ import { builtins } from "./builtins";
 import { PluginDefinition, pushPlugin } from "./plugins";
 import { CacheEntry } from "./cache";
 import { NumberValue } from "./types";
+import { ScopeOverride } from "./override";
 
 export class Engine {
   globalScope: Scope;
@@ -17,11 +18,16 @@ export class Engine {
 
   cacheRoot: CacheEntry;
 
+  startTime: number | null = null;
+  timeOverride: ScopeOverride;
+
   constructor(code: string, plugins: PluginDefinition[] = []) {
     this.globalScope = new Scope();
 
     // add builtins here
     this.globalScope.push(builtins);
+
+    this.timeOverride = new ScopeOverride(this.globalScope, "time");
 
     // plugins
     plugins.forEach((plugin) => {
@@ -126,7 +132,14 @@ export class Engine {
     }
   }
 
-  update() {
+  update(time: number) {
+    if (this.startTime === null) {
+      this.startTime = time;
+    }
+
+    const currentTime = new NumberValue((time - this.startTime) * 0.001);
+    this.timeOverride.bind(() => currentTime);
+
     // things referenced from the cache root will not be garbage collected
     CacheEntry.pushRoot(this.cacheRoot);
 

@@ -211,44 +211,6 @@ const vec3 = nativeBinding("vec3", [
   },
 ]);
 
-class Timer extends TypedValue {
-  static typeName = "timer";
-
-  private binding: Binding;
-  private intervalId: any;
-
-  constructor(scope: Scope) {
-    super();
-
-    this.binding = {
-      name: "#time",
-      evaluate: () => new NumberValue(Date.now() * 0.001),
-    };
-
-    scope.push(this.binding);
-
-    this.intervalId = setInterval(() => {
-      scope.pop(this.binding);
-      scope.push(this.binding);
-    }, 5) as any;
-  }
-
-  dispose() {
-    clearInterval(this.intervalId);
-  }
-}
-
-const time: Binding = {
-  name: "time",
-  evaluate: (scope: Scope) => {
-    // the timer will rebind the private #time value regularly
-    const timer = scope.evaluate((scope: Scope) => new Timer(scope));
-
-    // forward the changing time value
-    return (scope: Scope) => scope.evaluate("#time");
-  },
-};
-
 export const builtins: Binding[] = [
   animate,
   ceil,
@@ -263,7 +225,6 @@ export const builtins: Binding[] = [
   step,
   str,
   tan,
-  time,
   vec2,
   vec3,
 ];

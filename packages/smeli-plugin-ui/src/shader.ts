@@ -220,22 +220,7 @@ export const shader = {
       },
       {
         name: "uniforms",
-        evaluate: (parentScope: Scope) => {
-          const scope = new Scope(parentScope);
-          scope.push({
-            name: "time",
-            evaluate: () => {
-              const currentTime = scope.root().evaluate("time").as(NumberValue);
-              const startTime = scope
-                .evaluate("#gl:start_time")
-                .as(NumberValue);
-
-              return SubTrait.call(currentTime, startTime);
-            },
-          });
-
-          return scope;
-        },
+        evaluate: (parentScope: Scope) => new Scope(parentScope),
       },
       {
         name: "#gl:context",
