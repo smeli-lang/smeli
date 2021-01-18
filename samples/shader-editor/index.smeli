@@ -1,0 +1,29 @@
+@plugin("@smeli/plugin-ui")
+@plugin("@smeli/plugin-ace")
+
+ui: ui {
+  theme: default_themes.dark
+  page: ui.surface {
+    direction: "row"
+    responsive: true
+    item0: ace.editor {
+      code: "@inline("effect.glsl")"
+    }
+    item1: ui.shader {
+      code: item0.code
+      uniforms: {
+        primary: ui.theme.colors.primary
+      }
+    }
+  }
+}
+
+#>
+
+ui: ui {
+  page: page {
+    item0: item0 {
+      code: "@inline("effect2.glsl")"
+    }
+  }
+}
