@@ -8,10 +8,7 @@ export class NativeFunction extends TypedValue {
   parentScope: Scope;
   overloadedFunction: OverloadedFunction;
 
-  constructor(
-    parentScope: Scope,
-    overloadedFunction: OverloadedFunction,
-  ) {
+  constructor(parentScope: Scope, overloadedFunction: OverloadedFunction) {
     super();
 
     this.parentScope = parentScope;
@@ -21,21 +18,26 @@ export class NativeFunction extends TypedValue {
   __call_site__(scope: Scope, args: Evaluator[]): Evaluator {
     return (scope: Scope) => {
       // evaluate arguments at the call site
-      const argValues = args.map(arg => scope.transient(arg));
+      const argValues = args.map((arg) => scope.evaluate(arg));
 
       // call the native evaluator
       return this.overloadedFunction.call(...argValues);
-    }
+    };
+  }
+
+  makeTransientEvaluator(): (...args: TypedValue[]) => TypedValue {
+    return (...args: TypedValue[]) => this.overloadedFunction.call(...args);
   }
 }
 
 export function nativeBinding(name: string, overloads: Overload[]): Binding {
   const overloadedFunction = new OverloadedFunction(name);
-  overloads.forEach(overload => overloadedFunction.implement(overload));
+  overloads.forEach((overload) => overloadedFunction.implement(overload));
 
   const binding: Binding = {
     name,
-    evaluate: (parentScope: Scope) =>  new NativeFunction(parentScope, overloadedFunction),
+    evaluate: (parentScope: Scope) =>
+      new NativeFunction(parentScope, overloadedFunction),
   };
 
   return binding;

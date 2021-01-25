@@ -10,11 +10,16 @@ export class Viewport {
   pixelTransformX: number[];
   pixelTransformY: number[];
 
+  // pixel size of the canvas
+  pixelSize: Vec2;
+
   constructor(scope: Scope, pixelSize: Vec2) {
     const center = scope.evaluate("center").as(Vec2);
     const size = scope.evaluate("size").as(Vec2);
     const ratio = scope.evaluate("ratio").as(Vec2);
     const mode = scope.evaluate("mode").as(StringValue).value;
+
+    this.pixelSize = pixelSize;
 
     let viewportWidth = Math.abs(size.x);
     let viewportHeight = Math.abs(size.y);

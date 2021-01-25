@@ -1,6 +1,7 @@
 import { pushPlugin, PluginDefinition } from "./plugins";
 import { NumberValue } from "./types";
 import { Scope } from "./scope";
+import { evaluateRoot } from "./cache";
 
 test("loads a basic plugin", () => {
   const plugin: PluginDefinition = {
@@ -16,11 +17,13 @@ test("loads a basic plugin", () => {
   const scope = new Scope();
   pushPlugin(scope, plugin);
 
-  const pluginScope = scope.evaluate("hello") as Scope;
-  expect(pluginScope.type()).toBe(Scope);
+  evaluateRoot(() => {
+    const pluginScope = scope.evaluate("hello").as(Scope);
+    const world = pluginScope.evaluate("world");
+    expect(world).toEqual(new NumberValue(42));
 
-  const world = pluginScope.evaluate("world");
-  expect(world).toEqual(new NumberValue(42));
+    return world;
+  }, scope);
 });
 
 test("loads a code plugin", () => {
@@ -34,11 +37,13 @@ test("loads a code plugin", () => {
   const scope = new Scope();
   pushPlugin(scope, plugin);
 
-  const pluginScope = scope.evaluate("hello") as Scope;
-  expect(pluginScope.type()).toBe(Scope);
+  evaluateRoot(() => {
+    const pluginScope = scope.evaluate("hello").as(Scope);
+    const world = pluginScope.evaluate("world");
+    expect(world).toEqual(new NumberValue(42));
 
-  const world = pluginScope.evaluate("world");
-  expect(world).toEqual(new NumberValue(42));
+    return world;
+  }, scope);
 });
 
 test("loads bindings first, then code", () => {
@@ -58,9 +63,11 @@ test("loads bindings first, then code", () => {
   const scope = new Scope();
   pushPlugin(scope, plugin);
 
-  const pluginScope = scope.evaluate("hello") as Scope;
-  expect(pluginScope.type()).toBe(Scope);
+  evaluateRoot(() => {
+    const pluginScope = scope.evaluate("hello").as(Scope);
+    const world = pluginScope.evaluate("world");
+    expect(world).toEqual(new NumberValue(62));
 
-  const world = pluginScope.evaluate("world");
-  expect(world).toEqual(new NumberValue(62));
+    return world;
+  }, scope);
 });

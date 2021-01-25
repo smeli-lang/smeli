@@ -1,4 +1,9 @@
-import { CacheEntry } from "./cache";
+import {
+  ContextCache,
+  evaluate,
+  EvaluationContext,
+  ImmediateTransients,
+} from "./cache";
 import { TypedValue, TypedConstructor } from "./types";
 
 export type Evaluator = (scope: Scope) => TypedValue | Evaluator;
@@ -17,14 +22,16 @@ type NestedValues = {
   [key: string]: NestedValues | TypedValue;
 };
 
-export class Scope extends TypedValue {
+export class Scope extends TypedValue implements EvaluationContext {
   static typeName = "scope";
 
   parent: Scope | null;
   prefix: Scope | null;
 
   bindings: Map<string, Binding[]>;
-  cache: Map<Binding, CacheEntry>;
+  cache: ContextCache;
+  transients: ImmediateTransients;
+
   childScopes: Set<Scope>;
   derivedScopes: Set<Scope>;
 
@@ -36,6 +43,8 @@ export class Scope extends TypedValue {
 
     this.bindings = new Map();
     this.cache = new Map();
+    this.transients = new Map();
+
     this.childScopes = new Set();
     this.derivedScopes = new Set();
 
@@ -67,7 +76,7 @@ export class Scope extends TypedValue {
     }
 
     // invalidate cache entries depending on the previously cached value
-    const previousBinding = this.lookup(binding.name, this);
+    const previousBinding = this.lookup(binding.name);
     if (previousBinding) {
       this.deprecateDerivedBinding(previousBinding);
     }
@@ -100,7 +109,7 @@ export class Scope extends TypedValue {
     }
 
     // destroy the associated cache entries
-    this.invalidateDerivedBinding(binding);
+    this.invalidateDerivedBinding(binding.evaluate);
 
     if (stack.length === 0) {
       this.bindings.delete(binding.name);
@@ -112,69 +121,8 @@ export class Scope extends TypedValue {
     nameOrEvaluator: string | Evaluator
   ): TypedValue;
   evaluate(nameOrEvaluator: string | Evaluator): any {
-    let binding;
-    if (typeof nameOrEvaluator === "function") {
-      // create a temporary binding for this evaluator
-      binding = {
-        name: "#temp",
-        evaluate: nameOrEvaluator,
-      };
-    } else {
-      binding = this.lookup(nameOrEvaluator, this);
-    }
-
-    if (binding) {
-      // create a cache entry if necessary
-      let cacheEntry = this.cache.get(binding);
-      if (!cacheEntry) {
-        cacheEntry = new CacheEntry(this, binding);
-        this.cache.set(binding, cacheEntry);
-      }
-
-      const value = cacheEntry.evaluate();
-
-      return value;
-    }
-
-    if (this.parent) {
-      return this.parent.evaluate(nameOrEvaluator);
-    }
-
-    throw new Error(`No previous definition found for '${nameOrEvaluator}'`);
-  }
-
-  transient(evaluator: Evaluator) {
-    let value: Evaluator | TypedValue;
-    value = evaluator;
-
-    while (typeof value === "function") {
-      value = value(this);
-    }
-
-    CacheEntry.transient(value);
-
-    return value;
-  }
-
-  ast(name: string): any {
-    const binding = this.lookup(name, this);
-
-    if (binding) {
-      // create a cache entry if necessary
-      let cacheEntry = this.cache.get(binding);
-      if (!cacheEntry) {
-        cacheEntry = new CacheEntry(this, binding);
-        this.cache.set(binding, cacheEntry);
-      }
-
-      return cacheEntry.ast();
-    }
-
-    if (this.parent) {
-      return this.parent.ast(name);
-    }
-
-    throw new Error(`No previous definition found for '${name}'`);
+    // this API is deprecated, forward to the new version for now
+    return evaluate(nameOrEvaluator, this);
   }
 
   evaluateNested(nestedBindings: NestedBindings): NestedValues {
@@ -197,7 +145,11 @@ export class Scope extends TypedValue {
     return result;
   }
 
-  lookup(name: string, scope: Scope): Binding | null {
+  lookup(name: string): Evaluator | null {
+    return this.prefixLookup(name, this);
+  }
+
+  private prefixLookup(name: string, scope: Scope): Evaluator | null {
     const stack = this.bindings.get(name);
     if (stack) {
       for (let i = stack.length - 1; i >= 0; i--) {
@@ -205,44 +157,39 @@ export class Scope extends TypedValue {
 
         // if this binding is already being evaluated
         // from the same scope, skip it
-        if (CacheEntry.isEvaluating(scope, binding)) {
+        const cacheEntry = scope.cache.get(binding.evaluate);
+        if (cacheEntry && cacheEntry.isEvaluating) {
           continue;
         }
 
-        return binding;
+        return binding.evaluate;
       }
     }
 
-    return this.prefix?.lookup(name, scope) || null;
+    return this.prefix?.prefixLookup(name, scope) || null;
   }
 
-  // signaled by the cache system to discard a cache entry
-  // during garbage collection
-  uncache(binding: Binding) {
-    this.cache.delete(binding);
-  }
-
-  private deprecateDerivedBinding(binding: Binding) {
-    const cacheEntry = this.cache.get(binding);
+  private deprecateDerivedBinding(evaluator: Evaluator) {
+    const cacheEntry = this.cache.get(evaluator);
     if (cacheEntry) {
       cacheEntry.deprecate();
     }
 
     // recursively deprecate the binding on all derived scopes
     for (let derivedScope of this.derivedScopes.values()) {
-      derivedScope.deprecateDerivedBinding(binding);
+      derivedScope.deprecateDerivedBinding(evaluator);
     }
   }
 
-  private invalidateDerivedBinding(binding: Binding) {
-    const cacheEntry = this.cache.get(binding);
+  private invalidateDerivedBinding(evaluator: Evaluator) {
+    const cacheEntry = this.cache.get(evaluator);
     if (cacheEntry) {
       cacheEntry.invalidate();
     }
 
     // recursively invalidate all derived scopes
     for (let derivedScope of this.derivedScopes.values()) {
-      derivedScope.invalidateDerivedBinding(binding);
+      derivedScope.invalidateDerivedBinding(evaluator);
     }
   }
 

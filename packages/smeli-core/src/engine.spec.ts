@@ -1,3 +1,4 @@
+import { evaluate, evaluateRoot } from "./cache";
 import { Engine } from "./engine";
 import { NumberValue } from "./types";
 
@@ -7,12 +8,14 @@ test("should run a basic statement", () => {
 
   engine.step(1);
 
-  const result = engine.globalScope.evaluate("a") || null;
+  const result = evaluateRoot(() => evaluate("a"), engine.globalScope);
   expect(result).not.toBeNull();
 
   const numberValue = result.as(NumberValue);
   expect(numberValue.value).toBe(42);
 
   engine.step(-1);
-  expect(() => engine.globalScope.evaluate("a")).toThrowError();
+  expect(() =>
+    evaluateRoot(() => evaluate("a"), engine.globalScope)
+  ).toThrowError();
 });

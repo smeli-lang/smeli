@@ -1,3 +1,5 @@
+import { RelativePattern } from "vscode";
+import { evaluate, evaluateRoot } from "./cache";
 import { Scope } from "./scope";
 import { NumberValue } from "./types";
 
@@ -9,10 +11,10 @@ test("push and pop a single binding", () => {
   };
 
   scope.push(binding);
-  expect(scope.evaluate("a")).toEqual(new NumberValue(42));
+  expect(evaluateRoot(() => evaluate("a"), scope)).toEqual(new NumberValue(42));
 
   scope.pop(binding);
-  expect(() => scope.evaluate("a")).toThrowError();
+  expect(() => evaluateRoot(() => evaluate("a"), scope)).toThrowError();
 
   scope.dispose();
 });
@@ -34,7 +36,7 @@ test("evaluates binding history", () => {
   ];
 
   scope.push(bindings);
-  expect(scope.evaluate("a")).toEqual(new NumberValue(64));
+  expect(evaluateRoot(() => evaluate("a"), scope)).toEqual(new NumberValue(64));
 
   scope.dispose();
 });
@@ -47,7 +49,7 @@ test("evaluates bindings from prefix", () => {
   });
 
   const scope = new Scope(null, prefix);
-  expect(scope.evaluate("x")).toEqual(new NumberValue(10));
+  expect(evaluateRoot(() => evaluate("x"), scope)).toEqual(new NumberValue(10));
 
   scope.dispose();
   prefix.dispose();
@@ -67,16 +69,24 @@ test("evaluates bindings from prefix against the derived scope", () => {
   ]);
 
   const scope = new Scope(null, prefix);
-  expect(scope.evaluate("x")).toEqual(new NumberValue(10));
-  expect(scope.evaluate("y")).toEqual(new NumberValue(10));
+  evaluateRoot(() => {
+    expect(evaluate("x")).toEqual(new NumberValue(10));
+    expect(evaluate("y")).toEqual(new NumberValue(10));
+
+    return new NumberValue(0);
+  }, scope);
 
   scope.push({
     name: "x",
     evaluate: () => new NumberValue(20),
   });
 
-  expect(scope.evaluate("x")).toEqual(new NumberValue(20));
-  expect(scope.evaluate("y")).toEqual(new NumberValue(20));
+  evaluateRoot(() => {
+    expect(evaluate("x")).toEqual(new NumberValue(20));
+    expect(evaluate("y")).toEqual(new NumberValue(20));
+
+    return new NumberValue(0);
+  }, scope);
 
   scope.dispose();
   prefix.dispose();
@@ -110,7 +120,7 @@ test("using the same prefix from different scopes is reentrant", () => {
     },
   ]);
 
-  expect(scope.evaluate("y")).toEqual(new NumberValue(10));
+  expect(evaluateRoot(() => evaluate("y"), scope)).toEqual(new NumberValue(10));
 
   scope.dispose();
   prefix.dispose();
@@ -119,7 +129,7 @@ test("using the same prefix from different scopes is reentrant", () => {
 test("evaluates temporary bindings", () => {
   const scope = new Scope();
 
-  const value = scope.evaluate(() => new NumberValue(42));
+  const value = evaluateRoot(() => new NumberValue(42), scope);
   expect(value).toEqual(new NumberValue(42));
 
   scope.dispose();

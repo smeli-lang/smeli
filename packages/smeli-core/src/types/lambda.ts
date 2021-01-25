@@ -1,23 +1,24 @@
 import { TypedValue } from "./value";
 import { Scope, Evaluator } from "../scope";
+import { evaluate } from "../cache";
 
 export class Lambda extends TypedValue {
   static typeName = "lambda";
 
   parentScope: Scope;
   argumentNames: string[];
-  evaluate: Evaluator;
+  evaluator: Evaluator;
 
   constructor(
     parentScope: Scope,
     argumentNames: string[],
-    evaluate: Evaluator
+    evaluator: Evaluator
   ) {
     super();
 
     this.parentScope = parentScope;
     this.argumentNames = argumentNames;
-    this.evaluate = evaluate;
+    this.evaluator = evaluator;
   }
 
   __call_site__(scope: Scope, args: Evaluator[]): Evaluator {
@@ -30,24 +31,39 @@ export class Lambda extends TypedValue {
 
     // the evaluation scope is child to the closure parent scope
     // to keep the correct resolution for unbound symbols
-    const evaluationScope = scope
-      .evaluate(() => new Scope(this.parentScope))
-      .as(Scope);
+    const evaluationScope = new Scope(this.parentScope);
 
     // arguments are evaluated against the calling scope
     this.argumentNames.forEach((name, index) => {
+      const argumentEvaluator = () => evaluate(args[index], scope);
       evaluationScope.push({
         name,
-        evaluate: () => args[index](scope),
+        evaluate: argumentEvaluator,
       });
     });
 
     // closure expression is evaluated against its evaluation scope
-    evaluationScope.push({
-      name: "#return",
-      evaluate: this.evaluate,
-    });
+    return () => evaluate(this.evaluator, evaluationScope);
+  }
 
-    return () => evaluationScope.evaluate("#return");
+  makeTransientEvaluator(): (...args: TypedValue[]) => TypedValue {
+    // the evaluation scope is child to the closure parent scope
+    // to keep the correct resolution for unbound symbols
+    const evaluationScope = new Scope(this.parentScope);
+
+    return (...args: TypedValue[]) => {
+      if (this.argumentNames.length !== args.length) {
+        throw new Error(
+          `Argument mismatch, expected ${this.argumentNames.length} but got ${args.length}`
+        );
+      }
+
+      const transients: { [key: string]: TypedValue } = {};
+      this.argumentNames.forEach((name, index) => {
+        transients[name] = args[index];
+      });
+
+      return evaluate(this.evaluator, evaluationScope, false, transients);
+    };
   }
 }

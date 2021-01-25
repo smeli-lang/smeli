@@ -174,7 +174,7 @@ export const surface = {
             node.style.color = textColor.toCssColor();
           }
 
-          const result = scope.evaluate(() => new DomNode(node));
+          const result = new DomNode(node);
 
           // cache the parent node creation
           return (scope: Scope) => {

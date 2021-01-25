@@ -14,7 +14,7 @@ export const outline = {
         const node = document.createElement("div");
         node.className = "widget " + styles.outline;
 
-        const result = scope.evaluate(() => new DomNode(node));
+        const result = new DomNode(node);
 
         // cache parent node
         return (scope: Scope) => {

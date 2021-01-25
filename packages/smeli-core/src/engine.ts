@@ -1,22 +1,22 @@
-import { Statement } from "./ast";
 import { ParserState, parseStatementList, ParserReport } from "./parser";
 import { Scope } from "./scope";
 import { builtins } from "./builtins";
 import { PluginDefinition, pushPlugin } from "./plugins";
-import { CacheEntry } from "./cache";
+import { evaluate, evaluateRoot } from "./cache";
 import { NumberValue } from "./types";
 import { ScopeOverride } from "./override";
+import { CompiledStatement, compileStatements, Evaluator } from "./evaluation";
 
 export class Engine {
   globalScope: Scope;
-  statements: Statement[];
+  statements: CompiledStatement[];
   messages: ParserReport[];
 
   nextStatement: number = 0;
 
   sideEffects: Map<string, string[]> = new Map();
 
-  cacheRoot: CacheEntry;
+  rootEvaluator: Evaluator;
 
   startTime: number | null = null;
   timeOverride: ScopeOverride;
@@ -38,30 +38,23 @@ export class Engine {
       }
     });
 
-    const rootBinding = {
-      name: "#root",
-      evaluate: (scope: Scope) => {
-        // evaluate only bindings with side effects,
-        // everything else will be lazily evaluated
-        // indirectly
-        for (let [pluginName, bindingNames] of this.sideEffects) {
-          const pluginScope = scope.evaluate(pluginName).as(Scope);
-          for (let binding of bindingNames) {
-            pluginScope.evaluate(binding);
-          }
+    this.rootEvaluator = () => {
+      // evaluate only bindings with side effects,
+      // everything else will be lazily evaluated
+      // indirectly
+      for (let [pluginName, bindingNames] of this.sideEffects) {
+        const pluginScope = evaluate(pluginName).as(Scope);
+        for (let binding of bindingNames) {
+          pluginScope.evaluate(binding);
         }
+      }
 
-        return new NumberValue(0);
-      },
+      return new NumberValue(0);
     };
-
-    // root cache entry
-    this.globalScope.push(rootBinding);
-    this.cacheRoot = new CacheEntry(this.globalScope, rootBinding);
 
     // parse code
     const state = new ParserState(code, 0, "smeli");
-    this.statements = parseStatementList(state);
+    this.statements = compileStatements(parseStatementList(state));
     this.messages = state.messages;
   }
 
@@ -69,7 +62,7 @@ export class Engine {
     const state = new ParserState(code, offset || 0, "smeli");
     state.currentLine = line || 0;
 
-    const statements = parseStatementList(state);
+    const statements = compileStatements(parseStatementList(state));
     this.messages = state.messages;
 
     const success = state.messages.length === 0;
@@ -140,26 +133,18 @@ export class Engine {
     const currentTime = new NumberValue((time - this.startTime) * 0.001);
     this.timeOverride.bind(() => currentTime);
 
-    // things referenced from the cache root will not be garbage collected
-    CacheEntry.pushRoot(this.cacheRoot);
-
     try {
       // evaluate all the side effects
-      CacheEntry.evaluateRoot();
+      // (things referenced from the cache root will not be garbage collected)
+      evaluateRoot(this.rootEvaluator, this.globalScope);
     } catch (error) {
-      throw new Error(
-        error.message +
-          "\n" +
-          error.smeliStack
-            .map((bindingName: string) => "from: " + bindingName)
-            .join("\n")
-      );
-    } finally {
-      // dispose of all unreferenced cached values
-      CacheEntry.gc();
-
-      // reset to initial state
-      CacheEntry.popRoot();
+      let message = error.message + "\n";
+      if (error.smeliStack) {
+        message += error.smeliStack
+          .map((bindingName: string) => "from: " + bindingName)
+          .join("\n");
+      }
+      throw new Error(message);
     }
   }
 }

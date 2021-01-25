@@ -4,6 +4,14 @@ export interface TypedConstructor<T extends TypedValue> {
 }
 
 export abstract class TypedValue {
+  static disposableOwner: TypedValue[] | null = null;
+
+  constructor() {
+    if (this.dispose && TypedValue.disposableOwner) {
+      TypedValue.disposableOwner.push(this);
+    }
+  }
+
   // called when the value is garbage collected
   dispose?(): void;
 

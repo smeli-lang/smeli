@@ -49,7 +49,7 @@ export const editor = {
             }, 0);
           });
 
-          const result = scope.evaluate(() => new DomNode(element));
+          const result = new DomNode(element);
 
           // cache editor
           return (scope: Scope) => {

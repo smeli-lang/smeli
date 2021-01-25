@@ -1,6 +1,7 @@
 import { NumberValue, StringValue, Vec2, Vec3 } from "../types";
 import { Scope } from "../scope";
 import { IndexTrait } from "./index-trait";
+import { evaluateRoot } from "../cache";
 
 test("index(vec2, string)", () => {
   const vec = new Vec2(10.0, 42.0);
@@ -66,11 +67,15 @@ test("index(scope, string)", () => {
 
   const member = new StringValue("a");
 
-  const result = IndexTrait.call(scope, member).as(NumberValue);
+  const result = evaluateRoot(() => IndexTrait.call(scope, member), scope).as(
+    NumberValue
+  );
   expect(result.value).toBe(42);
 
   scope.pop(binding);
-  expect(() => IndexTrait.call(scope, member)).toThrowError();
+  expect(() =>
+    evaluateRoot(() => IndexTrait.call(scope, member), scope)
+  ).toThrowError();
 
   scope.dispose();
 });

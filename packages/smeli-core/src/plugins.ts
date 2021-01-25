@@ -1,5 +1,6 @@
 import { Scope, Binding } from "./scope";
 import { ParserState, parseStatementList } from "./parser";
+import { compileStatements } from "./evaluation";
 
 export type PluginDefinition = {
   // name of the global plugin scope
@@ -21,7 +22,7 @@ export function pushPlugin(parentScope: Scope, definition: PluginDefinition) {
 
       if (definition.code) {
         const parserState = new ParserState(definition.code);
-        const statements = parseStatementList(parserState);
+        const statements = compileStatements(parseStatementList(parserState));
         statements.forEach((statement) => scope.push(statement.binding));
       }
 

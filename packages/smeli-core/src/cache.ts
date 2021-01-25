@@ -1,14 +1,25 @@
-import { Binding, Evaluator, Scope } from "./scope";
-import { TypedValue } from "./types";
+import { Evaluator } from "./evaluation";
+import { ExpressionValue, TypedValue } from "./types";
+
+export interface EvaluationContext extends TypedValue {
+  cache: ContextCache;
+  parent: EvaluationContext | null;
+  transients: ImmediateTransients;
+
+  lookup: (name: string) => Evaluator | null;
+}
+
+export type ContextCache = Map<Evaluator, CacheEntry>;
+export type ImmediateTransients = Map<string, TypedValue>;
 
 type EvaluationStage = {
-  evaluate: Evaluator;
+  evaluator: Evaluator;
   dependencies: Set<CacheEntry>;
+  disposables: TypedValue[];
 };
 
 export class CacheEntry {
-  private scope: Scope;
-  private binding: Binding;
+  public context: EvaluationContext;
 
   private value: TypedValue | null;
 
@@ -17,101 +28,12 @@ export class CacheEntry {
   private stages: EvaluationStage[];
   private currentStage: number;
 
-  // dynamic dependency graph construction
-  private static evaluationStack: CacheEntry[] = [];
+  public isEvaluating: boolean;
 
-  // garbage collection
-  private static unreferencedEntries: Set<CacheEntry> = new Set();
+  public static enableCache: boolean = true;
 
-  // ownership of TypedValue objects
-  private static valueOwner: Map<TypedValue, CacheEntry> = new Map();
-
-  // values evaluated directly without caching, they
-  // only need to be disposed after the evaluator returns
-  private static transients: TypedValue[] = [];
-
-  static isEvaluating(scope: Scope, binding: Binding) {
-    for (let i = CacheEntry.evaluationStack.length - 1; i >= 0; i--) {
-      const entry = CacheEntry.evaluationStack[i];
-      if (entry.scope === scope && entry.binding === binding) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  static pushRoot(entry: CacheEntry) {
-    CacheEntry.unreferencedEntries.delete(entry);
-    CacheEntry.evaluationStack.push(entry);
-  }
-
-  static popRoot() {
-    const entry = CacheEntry.evaluationStack.pop();
-
-    if (!entry) {
-      throw new Error("No cache root found on the evaluation stack");
-    }
-
-    if (entry.references.size > 0) {
-      throw new Error("Cache root has references, this is not supported");
-    }
-
-    CacheEntry.unreferencedEntries.add(entry);
-  }
-
-  static evaluateRoot() {
-    if (CacheEntry.evaluationStack.length === 0) {
-      throw new Error("No cache root found on the evaluation stack");
-    }
-
-    const root =
-      CacheEntry.evaluationStack[CacheEntry.evaluationStack.length - 1];
-
-    const value = root.computeValue();
-    return value;
-  }
-
-  static gc() {
-    const unreferenced = CacheEntry.unreferencedEntries;
-
-    // invalidating entries may generate more garbage, as
-    // they will dereference their dependencies along the way
-    while (unreferenced.size > 0) {
-      for (let entry of unreferenced) {
-        entry.invalidate();
-
-        // signal the scope that this cache entry can be unregistered
-        entry.scope.uncache(entry.binding);
-
-        unreferenced.delete(entry);
-      }
-    }
-  }
-
-  static transient(value: TypedValue) {
-    // values owned by something else will
-    // be disposed later by their owners
-    if (CacheEntry.valueOwner.has(value)) {
-      return;
-    }
-
-    const evaluationStack = CacheEntry.evaluationStack;
-    if (evaluationStack.length === 0) {
-      throw new Error("Cannot start evaluation with a transient");
-    }
-
-    // give ownership to the top of the stack
-    const entry = evaluationStack[evaluationStack.length - 1];
-    CacheEntry.valueOwner.set(value, entry);
-
-    // store it for disposal
-    CacheEntry.transients.push(value);
-  }
-
-  constructor(scope: Scope, binding: Binding) {
-    this.scope = scope;
-    this.binding = binding;
+  constructor(context: EvaluationContext, evaluator: Evaluator) {
+    this.context = context;
 
     this.value = null;
 
@@ -121,27 +43,47 @@ export class CacheEntry {
     this.stages = [
       {
         dependencies: new Set<CacheEntry>(),
-        evaluate: (scope: Scope) => this.binding.evaluate(scope),
+        evaluator,
+        disposables: [],
       },
     ];
     this.currentStage = 0;
 
+    this.isEvaluating = false;
+
     // entries are created unreferenced,
     // they will persist across the next gc call
-    // if something uses them
-    CacheEntry.unreferencedEntries.add(this);
+    // if something references them,
+    // or are used as evalution root
+    Cache.unreferencedEntries.add(this);
   }
 
-  evaluate(): TypedValue {
-    const evaluationStack = CacheEntry.evaluationStack;
-
+  evaluate(
+    reference?: CacheEntry,
+    expressionOnly?: boolean,
+    expressionName?: string | null
+  ): TypedValue {
     // keep track of new cache dependencies
-    if (evaluationStack.length > 0) {
-      const entry = evaluationStack[evaluationStack.length - 1];
-      if (!this.references.has(entry)) {
-        entry.stages[entry.currentStage].dependencies.add(this);
-        this.addReference(entry);
+    if (reference) {
+      if (!this.references.has(reference)) {
+        reference.stages[reference.currentStage].dependencies.add(this);
+
+        if (this.references.size === 0) {
+          Cache.unreferencedEntries.delete(this);
+        }
+
+        this.references.add(reference);
       }
+    }
+
+    if (expressionOnly) {
+      const rootEvaluator = this.stages[0].evaluator;
+      const meta = rootEvaluator.smeliMeta;
+      if (meta && meta.sourceExpression) {
+        return new ExpressionValue(expressionName || "", meta.sourceExpression);
+      }
+
+      throw new Error("No expression bound to this evaluator");
     }
 
     // early out if already cached
@@ -149,37 +91,13 @@ export class CacheEntry {
       return this.value;
     }
 
-    evaluationStack.push(this);
+    this.isEvaluating = true;
 
     try {
-      const value = this.computeValue();
-      return value;
-    } catch (error) {
-      error.smeliStack = error.smeliStack || [];
-      error.smeliStack.push(this.binding.name);
-      throw error;
+      return this.computeValue();
     } finally {
-      evaluationStack.pop();
+      this.isEvaluating = false;
     }
-  }
-
-  ast(): any {
-    const evaluationStack = CacheEntry.evaluationStack;
-
-    // keep track of new cache dependencies
-    if (evaluationStack.length > 0) {
-      const entry = evaluationStack[evaluationStack.length - 1];
-      if (!this.references.has(entry)) {
-        entry.stages[entry.currentStage].dependencies.add(this);
-        this.addReference(entry);
-      }
-    }
-
-    if (!this.binding.ast) {
-      throw new Error(`Binding '${this.binding.name}' has no expression`);
-    }
-
-    return this.binding.ast;
   }
 
   // a new binding with the same name has been bound
@@ -195,12 +113,8 @@ export class CacheEntry {
     //console.log("invalidating: " + this.binding.name, this.references);
 
     // we should never be invalidating a value currently being evaluated
-    for (let i = CacheEntry.evaluationStack.length - 1; i >= 0; i--) {
-      if (CacheEntry.evaluationStack[i] === this) {
-        throw new Error(
-          `Invalidating a cache entry being evaluated (${this.binding.name})`
-        );
-      }
+    if (this.isEvaluating) {
+      throw new Error("Invalidating a cache entry being evaluated");
     }
 
     // discard references first, as they might need the
@@ -212,43 +126,48 @@ export class CacheEntry {
     this.discard();
   }
 
+  // this entry is being garbage collected
+  uncache() {
+    this.context.cache.delete(this.stages[0].evaluator);
+  }
+
   private computeValue(): TypedValue {
     //console.log("start eval: " + this.binding.name);
+    let stage = this.stages[this.currentStage];
+    let result: Evaluator | TypedValue = stage.evaluator;
 
-    while (!this.value) {
+    while (typeof result === "function") {
+      const previousOwner = TypedValue.disposableOwner;
+      TypedValue.disposableOwner = stage.disposables;
       try {
         //console.log("stage #" + this.currentStage);
-        const result = this.stages[this.currentStage].evaluate(this.scope);
+        result = result(this.context as any);
 
-        if (typeof result === "function") {
-          // move to the next evaluation stage
-          this.stages.push({
-            dependencies: new Set<CacheEntry>(),
-            evaluate: result,
-          });
-          this.currentStage++;
-        } else {
-          // this value might be owned by another entry
-          if (!CacheEntry.valueOwner.has(result)) {
-            CacheEntry.valueOwner.set(result, this);
+        if (CacheEntry.enableCache) {
+          if (typeof result === "function") {
+            // store the next evaluation stage
+            stage = {
+              dependencies: new Set<CacheEntry>(),
+              evaluator: result,
+              disposables: [],
+            };
+            this.stages.push(stage);
+            this.currentStage++;
+          } else {
+            this.value = result;
           }
-          this.value = result;
         }
+      } catch (error) {
+        this.discard(this.currentStage);
+        throw error;
       } finally {
-        // clear out any owned transient values
-        for (let transientValue of CacheEntry.transients) {
-          CacheEntry.valueOwner.delete(transientValue);
-          if (transientValue.dispose) {
-            transientValue.dispose();
-          }
-        }
-        CacheEntry.transients.length = 0;
+        TypedValue.disposableOwner = previousOwner;
       }
     }
 
     //console.log("end eval:   " + this.binding.name, this.dependencies);
 
-    return this.value;
+    return result;
   }
 
   private invalidateReferences() {
@@ -272,42 +191,211 @@ export class CacheEntry {
   // unregister from the dependencies
   // then dispose of all the values owned by this cache entry,
   private discard(targetStage: number = 0) {
-    // unregister from dependencies
-    for (let i = targetStage; i <= this.currentStage; i++) {
+    this.value = null;
+
+    for (let i = this.currentStage; i >= targetStage; i--) {
       const stage = this.stages[i];
+
+      // unregister from dependencies
       for (let dep of stage.dependencies) {
-        dep.removeReference(this);
+        dep.references.delete(this);
+
+        if (dep.references.size === 0) {
+          Cache.unreferencedEntries.add(dep);
+        }
       }
       stage.dependencies.clear();
+
+      // clear out any owned values
+      const disposables = stage.disposables;
+      for (const value of disposables.reverse()) {
+        // values in that list must have a dispose() method,
+        // if not, that's a bug, let it crash
+        (value as any).dispose();
+      }
+      disposables.length = 0;
     }
 
     // destroy intermediate stages
     this.stages.length = targetStage + 1;
     this.currentStage = targetStage;
-
-    // this entry might not own its value
-    if (this.value && CacheEntry.valueOwner.get(this.value) === this) {
-      if (this.value.dispose) {
-        this.value.dispose();
-      }
-      CacheEntry.valueOwner.delete(this.value);
-    }
-    this.value = null;
-  }
-
-  private addReference(entry: CacheEntry) {
-    if (this.references.size === 0) {
-      CacheEntry.unreferencedEntries.delete(this);
-    }
-
-    this.references.add(entry);
-  }
-
-  private removeReference(entry: CacheEntry) {
-    this.references.delete(entry);
-
-    if (this.references.size === 0) {
-      CacheEntry.unreferencedEntries.add(this);
-    }
   }
 }
+
+export class Cache {
+  // dynamic dependency graph construction
+  private static currentEntry: CacheEntry | null = null;
+
+  // garbage collection
+  public static unreferencedEntries: Set<CacheEntry> = new Set();
+
+  private static activeTransients: Map<TypedValue, number> = new Map();
+  private static stackSize: number = 0;
+
+  static evaluateRoot(
+    evaluator: Evaluator,
+    context: EvaluationContext
+  ): TypedValue {
+    // create a cache entry if necessary
+    let rootEntry = context.cache.get(evaluator);
+    if (!rootEntry) {
+      rootEntry = new CacheEntry(context, evaluator);
+      context.cache.set(evaluator, rootEntry);
+    }
+
+    Cache.currentEntry = rootEntry;
+
+    try {
+      return rootEntry.evaluate();
+    } finally {
+      Cache.currentEntry = null;
+
+      // this entry shouldn't have been referenced
+      if (Cache.unreferencedEntries.has(rootEntry)) {
+        // collect everything not referenced through the root
+        Cache.unreferencedEntries.delete(rootEntry);
+        Cache.gc();
+        Cache.unreferencedEntries.add(rootEntry);
+      } else {
+        throw new Error(
+          "Evaluation root has been referenced during evaluation"
+        );
+      }
+    }
+  }
+
+  static gc() {
+    const unreferenced = Cache.unreferencedEntries;
+
+    // invalidating entries may generate more garbage, as
+    // they will dereference their dependencies along the way
+    while (unreferenced.size > 0) {
+      for (let entry of unreferenced) {
+        entry.invalidate();
+
+        // unreference the cache entry
+        entry.uncache();
+
+        unreferenced.delete(entry);
+      }
+    }
+  }
+
+  static evaluate(
+    nameOrEvaluator: string | Evaluator,
+    newContext?: EvaluationContext,
+    expressionOnly?: boolean,
+    transients?: { [key: string]: TypedValue }
+  ): TypedValue {
+    const previousEntry = Cache.currentEntry;
+
+    if (!previousEntry) {
+      throw new Error("Evaluation must start with evaluateRoot()");
+    }
+
+    const context = newContext || previousEntry.context;
+
+    let name: string | null;
+    let evaluator: Evaluator | null;
+    if (typeof nameOrEvaluator === "string") {
+      const transient = context.transients.get(nameOrEvaluator);
+      if (transient) {
+        Cache.activeTransients.set(transient, Cache.stackSize);
+        CacheEntry.enableCache = false;
+        return transient;
+      }
+
+      name = nameOrEvaluator;
+      evaluator = context.lookup(nameOrEvaluator);
+    } else {
+      name = null;
+      evaluator = nameOrEvaluator;
+    }
+
+    if (evaluator) {
+      // create a cache entry if necessary
+      let cacheEntry = context.cache.get(evaluator);
+      if (!cacheEntry) {
+        cacheEntry = new CacheEntry(context, evaluator);
+        context.cache.set(evaluator, cacheEntry);
+      }
+
+      if (transients) {
+        for (const name in transients) {
+          if (context.transients.has(name)) {
+            throw new Error(
+              "Multiple overrides of the same name on the same context, this is not supported"
+            );
+          }
+          context.transients.set(name, transients[name]);
+        }
+      }
+
+      Cache.currentEntry = cacheEntry;
+      Cache.stackSize++;
+
+      CacheEntry.enableCache = true;
+
+      let value;
+      try {
+        value = cacheEntry.evaluate(
+          previousEntry || undefined,
+          expressionOnly,
+          name
+        );
+      } catch (error) {
+        const debugName = name || "[anonymous evaluator]";
+
+        // append debug info for this call
+        error.smeliStack = error.smeliStack || [];
+        error.smeliStack.push(debugName);
+
+        // then rethrow up the stack
+        throw error;
+      } finally {
+        Cache.currentEntry = previousEntry;
+        Cache.stackSize--;
+
+        if (transients) {
+          for (const name in transients) {
+            context.transients.delete(name);
+            Cache.activeTransients.delete(transients[name]);
+          }
+        }
+
+        CacheEntry.enableCache = true;
+        for (let [transient, stackMax] of Cache.activeTransients) {
+          stackMax = Math.min(stackMax, Cache.stackSize);
+          Cache.activeTransients.set(transient, stackMax);
+
+          if (stackMax === Cache.stackSize) {
+            CacheEntry.enableCache = false;
+          }
+        }
+      }
+
+      return value;
+    }
+
+    const parent = context.parent;
+    if (parent) {
+      return evaluate(nameOrEvaluator, parent, expressionOnly);
+    }
+
+    throw new Error(`No previous definition found for '${nameOrEvaluator}'`);
+  }
+
+  static currentEvaluationContext(): EvaluationContext {
+    const entry = Cache.currentEntry;
+    if (!entry) {
+      throw new Error("Not currently evaluating");
+    }
+
+    return entry.context;
+  }
+}
+
+export const evaluate = Cache.evaluate;
+export const evaluateRoot = Cache.evaluateRoot;
+
+export const currentEvaluationContext = Cache.currentEvaluationContext;

@@ -34,7 +34,7 @@ export const stack = {
           const node = document.createElement("div");
           node.className = `${styles.stack} container`;
 
-          const result = scope.evaluate(() => new DomNode(node));
+          const result = new DomNode(node);
 
           // cache the parent node creation
           return (scope: Scope) => {

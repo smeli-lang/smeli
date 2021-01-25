@@ -10,6 +10,9 @@ export * from "./traits";
 
 export { PluginDefinition } from "./plugins";
 
+export { currentEvaluationContext, evaluate } from "./cache";
+export { stringify } from "./stringify";
+
 export type SmeliOptions = {
   code?: string;
   plugins?: PluginDefinition[];

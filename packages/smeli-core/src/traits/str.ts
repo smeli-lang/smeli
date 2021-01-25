@@ -27,15 +27,15 @@ StrTrait.implement({
 });
 
 StrTrait.implement({
-  argumentTypes: [NumberValue],
-  returnType: StringValue,
-  call: (number: NumberValue) => new StringValue(number.value.toString()),
-});
-
-StrTrait.implement({
   argumentTypes: [StringValue],
   returnType: StringValue,
   call: (value: StringValue) => value,
+});
+
+StrTrait.implement({
+  argumentTypes: [NumberValue],
+  returnType: StringValue,
+  call: (number: NumberValue) => new StringValue(number.value.toString()),
 });
 
 StrTrait.implement({

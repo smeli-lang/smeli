@@ -7,6 +7,8 @@ ui: ui {
 
 # Plot Demo
 
+f: x => sin(x * sin(time)) * 0.4 - 2
+
 demo_plot: plot.view {
   viewport: viewport {
     center: vec2(sin(time), sin(time * 0.7))
@@ -36,20 +38,20 @@ demo_plot: plot.view {
     point2: vec2(1.2, 0.2)
     label: "β"
   }
-  # item5: plot.function {
-  #   function: x => sin(x * sin(time)) * 0.4 - 2
-  # }
-  # item6: plot.point {
-  #   position: vec2(-2, item5.function(-2))
-  #   guides: true
-  #   label: "f(-2)"
-  # }
-  item7: plot.circle {
-    color: item4.color
-    center: vec2(3, -2)
-    slice: slice * sin(time * 0.3) * 0.5 + slice * 0.5
+  item5: plot.function {
+    function: f
   }
-  item5: plot.vector {
+  item6: plot.point {
+    position: vec2(-2, item5.function(-2))
+    guides: true
+    label: "f(-2)"
+  }
+  # item7: plot.circle {
+  #   color: item4.color
+  #   center: vec2(3, -2)
+  #   slice: slice * sin(time * 0.3) * 0.5 + slice * 0.5
+  # }
+  item7: plot.vector {
     color: vec3(0.4, 0.8, 0.9)
     start: vec2(-4, 1)
     end: start + vec2(cos(time), sin(time))
@@ -81,7 +83,11 @@ demo_plot: demo_plot {
     size: animate(size, size * 2, 0.5)
   }
 
-  item5: item5 {
+  item7: item7 {
     start: animate(start, start + vec2(15, 0), 0.5)
+  }
+
+  item5: item5 {
+    function: x => animate(f(x), x * x, 0.5)
   }
 }
