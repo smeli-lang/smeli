@@ -1,9 +1,9 @@
 import {
+  createChildScope,
   evaluate,
   Lambda,
   NativeFunction,
   NumberValue,
-  Scope,
   Vec3,
 } from "@smeli/core";
 
@@ -13,20 +13,19 @@ import { PlotItem } from "./types";
 
 export const functionItem = {
   name: "function",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       {
         name: "function",
-        evaluate: (scope: Scope) => evaluate("sin"),
+        evaluate: () => evaluate("sin"),
       },
       {
         name: "color",
-        evaluate: (scope: Scope) => evaluateTheme(scope).colors.primary,
+        evaluate: () => evaluateTheme().colors.primary,
       },
       {
         name: "#plot:item",
-        evaluate: (scope: Scope) => {
+        evaluate: () => {
           const functionValue = evaluate("function");
 
           if (!functionValue.is(Lambda) && !functionValue.is(NativeFunction)) {
@@ -36,7 +35,7 @@ export const functionItem = {
           const transientEvaluator = functionValue.makeTransientEvaluator();
 
           // cache evaluation function
-          return (scope: Scope) => {
+          return () => {
             const color = evaluate("color").as(Vec3);
 
             return new PlotItem(({ context, viewport }) => {
@@ -66,8 +65,5 @@ export const functionItem = {
           };
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };

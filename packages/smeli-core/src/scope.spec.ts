@@ -28,8 +28,8 @@ test("evaluates binding history", () => {
     },
     {
       name: "a",
-      evaluate: (scope: Scope) => {
-        const a = scope.evaluate("a").as(NumberValue);
+      evaluate: () => {
+        const a = evaluate("a").as(NumberValue);
         return new NumberValue(a.value + 22);
       },
     },
@@ -64,7 +64,7 @@ test("evaluates bindings from prefix against the derived scope", () => {
     },
     {
       name: "y",
-      evaluate: (scope) => scope.evaluate("x"),
+      evaluate: () => evaluate("x"),
     },
   ]);
 
@@ -101,7 +101,7 @@ test("using the same prefix from different scopes is reentrant", () => {
     },
     {
       name: "y",
-      evaluate: (scope) => scope.evaluate("x"),
+      evaluate: () => evaluate("x"),
     },
   ]);
 
@@ -113,9 +113,9 @@ test("using the same prefix from different scopes is reentrant", () => {
     },
     {
       name: "x",
-      evaluate: (scope: Scope) => {
-        const childScope = scope.evaluate("child").as(Scope);
-        return childScope.evaluate("y");
+      evaluate: () => {
+        const childScope = evaluate("child").as(Scope);
+        return evaluate("y", childScope);
       },
     },
   ]);

@@ -1,13 +1,18 @@
-import { Scope, StringValue, BoolValue, NumberValue } from "@smeli/core";
+import {
+  createChildScope,
+  StringValue,
+  BoolValue,
+  NumberValue,
+  evaluate,
+} from "@smeli/core";
 
 import { evaluateUiStyles } from "./styles";
 import { DomNode } from "./types";
 
 export const textbox = {
   name: "textbox",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       {
         name: "text",
         evaluate: () => new StringValue(""),
@@ -22,12 +27,12 @@ export const textbox = {
       },
       {
         name: "#ui:node",
-        evaluate: (scope: Scope) => {
-          const styles = evaluateUiStyles(scope);
+        evaluate: () => {
+          const styles = evaluateUiStyles();
 
-          const text = scope.evaluate("text").as(StringValue);
-          const important = scope.evaluate("important").as(BoolValue);
-          const size = scope.evaluate("size").as(NumberValue);
+          const text = evaluate("text").as(StringValue);
+          const important = evaluate("important").as(BoolValue);
+          const size = evaluate("size").as(NumberValue);
 
           const box = document.createElement("div");
           box.className = "widget " + styles.textbox;
@@ -42,8 +47,5 @@ export const textbox = {
           return new DomNode(box);
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };

@@ -45,7 +45,7 @@ export class Engine {
       for (let [pluginName, bindingNames] of this.sideEffects) {
         const pluginScope = evaluate(pluginName).as(Scope);
         for (let binding of bindingNames) {
-          pluginScope.evaluate(binding);
+          evaluate(binding, pluginScope);
         }
       }
 

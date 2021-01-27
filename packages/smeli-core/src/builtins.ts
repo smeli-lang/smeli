@@ -10,26 +10,28 @@ import {
 } from "./types";
 import { AddTrait, MulTrait, StrTrait } from "./traits";
 import { Binding, Scope } from "./scope";
+import { currentEvaluationContext, evaluate } from "./cache";
 
 const animate: Binding = {
   name: "animate",
-  evaluate: (parentScope: Scope) =>
-    new Lambda(parentScope, ["start", "end", "duration"], (scope: Scope) => {
-      const duration = scope.evaluate("duration").as(NumberValue).value;
+  evaluate: () => {
+    const parentScope = currentEvaluationContext().as(Scope);
+    return new Lambda(parentScope, ["start", "end", "duration"], () => {
+      const duration = evaluate("duration").as(NumberValue).value;
       let finished = false;
       let startTime: number | null = null;
 
-      return (scope: Scope) => {
-        const endValue = scope.evaluate("end");
+      return () => {
+        const endValue = evaluate("end");
 
         // stop evaluating when animation is over
         if (finished) {
           return endValue;
         }
 
-        const startValue = scope.evaluate("start");
+        const startValue = evaluate("start");
 
-        const currentTime = scope.evaluate("time").as(NumberValue).value;
+        const currentTime = evaluate("time").as(NumberValue).value;
         if (startTime === null) {
           startTime = currentTime;
         }
@@ -48,7 +50,8 @@ const animate: Binding = {
 
         return AddTrait.call(weightedStart, weightedEnd);
       };
-    }),
+    });
+  },
 };
 
 const ceil = nativeBinding("ceil", [

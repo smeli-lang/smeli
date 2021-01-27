@@ -1,12 +1,12 @@
 import {
   ContextCache,
+  currentEvaluationContext,
   evaluate,
   EvaluationContext,
   ImmediateTransients,
 } from "./cache";
+import { Evaluator } from "./evaluation";
 import { TypedValue, TypedConstructor } from "./types";
-
-export type Evaluator = (scope: Scope) => TypedValue | Evaluator;
 
 export type Binding = {
   name: string;
@@ -116,28 +116,19 @@ export class Scope extends TypedValue implements EvaluationContext {
     }
   }
 
-  evaluate<T extends TypedValue>(nameOrEvaluator: (scope: Scope) => T): T;
-  evaluate<T extends TypedValue>(
-    nameOrEvaluator: string | Evaluator
-  ): TypedValue;
-  evaluate(nameOrEvaluator: string | Evaluator): any {
-    // this API is deprecated, forward to the new version for now
-    return evaluate(nameOrEvaluator, this);
-  }
-
   evaluateNested(nestedBindings: NestedBindings): NestedValues {
     const result: NestedValues = {};
 
     for (const [name, rhs] of Object.entries(nestedBindings)) {
       if (rhs === null) {
         // evaluate as anything
-        result[name] = this.evaluate(name);
+        result[name] = evaluate(name, this);
       } else if (rhs.typeName !== undefined) {
         const constructor = rhs as TypedConstructor<TypedValue>;
-        result[name] = this.evaluate(name).as(constructor);
+        result[name] = evaluate(name, this).as(constructor);
       } else {
         const childBindings = rhs as NestedBindings;
-        const childScope = this.evaluate(name).as(Scope);
+        const childScope = evaluate(name, this).as(Scope);
         result[name] = childScope.evaluateNested(childBindings);
       }
     }
@@ -197,3 +188,12 @@ export class Scope extends TypedValue implements EvaluationContext {
     return this.parent?.root() || this;
   }
 }
+
+// create a child scope in the current evaluation context
+// (with no prefix scope)
+export const createChildScope = (bindings: Binding[] = []) => {
+  const parentScope = currentEvaluationContext().as(Scope);
+  const scope = new Scope(parentScope);
+  scope.push(bindings);
+  return scope;
+};

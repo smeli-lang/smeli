@@ -8,6 +8,7 @@ import {
 } from "../types";
 import { Scope } from "../scope";
 import { argumentCount, argumentType, defineTrait } from "./validation";
+import { evaluate } from "../cache";
 
 export const IndexTrait = defineTrait("index", [
   argumentCount(2),
@@ -48,5 +49,5 @@ IndexTrait.implement({
 IndexTrait.implement({
   argumentTypes: [Scope, StringValue],
   returnType: AnyType,
-  call: (scope: Scope, name: StringValue) => scope.evaluate(name.value),
+  call: (scope: Scope, name: StringValue) => evaluate(name.value, scope),
 });

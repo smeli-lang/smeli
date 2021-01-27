@@ -1,13 +1,15 @@
 import {
+  createChildScope,
   NumberValue,
   Scope,
   ScopeOverride,
   StringValue,
-  SubTrait,
   TypedValue,
   Vec2,
   Vec3,
   TypedConstructor,
+  evaluate,
+  currentEvaluationContext,
 } from "@smeli/core";
 
 import { DomNode } from "./types";
@@ -26,7 +28,15 @@ const vertexShaderCode = `
   void main()
   {
       uv = position;
-      uv.x *= resolution.x / resolution.y;
+
+      if (resolution.x > resolution.y)
+      {
+        uv.x *= resolution.x / resolution.y;
+      }
+      else
+      {
+        uv.y *= resolution.y / resolution.x;
+      }
       gl_Position = vec4(position, 0.0, 1.0);
   }
 `;
@@ -211,24 +221,23 @@ function redraw(
 
 export const shader = {
   name: "shader",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       {
         name: "code",
-        evaluate: (scope: Scope) => new StringValue(defaultFragmentShaderCode),
+        evaluate: () => new StringValue(defaultFragmentShaderCode),
       },
       {
         name: "uniforms",
-        evaluate: (parentScope: Scope) => new Scope(parentScope),
+        evaluate: () => createChildScope(),
       },
       {
         name: "#gl:context",
-        evaluate: (scope: Scope) => new GLDrawContext(),
+        evaluate: () => new GLDrawContext(),
       },
       {
         name: "#gl:start_time",
-        evaluate: (scope: Scope) => new NumberValue(Date.now() * 0.001),
+        evaluate: () => new NumberValue(Date.now() * 0.001),
       },
       {
         name: "#pixel_size",
@@ -236,15 +245,16 @@ export const shader = {
       },
       {
         name: "#ui:node",
-        evaluate: (scope: Scope) => {
-          const styles = evaluateUiStyles(scope);
+        evaluate: () => {
+          const styles = evaluateUiStyles();
 
           const container = document.createElement("div");
           container.className = "container " + styles.shader;
 
-          const context = scope.evaluate("#gl:context").as(GLDrawContext);
+          const context = evaluate("#gl:context").as(GLDrawContext);
           container.appendChild(context.canvas);
 
+          const scope = currentEvaluationContext().as(Scope);
           const pixelSizeOverride = new ScopeOverride(scope, "#pixel_size");
           const resizeObserver = new ResizeObserver((entries: any) => {
             // use only the latest update
@@ -253,24 +263,22 @@ export const shader = {
             pixelSizeOverride.bind(() => new Vec2(width, height));
           });
 
-          const result = scope.evaluate(
-            () => new DomNode(container, {}, [resizeObserver])
-          );
+          const result = new DomNode(container, {}, [resizeObserver]);
 
           const quadVertices = [-1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0];
           context.loadGeometry(quadVertices);
 
           // cache DOM element and GL context
-          return (scope: Scope) => {
-            const code = scope.evaluate("code").as(StringValue);
+          return () => {
+            const code = evaluate("code").as(StringValue);
             context.loadProgram(vertexShaderCode, code.value);
 
-            const uniformScope = scope.evaluate("uniforms").as(Scope);
+            const uniformScope = evaluate("uniforms").as(Scope);
 
             // cache compiled code
-            return (scope: Scope) => {
+            return () => {
               // actual pixel size of the canvas
-              const pixelSize = scope.evaluate("#pixel_size").as(Vec2);
+              const pixelSize = evaluate("#pixel_size").as(Vec2);
               if (pixelSize.x === 0 || pixelSize.y === 0) {
                 return result;
               }
@@ -281,7 +289,7 @@ export const shader = {
                 const value =
                   info.name === "resolution"
                     ? pixelSize
-                    : uniformScope.evaluate(info.name).as(info.type);
+                    : evaluate(info.name, uniformScope).as(info.type);
 
                 return {
                   name: info.name,
@@ -297,8 +305,5 @@ export const shader = {
           };
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };

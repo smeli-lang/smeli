@@ -1,6 +1,7 @@
 import { TypedValue } from "./value";
-import { Scope, Evaluator } from "../scope";
-import { evaluate } from "../cache";
+import { Scope } from "../scope";
+import { currentEvaluationContext, evaluate } from "../cache";
+import { Evaluator } from "../evaluation";
 
 export class Lambda extends TypedValue {
   static typeName = "lambda";
@@ -21,7 +22,7 @@ export class Lambda extends TypedValue {
     this.evaluator = evaluator;
   }
 
-  __call_site__(scope: Scope, args: Evaluator[]): Evaluator {
+  __call_site__(args: Evaluator[]): Evaluator {
     // simple signature check (length only)
     if (this.argumentNames.length !== args.length) {
       throw new Error(
@@ -34,8 +35,9 @@ export class Lambda extends TypedValue {
     const evaluationScope = new Scope(this.parentScope);
 
     // arguments are evaluated against the calling scope
+    const callingScope = currentEvaluationContext().as(Scope);
     this.argumentNames.forEach((name, index) => {
-      const argumentEvaluator = () => evaluate(args[index], scope);
+      const argumentEvaluator = () => evaluate(args[index], callingScope);
       evaluationScope.push({
         name,
         evaluate: argumentEvaluator,

@@ -1,4 +1,11 @@
-import { BoolValue, NumberValue, Scope, Vec2, Vec3 } from "@smeli/core";
+import {
+  createChildScope,
+  BoolValue,
+  evaluate,
+  NumberValue,
+  Vec2,
+  Vec3,
+} from "@smeli/core";
 
 import { evaluateTheme } from "@smeli/plugin-ui";
 
@@ -6,9 +13,8 @@ import { PlotItem } from "./types";
 
 export const circle = {
   name: "circle",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       {
         name: "center",
         evaluate: () => new Vec2(0.0, 0.0),
@@ -23,7 +29,7 @@ export const circle = {
       },
       {
         name: "color",
-        evaluate: (scope: Scope) => evaluateTheme(scope).colors.primary,
+        evaluate: () => evaluateTheme().colors.primary,
       },
       {
         name: "fill",
@@ -31,12 +37,12 @@ export const circle = {
       },
       {
         name: "#plot:item",
-        evaluate: (scope: Scope) => {
-          const center = scope.evaluate("center").as(Vec2);
-          const radius = scope.evaluate("radius").as(NumberValue);
-          const slice = scope.evaluate("slice").as(Vec2);
-          const color = scope.evaluate("color").as(Vec3);
-          const fill = scope.evaluate("fill").as(BoolValue);
+        evaluate: () => {
+          const center = evaluate("center").as(Vec2);
+          const radius = evaluate("radius").as(NumberValue);
+          const slice = evaluate("slice").as(Vec2);
+          const color = evaluate("color").as(Vec3);
+          const fill = evaluate("fill").as(BoolValue);
 
           return new PlotItem(({ context, viewport }) => {
             const pixelCenter = viewport.toPixels(center.x, center.y);
@@ -79,8 +85,5 @@ export const circle = {
           });
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };

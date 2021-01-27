@@ -1,12 +1,17 @@
-import { Scope, Binding } from "@smeli/core";
+import {
+  Scope,
+  Binding,
+  evaluate,
+  currentEvaluationContext,
+} from "@smeli/core";
 import { evaluateTheme, DomStyles } from "@smeli/plugin-ui";
 
 import { formulaStyles } from "./formula.styles";
 
 export const styles: Binding = {
   name: "#styles",
-  evaluate: (scope: Scope) => {
-    const theme = evaluateTheme(scope);
+  evaluate: () => {
+    const theme = evaluateTheme();
 
     return new DomStyles({
       formula: formulaStyles(theme),
@@ -14,9 +19,10 @@ export const styles: Binding = {
   },
 };
 
-export const evaluateKatexStyles = (scope: Scope) => {
-  const globalScope = scope.root();
-  const uiScope = globalScope.evaluate("katex").as(Scope);
-  const styles = uiScope.evaluate("#styles").as(DomStyles);
+export const evaluateKatexStyles = () => {
+  const context = currentEvaluationContext();
+  const globalScope = context.as(Scope).root();
+  const katexScope = evaluate("katex", globalScope).as(Scope);
+  const styles = evaluate("#styles", katexScope).as(DomStyles);
   return styles.sheet.classes;
 };

@@ -1,7 +1,7 @@
 import { pushPlugin, PluginDefinition } from "./plugins";
 import { NumberValue } from "./types";
 import { Scope } from "./scope";
-import { evaluateRoot } from "./cache";
+import { evaluate, evaluateRoot } from "./cache";
 
 test("loads a basic plugin", () => {
   const plugin: PluginDefinition = {
@@ -18,8 +18,8 @@ test("loads a basic plugin", () => {
   pushPlugin(scope, plugin);
 
   evaluateRoot(() => {
-    const pluginScope = scope.evaluate("hello").as(Scope);
-    const world = pluginScope.evaluate("world");
+    const pluginScope = evaluate("hello").as(Scope);
+    const world = evaluate("world", pluginScope);
     expect(world).toEqual(new NumberValue(42));
 
     return world;
@@ -38,8 +38,8 @@ test("loads a code plugin", () => {
   pushPlugin(scope, plugin);
 
   evaluateRoot(() => {
-    const pluginScope = scope.evaluate("hello").as(Scope);
-    const world = pluginScope.evaluate("world");
+    const pluginScope = evaluate("hello").as(Scope);
+    const world = evaluate("world", pluginScope);
     expect(world).toEqual(new NumberValue(42));
 
     return world;
@@ -64,8 +64,8 @@ test("loads bindings first, then code", () => {
   pushPlugin(scope, plugin);
 
   evaluateRoot(() => {
-    const pluginScope = scope.evaluate("hello").as(Scope);
-    const world = pluginScope.evaluate("world");
+    const pluginScope = evaluate("hello").as(Scope);
+    const world = evaluate("world", pluginScope);
     expect(world).toEqual(new NumberValue(62));
 
     return world;

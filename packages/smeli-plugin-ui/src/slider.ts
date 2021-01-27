@@ -1,12 +1,19 @@
-import { NumberValue, Scope, ScopeOverride, StringValue } from "@smeli/core";
+import {
+  createChildScope,
+  currentEvaluationContext,
+  evaluate,
+  NumberValue,
+  Scope,
+  ScopeOverride,
+  StringValue,
+} from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
 
 export const slider = {
   name: "slider",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       {
         name: "label",
         evaluate: () => new StringValue(""),
@@ -29,8 +36,8 @@ export const slider = {
       },
       {
         name: "#ui:node",
-        evaluate: (scope: Scope) => {
-          const styles = evaluateUiStyles(scope);
+        evaluate: () => {
+          const styles = evaluateUiStyles();
 
           const widget = document.createElement("div");
           widget.className = "widget " + styles.slider;
@@ -43,6 +50,7 @@ export const slider = {
           widget.appendChild(labelDiv);
           labelDiv.className = "label normal";
 
+          const scope = currentEvaluationContext().as(Scope);
           const valueOverride = new ScopeOverride(
             scope,
             "value",
@@ -55,43 +63,40 @@ export const slider = {
             }
           );
 
-          const result = scope.evaluate(
-            () =>
-              new DomNode(widget, {
-                input: (event: Event) => {
-                  const inputValue = parseFloat(slider.value);
-                  valueOverride.bind(() => new NumberValue(inputValue));
-                },
+          const result = new DomNode(widget, {
+            input: (event: Event) => {
+              const inputValue = parseFloat(slider.value);
+              valueOverride.bind(() => new NumberValue(inputValue));
+            },
 
-                mousedown: ((event: MouseEvent) => {
-                  // toggle override on right click
-                  if (event.button === 2) {
-                    event.preventDefault();
-                    valueOverride.toggle();
-                  }
-                }) as EventListener,
+            mousedown: ((event: MouseEvent) => {
+              // toggle override on right click
+              if (event.button === 2) {
+                event.preventDefault();
+                valueOverride.toggle();
+              }
+            }) as EventListener,
 
-                mouseup: () => slider.blur(),
+            mouseup: () => slider.blur(),
 
-                contextmenu: (event: Event) => event.preventDefault(),
-              })
-          );
+            contextmenu: (event: Event) => event.preventDefault(),
+          });
 
           // cache expensive setup in an intermediate stage
           // (also - it allows the slider to override its value binding
           // without destroying itself)
-          return (scope: Scope) => {
-            const min = scope.evaluate("min").as(NumberValue);
-            const max = scope.evaluate("max").as(NumberValue);
-            const step = scope.evaluate("step").as(NumberValue);
-            const value = scope.evaluate("value").as(NumberValue);
+          return () => {
+            const min = evaluate("min").as(NumberValue);
+            const max = evaluate("max").as(NumberValue);
+            const step = evaluate("step").as(NumberValue);
+            const value = evaluate("value").as(NumberValue);
 
             slider.min = min.value.toString();
             slider.max = max.value.toString();
             slider.step = step.value.toString();
             slider.value = value.value.toString();
 
-            const label = scope.evaluate("label").as(StringValue);
+            const label = evaluate("label").as(StringValue);
             labelDiv.innerHTML = label.value;
             labelDiv.style.display = label.value !== "" ? "block" : "none";
 
@@ -99,8 +104,5 @@ export const slider = {
           };
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };

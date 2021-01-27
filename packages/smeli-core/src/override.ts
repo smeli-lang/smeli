@@ -1,4 +1,5 @@
-import { Binding, Evaluator, Scope } from "./scope";
+import { Evaluator } from "./evaluation";
+import { Binding, Scope } from "./scope";
 
 type ActivationCallback = (activated: boolean) => void;
 

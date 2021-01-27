@@ -1,4 +1,11 @@
-import { BoolValue, Scope, StringValue, Vec2, Vec3 } from "@smeli/core";
+import {
+  createChildScope,
+  BoolValue,
+  evaluate,
+  StringValue,
+  Vec2,
+  Vec3,
+} from "@smeli/core";
 
 import { evaluateTheme } from "@smeli/plugin-ui";
 
@@ -6,16 +13,15 @@ import { PlotItem } from "./types";
 
 export const point = {
   name: "point",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       {
         name: "position",
         evaluate: () => new Vec2(0.0, 0.0),
       },
       {
         name: "color",
-        evaluate: (scope: Scope) => evaluateTheme(scope).colors.primary,
+        evaluate: () => evaluateTheme().colors.primary,
       },
       {
         name: "guides",
@@ -27,11 +33,11 @@ export const point = {
       },
       {
         name: "#plot:item",
-        evaluate: (scope: Scope) => {
-          const position = scope.evaluate("position").as(Vec2);
-          const color = scope.evaluate("color").as(Vec3);
-          const guides = scope.evaluate("guides").as(BoolValue);
-          const label = scope.evaluate("label").as(StringValue);
+        evaluate: () => {
+          const position = evaluate("position").as(Vec2);
+          const color = evaluate("color").as(Vec3);
+          const guides = evaluate("guides").as(BoolValue);
+          const label = evaluate("label").as(StringValue);
 
           return new PlotItem(({ canvas, context, viewport }) => {
             const pixelPosition = viewport.toPixels(position.x, position.y);
@@ -69,8 +75,5 @@ export const point = {
           });
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };

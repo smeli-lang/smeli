@@ -1,4 +1,4 @@
-import { Scope, StringValue, Vec2 } from "@smeli/core";
+import { evaluate, Scope, StringValue, Vec2 } from "@smeli/core";
 
 // handles all view-space transforms, to and from
 // actual pixels
@@ -14,10 +14,10 @@ export class Viewport {
   pixelSize: Vec2;
 
   constructor(scope: Scope, pixelSize: Vec2) {
-    const center = scope.evaluate("center").as(Vec2);
-    const size = scope.evaluate("size").as(Vec2);
-    const ratio = scope.evaluate("ratio").as(Vec2);
-    const mode = scope.evaluate("mode").as(StringValue).value;
+    const center = evaluate("center", scope).as(Vec2);
+    const size = evaluate("size", scope).as(Vec2);
+    const ratio = evaluate("ratio", scope).as(Vec2);
+    const mode = evaluate("mode", scope).as(StringValue).value;
 
     this.pixelSize = pixelSize;
 

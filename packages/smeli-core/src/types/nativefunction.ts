@@ -1,6 +1,8 @@
 import { TypedValue } from "./value";
 import { Overload, OverloadedFunction } from "./overload";
-import { Binding, Evaluator, Scope } from "../scope";
+import { Binding, Scope } from "../scope";
+import { currentEvaluationContext, evaluate } from "../cache";
+import { Evaluator } from "../evaluation";
 
 export class NativeFunction extends TypedValue {
   static typeName = "native_function";
@@ -15,10 +17,10 @@ export class NativeFunction extends TypedValue {
     this.overloadedFunction = overloadedFunction;
   }
 
-  __call_site__(scope: Scope, args: Evaluator[]): Evaluator {
-    return (scope: Scope) => {
+  __call_site__(args: Evaluator[]): Evaluator {
+    return () => {
       // evaluate arguments at the call site
-      const argValues = args.map((arg) => scope.evaluate(arg));
+      const argValues = args.map((arg) => evaluate(arg));
 
       // call the native evaluator
       return this.overloadedFunction.call(...argValues);
@@ -36,8 +38,10 @@ export function nativeBinding(name: string, overloads: Overload[]): Binding {
 
   const binding: Binding = {
     name,
-    evaluate: (parentScope: Scope) =>
-      new NativeFunction(parentScope, overloadedFunction),
+    evaluate: () => {
+      const parentScope = currentEvaluationContext().as(Scope);
+      return new NativeFunction(parentScope, overloadedFunction);
+    },
   };
 
   return binding;

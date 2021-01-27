@@ -1,4 +1,4 @@
-import { BoolValue, Scope, Vec2, Vec3 } from "@smeli/core";
+import { createChildScope, BoolValue, evaluate, Vec2, Vec3 } from "@smeli/core";
 
 import { evaluateTheme } from "@smeli/plugin-ui";
 
@@ -20,32 +20,31 @@ function* quantize(min: number, max: number, step: number) {
 
 export const grid = {
   name: "grid",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       {
         name: "color",
-        evaluate: (scope: Scope) => evaluateTheme(scope).colors.on_background,
+        evaluate: () => evaluateTheme().colors.on_background,
       },
       {
         name: "step",
-        evaluate: (scope: Scope) => new Vec2(1, 1),
+        evaluate: () => new Vec2(1, 1),
       },
       {
         name: "axis",
-        evaluate: (scope: Scope) => new BoolValue(true),
+        evaluate: () => new BoolValue(true),
       },
       {
         name: "axis_step",
-        evaluate: (scope: Scope) => new Vec2(1, 1),
+        evaluate: () => new Vec2(1, 1),
       },
       {
         name: "#plot:item",
-        evaluate: (scope: Scope) => {
-          const color = scope.evaluate("color").as(Vec3);
-          const step = scope.evaluate("step").as(Vec2);
-          const axis = scope.evaluate("axis").as(BoolValue);
-          const axis_step = scope.evaluate("axis_step").as(Vec2);
+        evaluate: () => {
+          const color = evaluate("color").as(Vec3);
+          const step = evaluate("step").as(Vec2);
+          const axis = evaluate("axis").as(BoolValue);
+          const axis_step = evaluate("axis_step").as(Vec2);
 
           return new PlotItem(({ canvas, context, viewport }) => {
             context.strokeStyle = color.toCssColor(0.38);
@@ -139,8 +138,5 @@ export const grid = {
           });
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };

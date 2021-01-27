@@ -1,4 +1,11 @@
-import { BoolValue, Scope, StringValue, Vec2, Vec3 } from "@smeli/core";
+import {
+  createChildScope,
+  BoolValue,
+  evaluate,
+  StringValue,
+  Vec2,
+  Vec3,
+} from "@smeli/core";
 
 import { evaluateTheme } from "@smeli/plugin-ui";
 
@@ -6,9 +13,8 @@ import { PlotItem } from "./types";
 
 export const angle = {
   name: "angle",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       {
         name: "point0",
         evaluate: () => new Vec2(-1.0, 0.3),
@@ -27,7 +33,7 @@ export const angle = {
       },
       {
         name: "color",
-        evaluate: (scope: Scope) => evaluateTheme(scope).colors.primary,
+        evaluate: () => evaluateTheme().colors.primary,
       },
       {
         name: "label",
@@ -35,16 +41,16 @@ export const angle = {
       },
       {
         name: "#plot:item",
-        evaluate: (scope: Scope) => {
+        evaluate: () => {
           const points: Vec2[] = [];
           for (let i = 0; i < 3; i++) {
-            const point = scope.evaluate("point" + i).as(Vec2);
+            const point = evaluate("point" + i).as(Vec2);
             points.push(point);
           }
-          const right = scope.evaluate("right").as(BoolValue);
+          const right = evaluate("right").as(BoolValue);
 
-          const color = scope.evaluate("color").as(Vec3);
-          const label = scope.evaluate("label").as(StringValue);
+          const color = evaluate("color").as(Vec3);
+          const label = evaluate("label").as(StringValue);
 
           return new PlotItem(({ context, viewport }) => {
             const pixelPoints = points.map((point) =>
@@ -145,8 +151,5 @@ export const angle = {
           });
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };

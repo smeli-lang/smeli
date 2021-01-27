@@ -15,7 +15,7 @@ import {
 } from "./ast";
 import { Lambda, NativeFunction, StringValue, TypedValue } from "./types";
 import { IndexTrait } from "./traits";
-import { evaluate } from "./cache";
+import { currentEvaluationContext, evaluate } from "./cache";
 
 // Evaluators are plain js functions, but some of them
 // can be augmented with metadata, such as a back link
@@ -70,8 +70,8 @@ expressionVisitor.set(Identifier, (identifier: Identifier) => {
   }
 
   return annotate(
-    (scope: Scope) => {
-      let container: TypedValue = scope;
+    () => {
+      let container: TypedValue = currentEvaluationContext();
       for (let i = 0; i < identifier.scopeNames.length; i++) {
         container = IndexTrait.call(container, identifier.scopeNames[i]);
       }
@@ -95,12 +95,13 @@ expressionVisitor.set(ScopeExpression, (scopeExpression: ScopeExpression) => {
     : null;
 
   return annotate(
-    (parentScope: Scope) => {
+    () => {
       let prefixScope = null;
       if (prefixEvaluator) {
         prefixScope = evaluate(prefixEvaluator).as(Scope);
       }
 
+      const parentScope = currentEvaluationContext().as(Scope);
       const scope = new Scope(parentScope, prefixScope);
       statements.forEach((statement) => scope.push(statement.binding));
 
@@ -115,8 +116,9 @@ expressionVisitor.set(ScopeExpression, (scopeExpression: ScopeExpression) => {
 expressionVisitor.set(LambdaExpression, (lambda: LambdaExpression) => {
   const bodyEvaluator = compileExpression(lambda.body);
   return annotate(
-    (parentScope: Scope) => {
+    () => {
       const argumentNames = lambda.args.map((id) => id.name);
+      const parentScope = currentEvaluationContext().as(Scope);
       return new Lambda(parentScope, argumentNames, bodyEvaluator);
     },
     {
@@ -130,17 +132,14 @@ expressionVisitor.set(FunctionCall, (functionCall: FunctionCall) => {
   const argumentEvaluators = functionCall.args.map(compileExpression);
 
   return annotate(
-    (scope: Scope) => {
+    () => {
       const functionValue = evaluate(functionValueEvaluator);
 
       if (!functionValue.is(Lambda) && !functionValue.is(NativeFunction)) {
         throw new Error(`${functionCall.identifier.name} is not a function`);
       }
 
-      const resultEvaluator = functionValue.__call_site__(
-        scope,
-        argumentEvaluators
-      );
+      const resultEvaluator = functionValue.__call_site__(argumentEvaluators);
 
       // cache evaluation scope
       return resultEvaluator;
@@ -158,9 +157,9 @@ expressionVisitor.set(BinaryOperator, (operator: BinaryOperator) => {
   const trait = operator.trait;
 
   return annotate(
-    (scope: Scope) => {
-      const lvalue = scope.evaluate(lhsEvaluator);
-      const rvalue = scope.evaluate(rhsEvaluator);
+    () => {
+      const lvalue = evaluate(lhsEvaluator);
+      const rvalue = evaluate(rhsEvaluator);
 
       return trait.call(lvalue, rvalue);
     },
@@ -207,12 +206,12 @@ statementVisitor.set(Comment, (comment: Comment) => {
       ? `<h${comment.headingLevel} class=${cssClass}>${comment.text}</h${comment.headingLevel}>`
       : "";
 
-  const evaluator = (scope: Scope) => {
+  const evaluator = () => {
     if (comment.headingLevel === 1 && comment.text !== "") {
       return new StringValue(html);
     }
 
-    const previous = scope.evaluate("#outline").as(StringValue);
+    const previous = evaluate("#outline").as(StringValue);
     return new StringValue(previous.value + html);
   };
 

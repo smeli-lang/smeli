@@ -1,4 +1,4 @@
-import { nativeBinding, Scope, StringValue, Vec3 } from "@smeli/core";
+import { evaluate, nativeBinding, Scope, StringValue, Vec3 } from "@smeli/core";
 import { DomNode } from "./types";
 
 import { outline } from "./outline";
@@ -33,7 +33,7 @@ export const loadPlugin = ({
     bindings: [
       {
         name: "page",
-        evaluate: (scope: Scope) => scope.evaluate("outline"),
+        evaluate: () => evaluate("outline"),
       },
       nativeBinding("color_from_hex", [
         {
@@ -71,17 +71,17 @@ export const loadPlugin = ({
       ]),
       {
         name: "#update",
-        evaluate: (scope: Scope) => {
-          const styles = evaluateUiStyles(scope);
+        evaluate: () => {
+          const styles = evaluateUiStyles();
           container.className = styles.container;
 
           // cache style
-          return (scope: Scope) => {
-            const page = scope.evaluate("page").as(Scope);
+          return () => {
+            const page = evaluate("page").as(Scope);
 
             // cache page
-            return (scope: Scope) => {
-              const node = page.evaluate("#ui:node").as(DomNode);
+            return () => {
+              const node = evaluate("#ui:node", page).as(DomNode);
 
               // diff with currently displayed page
               if (!container.hasChildNodes()) {

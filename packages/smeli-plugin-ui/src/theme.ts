@@ -1,4 +1,10 @@
-import { BoolValue, Scope, Vec3 } from "@smeli/core";
+import {
+  BoolValue,
+  currentEvaluationContext,
+  evaluate,
+  Scope,
+  Vec3,
+} from "@smeli/core";
 
 export type Theme = {
   is_dark: BoolValue;
@@ -48,11 +54,11 @@ export const themeCode = `
   theme: default_themes.light
 `;
 
-export function evaluateTheme(scope: Scope): Theme {
-  const globalScope = scope.root();
-  const uiScope = globalScope.evaluate("ui").as(Scope);
-  const theme = uiScope
-    .evaluate("theme")
+export function evaluateTheme(): Theme {
+  const context = currentEvaluationContext();
+  const globalScope = context.as(Scope).root();
+  const uiScope = evaluate("ui", globalScope).as(Scope);
+  const theme = evaluate("theme", uiScope)
     .as(Scope)
     .evaluateNested({
       is_dark: BoolValue,

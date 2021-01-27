@@ -1,4 +1,7 @@
 import {
+  createChildScope,
+  currentEvaluationContext,
+  evaluate,
   NumberValue,
   Scope,
   ScopeOverride,
@@ -20,14 +23,12 @@ declare class ResizeObserver {
 
 export const view = {
   name: "view",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       {
         name: "viewport",
-        evaluate: (parentScope: Scope) => {
-          const scope = new Scope(parentScope);
-          scope.push([
+        evaluate: () =>
+          createChildScope([
             {
               name: "center",
               evaluate: () => new Vec2(0, 0),
@@ -44,9 +45,7 @@ export const view = {
               name: "mode",
               evaluate: () => new StringValue("fit"),
             },
-          ]);
-          return scope;
-        },
+          ]),
       },
       {
         name: "item0",
@@ -86,8 +85,8 @@ export const view = {
       },
       {
         name: "ratio",
-        evaluate: (scope: Scope) => {
-          const pixelSize = scope.evaluate("#pixel_size").as(Vec2);
+        evaluate: () => {
+          const pixelSize = evaluate("#pixel_size").as(Vec2);
           if (pixelSize.x === 0 || pixelSize.y === 0) {
             return new NumberValue(0);
           } else {
@@ -97,8 +96,8 @@ export const view = {
       },
       {
         name: "#ui:node",
-        evaluate: (scope: Scope) => {
-          const styles = evaluatePlotStyles(scope);
+        evaluate: () => {
+          const styles = evaluatePlotStyles();
 
           const container = document.createElement("div");
           container.className = "container " + styles.view;
@@ -106,6 +105,7 @@ export const view = {
           const canvas = document.createElement("canvas");
           container.appendChild(canvas);
 
+          const scope = currentEvaluationContext().as(Scope);
           const pixelSizeOverride = new ScopeOverride(scope, "#pixel_size");
           const resizeObserver = new ResizeObserver((entries: any) => {
             // use only the latest update
@@ -114,14 +114,12 @@ export const view = {
             pixelSizeOverride.bind(() => new Vec2(width, height));
           });
 
-          const result = scope.evaluate(
-            () => new DomNode(container, {}, [resizeObserver])
-          );
+          const result = new DomNode(container, {}, [resizeObserver]);
 
           // cache DOM element
-          return (scope: Scope) => {
+          return () => {
             // actual pixel size of the canvas
-            const pixelSize = scope.evaluate("#pixel_size").as(Vec2);
+            const pixelSize = evaluate("#pixel_size").as(Vec2);
             if (pixelSize.x === 0 || pixelSize.y === 0) {
               return result;
             }
@@ -129,11 +127,11 @@ export const view = {
             canvas.height = pixelSize.y;
 
             // viewport parameters
-            const viewportScope = scope.evaluate("viewport").as(Scope);
+            const viewportScope = evaluate("viewport").as(Scope);
             const viewport = new Viewport(viewportScope, pixelSize);
 
             // cache view parameters
-            return (scope: Scope) => {
+            return () => {
               const context = canvas.getContext(
                 "2d"
               ) as CanvasRenderingContext2D;
@@ -145,10 +143,10 @@ export const view = {
               context.clearRect(0, 0, pixelSize.x, pixelSize.y);
 
               for (let i = 0; i < 8; i++) {
-                const itemScope = scope.evaluate("item" + i);
+                const itemScope = evaluate("item" + i);
 
                 if (itemScope.is(Scope)) {
-                  const item = itemScope.evaluate("#plot:item").as(PlotItem);
+                  const item = evaluate("#plot:item", itemScope).as(PlotItem);
                   item.render({
                     canvas,
                     context,
@@ -162,8 +160,5 @@ export const view = {
           };
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };

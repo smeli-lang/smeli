@@ -1,4 +1,4 @@
-import { Scope, Binding } from "./scope";
+import { Scope, Binding, createChildScope } from "./scope";
 import { ParserState, parseStatementList } from "./parser";
 import { compileStatements } from "./evaluation";
 
@@ -13,8 +13,8 @@ export type PluginDefinition = {
 export function pushPlugin(parentScope: Scope, definition: PluginDefinition) {
   parentScope.push({
     name: definition.name,
-    evaluate: (parentScope) => {
-      const scope = new Scope(parentScope);
+    evaluate: () => {
+      const scope = createChildScope();
 
       if (definition.bindings) {
         scope.push(definition.bindings);

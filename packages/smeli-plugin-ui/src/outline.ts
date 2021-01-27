@@ -1,32 +1,30 @@
-import { Scope, StringValue } from "@smeli/core";
+import { createChildScope, evaluate, StringValue } from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
 
 export const outline = {
   name: "outline",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push({
-      name: "#ui:node",
-      evaluate: (scope: Scope) => {
-        const styles = evaluateUiStyles(scope);
+  evaluate: () =>
+    createChildScope([
+      {
+        name: "#ui:node",
+        evaluate: () => {
+          const styles = evaluateUiStyles();
 
-        const node = document.createElement("div");
-        node.className = "widget " + styles.outline;
+          const node = document.createElement("div");
+          node.className = "widget " + styles.outline;
 
-        const result = new DomNode(node);
+          const result = new DomNode(node);
 
-        // cache parent node
-        return (scope: Scope) => {
-          const outlineData = scope.evaluate("#outline").as(StringValue);
+          // cache parent node
+          return () => {
+            const outlineData = evaluate("#outline").as(StringValue);
 
-          node.innerHTML = outlineData.value;
+            node.innerHTML = outlineData.value;
 
-          return result;
-        };
+            return result;
+          };
+        },
       },
-    });
-
-    return scope;
-  },
+    ]),
 };

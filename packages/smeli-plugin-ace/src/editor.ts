@@ -1,18 +1,23 @@
 import ace from "ace-builds";
 
 import "ace-builds/src-noconflict/theme-monokai";
-import "ace-builds/src-noconflict/mode-python";
+import "ace-builds/src-noconflict/mode-glsl";
 
-import { Binding, Scope, StringValue } from "@smeli/core";
+import {
+  createChildScope,
+  Binding,
+  evaluate,
+  Scope,
+  StringValue,
+} from "@smeli/core";
 import { DomNode } from "@smeli/plugin-ui";
 
 import { evaluateAceStyles } from "./styles";
 
 export const editor = {
   name: "editor",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       {
         name: "code",
         evaluate: () => new StringValue("# Hello, World!"),
@@ -20,14 +25,14 @@ export const editor = {
       {
         name: "#ui:node",
         evaluate: (scope: Scope) => {
-          const aceStyles = evaluateAceStyles(scope);
+          const aceStyles = evaluateAceStyles();
 
           const element = document.createElement("pre");
           element.className = "container " + aceStyles.editor;
 
           const editor = ace.edit(element, {
             theme: "ace/theme/monokai",
-            mode: "ace/mode/python",
+            mode: "ace/mode/glsl",
           });
 
           let override: Binding | null = null;
@@ -52,8 +57,8 @@ export const editor = {
           const result = new DomNode(element);
 
           // cache editor
-          return (scope: Scope) => {
-            const code = scope.evaluate("code").as(StringValue);
+          return () => {
+            const code = evaluate("code").as(StringValue);
 
             // guard against infinite recursion
             if (!override) {
@@ -65,8 +70,5 @@ export const editor = {
           };
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };

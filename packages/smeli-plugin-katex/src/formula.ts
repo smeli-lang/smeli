@@ -1,15 +1,19 @@
 import katex from "katex";
 
-import { NumberValue, Scope, StringValue } from "@smeli/core";
+import {
+  createChildScope,
+  evaluate,
+  NumberValue,
+  StringValue,
+} from "@smeli/core";
 import { DomNode } from "@smeli/plugin-ui";
 
 import { evaluateKatexStyles } from "./styles";
 
 export const formula = {
   name: "formula",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       {
         name: "code",
         evaluate: () => new StringValue("l = \\sqrt(x^2 + y^2)"),
@@ -20,11 +24,11 @@ export const formula = {
       },
       {
         name: "#ui:node",
-        evaluate: (scope: Scope) => {
-          const katexStyles = evaluateKatexStyles(scope);
+        evaluate: () => {
+          const katexStyles = evaluateKatexStyles();
 
-          const code = scope.evaluate("code").as(StringValue);
-          const size = scope.evaluate("size").as(NumberValue);
+          const code = evaluate("code").as(StringValue);
+          const size = evaluate("size").as(NumberValue);
 
           const element = document.createElement("div");
           element.className = "widget " + katexStyles.formula;
@@ -43,8 +47,5 @@ export const formula = {
           return new DomNode(element);
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };

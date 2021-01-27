@@ -1,4 +1,9 @@
-import { Binding, Scope } from "@smeli/core";
+import {
+  Binding,
+  currentEvaluationContext,
+  evaluate,
+  Scope,
+} from "@smeli/core";
 import { DomStyles } from "./types";
 import { evaluateTheme } from "./theme";
 
@@ -12,8 +17,8 @@ import { textboxStyles } from "./textbox.styles";
 
 export const styles: Binding = {
   name: "#styles",
-  evaluate: (scope: Scope) => {
-    const theme = evaluateTheme(scope);
+  evaluate: () => {
+    const theme = evaluateTheme();
 
     return new DomStyles({
       container: containerStyles(theme),
@@ -27,9 +32,10 @@ export const styles: Binding = {
   },
 };
 
-export const evaluateUiStyles = (scope: Scope) => {
-  const globalScope = scope.root();
-  const uiScope = globalScope.evaluate("ui").as(Scope);
-  const styles = uiScope.evaluate("#styles").as(DomStyles);
+export const evaluateUiStyles = () => {
+  const context = currentEvaluationContext();
+  const globalScope = context.as(Scope).root();
+  const uiScope = evaluate("ui", globalScope).as(Scope);
+  const styles = evaluate("#styles", uiScope).as(DomStyles);
   return styles.sheet.classes;
 };

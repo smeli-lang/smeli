@@ -1,12 +1,11 @@
-import { Scope, NumberValue } from "@smeli/core";
+import { createChildScope, Scope, NumberValue, evaluate } from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
 
 export const stack = {
   name: "stack",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       // there's no array support in the langage for now,
       // multiple fields are used as a temporary workaround
       {
@@ -28,8 +27,8 @@ export const stack = {
 
       {
         name: "#ui:node",
-        evaluate: (scope: Scope) => {
-          const styles = evaluateUiStyles(scope);
+        evaluate: () => {
+          const styles = evaluateUiStyles();
 
           const node = document.createElement("div");
           node.className = `${styles.stack} container`;
@@ -37,17 +36,17 @@ export const stack = {
           const result = new DomNode(node);
 
           // cache the parent node creation
-          return (scope: Scope) => {
+          return () => {
             // evaluate valid children items
             const items = [
-              scope.evaluate("item0"),
-              scope.evaluate("item1"),
-              scope.evaluate("item2"),
-              scope.evaluate("item3"),
+              evaluate("item0"),
+              evaluate("item1"),
+              evaluate("item2"),
+              evaluate("item3"),
             ];
             const itemNodes = items
               .filter((item) => item.is(Scope))
-              .map((item) => (item as Scope).evaluate("#ui:node").as(DomNode));
+              .map((item) => evaluate("#ui:node", item as Scope).as(DomNode));
 
             // cheap diff to limit the number of DOM operations
             const currentChildren = node.childNodes;
@@ -75,8 +74,5 @@ export const stack = {
           };
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };

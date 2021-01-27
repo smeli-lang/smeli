@@ -1,4 +1,9 @@
-import { Cache, evaluate, evaluateRoot } from "./cache";
+import {
+  Cache,
+  currentEvaluationContext,
+  evaluate,
+  evaluateRoot,
+} from "./cache";
 import { Scope } from "./scope";
 import { TypedValue, NumberValue } from "./types";
 
@@ -36,11 +41,11 @@ test("reevaluates dependencies when required", () => {
     },
     {
       name: "b",
-      evaluate: (scope: Scope) => scope.evaluate("a"),
+      evaluate: () => evaluate("a"),
     },
     {
       name: "c",
-      evaluate: (scope: Scope) => scope.evaluate("b"),
+      evaluate: () => evaluate("b"),
     },
   ]);
 
@@ -203,7 +208,7 @@ test("pushing a new binding on the prefix invalidates cache in derived scopes", 
   const scope = new Scope(null, prefix);
   scope.push({
     name: "y",
-    evaluate: (scope: Scope) => scope.evaluate("x"),
+    evaluate: () => evaluate("x"),
   });
   expect(evaluateRoot(() => evaluate("y"), scope)).toEqual(new NumberValue(42));
 
@@ -268,7 +273,7 @@ test("multi-stage evaluation: caches intermediate stages", () => {
         stage0++;
         return () => {
           stage1++;
-          return scope.evaluate("dependency");
+          return evaluate("dependency");
         };
       },
     },
@@ -312,15 +317,15 @@ test("multi-stage evaluation: invalidates intermediate stages correctly", () => 
     },
     {
       name: "x",
-      evaluate: (scope: Scope) => {
-        const a = scope.evaluate("a").as(NumberValue);
+      evaluate: () => {
+        const a = evaluate("a").as(NumberValue);
 
-        return (scope: Scope) => {
+        return () => {
           // artificially add a second dependency to 'a'
           // from a later stage
-          scope.evaluate("a");
+          evaluate("a");
 
-          const b = scope.evaluate("b").as(NumberValue);
+          const b = evaluate("b").as(NumberValue);
 
           return new NumberValue(a.value + b.value);
         };
@@ -369,4 +374,27 @@ test("transients: are not cached", () => {
 
     return new NumberValue(0);
   }, scope);
+});
+
+test("evaluation context", () => {
+  const scope1 = new Scope();
+  const scope2 = new Scope();
+
+  evaluateRoot(() => {
+    expect(currentEvaluationContext()).toBe(scope1);
+
+    // nested evaluation on the same scope
+    evaluate(() => {
+      expect(currentEvaluationContext()).toBe(scope1);
+      return new NumberValue(0);
+    });
+
+    // nested evaluation on a different scope
+    evaluate(() => {
+      expect(currentEvaluationContext()).toBe(scope2);
+      return new NumberValue(0);
+    }, scope2);
+
+    return new NumberValue(0);
+  }, scope1);
 });

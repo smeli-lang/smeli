@@ -1,4 +1,10 @@
-import { Scope, StringValue, Vec2, Vec3 } from "@smeli/core";
+import {
+  createChildScope,
+  evaluate,
+  StringValue,
+  Vec2,
+  Vec3,
+} from "@smeli/core";
 
 import { evaluateTheme } from "@smeli/plugin-ui";
 
@@ -20,9 +26,8 @@ function rotateScale(
 
 export const vector = {
   name: "vector",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       {
         name: "start",
         evaluate: () => new Vec2(0.0, 0.0),
@@ -33,7 +38,7 @@ export const vector = {
       },
       {
         name: "color",
-        evaluate: (scope: Scope) => evaluateTheme(scope).colors.primary,
+        evaluate: () => evaluateTheme().colors.primary,
       },
       {
         name: "label",
@@ -41,11 +46,11 @@ export const vector = {
       },
       {
         name: "#plot:item",
-        evaluate: (scope: Scope) => {
-          const start = scope.evaluate("start").as(Vec2);
-          const end = scope.evaluate("end").as(Vec2);
-          const color = scope.evaluate("color").as(Vec3);
-          const label = scope.evaluate("label").as(StringValue);
+        evaluate: () => {
+          const start = evaluate("start").as(Vec2);
+          const end = evaluate("end").as(Vec2);
+          const color = evaluate("color").as(Vec3);
+          const label = evaluate("label").as(StringValue);
 
           return new PlotItem(({ canvas, context, viewport }) => {
             const pixelStart = viewport.toPixels(start.x, start.y);
@@ -122,8 +127,5 @@ export const vector = {
           });
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };

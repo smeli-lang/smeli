@@ -1,11 +1,13 @@
 import {
   AddTrait,
+  createChildScope,
   Scope,
   StringValue,
   MulTrait,
   NumberValue,
   BoolValue,
   Vec3,
+  evaluate,
 } from "@smeli/core";
 import { DomNode } from "./types";
 import { evaluateUiStyles } from "./styles";
@@ -13,9 +15,8 @@ import { evaluateTheme } from "./theme";
 
 export const surface = {
   name: "surface",
-  evaluate: (parentScope: Scope) => {
-    const scope = new Scope(parentScope);
-    scope.push([
+  evaluate: () =>
+    createChildScope([
       {
         name: "direction",
         evaluate: () => new StringValue("row"),
@@ -82,15 +83,15 @@ export const surface = {
 
       {
         name: "#ui:node",
-        evaluate: (scope: Scope) => {
-          const theme = evaluateTheme(scope);
-          const styles = evaluateUiStyles(scope);
-          const direction = scope.evaluate("direction").as(StringValue);
-          const flex = scope.evaluate("flex").as(NumberValue);
-          const responsive = scope.evaluate("responsive").as(BoolValue);
-          const fade = scope.evaluate("fade").as(BoolValue);
-          const color = scope.evaluate("color");
-          const text_color = scope.evaluate("text_color");
+        evaluate: () => {
+          const theme = evaluateTheme();
+          const styles = evaluateUiStyles();
+          const direction = evaluate("direction").as(StringValue);
+          const flex = evaluate("flex").as(NumberValue);
+          const responsive = evaluate("responsive").as(BoolValue);
+          const fade = evaluate("fade").as(BoolValue);
+          const color = evaluate("color");
+          const text_color = evaluate("text_color");
 
           const node = document.createElement("div");
           node.className = `${styles.surface} direction-${direction.value} ${
@@ -135,7 +136,7 @@ export const surface = {
 
           // append drop shadows dynamically depending on elevation
           const shadowColor = theme.is_dark.value ? "#0008" : "#0004";
-          const elevation = scope.evaluate("elevation").as(NumberValue);
+          const elevation = evaluate("elevation").as(NumberValue);
           if (elevation.value !== 0) {
             // clamp height to reasonable limits
             const height = Math.min(Math.max(elevation.value, -16), 16);
@@ -177,21 +178,21 @@ export const surface = {
           const result = new DomNode(node);
 
           // cache the parent node creation
-          return (scope: Scope) => {
+          return () => {
             // evaluate valid children items
             const items = [
-              scope.evaluate("item0"),
-              scope.evaluate("item1"),
-              scope.evaluate("item2"),
-              scope.evaluate("item3"),
-              scope.evaluate("item4"),
-              scope.evaluate("item5"),
-              scope.evaluate("item6"),
-              scope.evaluate("item7"),
+              evaluate("item0"),
+              evaluate("item1"),
+              evaluate("item2"),
+              evaluate("item3"),
+              evaluate("item4"),
+              evaluate("item5"),
+              evaluate("item6"),
+              evaluate("item7"),
             ];
             const itemNodes = items
               .filter((item) => item.is(Scope))
-              .map((item) => (item as Scope).evaluate("#ui:node").as(DomNode));
+              .map((item) => evaluate("#ui:node", item as Scope).as(DomNode));
 
             // cheap diff to limit the number of DOM operations
             const currentChildren = node.childNodes;
@@ -213,8 +214,5 @@ export const surface = {
           };
         },
       },
-    ]);
-
-    return scope;
-  },
+    ]),
 };
