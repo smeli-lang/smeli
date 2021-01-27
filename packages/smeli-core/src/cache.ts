@@ -158,7 +158,16 @@ export class CacheEntry {
           }
         }
       } catch (error) {
-        this.discard(this.currentStage);
+        // clear out any owned values
+        const disposables = stage.disposables;
+        for (const value of disposables.reverse()) {
+          // values in that list must have a dispose() method,
+          // if not, that's a bug, let it crash
+          (value as any).dispose();
+        }
+        disposables.length = 0;
+
+        // rethrow up the stack
         throw error;
       } finally {
         TypedValue.disposableOwner = previousOwner;
