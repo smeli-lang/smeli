@@ -12,6 +12,17 @@ import { AddTrait, MulTrait, StrTrait } from "./traits";
 import { Binding, Scope } from "./scope";
 import { currentEvaluationContext, evaluate } from "./cache";
 
+const abs = nativeBinding("abs", [
+  {
+    argumentTypes: [NumberValue],
+    returnType: NumberValue,
+    call: (x: NumberValue): NumberValue => {
+      const result = Math.abs(x.value);
+      return new NumberValue(result);
+    },
+  },
+]);
+
 const animate: Binding = {
   name: "animate",
   evaluate: () => {
@@ -215,6 +226,7 @@ const vec3 = nativeBinding("vec3", [
 ]);
 
 export const builtins: Binding[] = [
+  abs,
   animate,
   ceil,
   cos,
