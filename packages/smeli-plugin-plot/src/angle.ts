@@ -75,18 +75,29 @@ export const angle = {
             context.lineWidth = 2;
 
             if (right.value) {
+              function normalize(v: { x: number; y: number }) {
+                const rcpLength = 1.0 / Math.sqrt(v.x * v.x + v.y * v.y);
+                v.x *= rcpLength;
+                v.y *= rcpLength;
+              }
+
+              normalize(edge0);
+              normalize(edge1);
+
+              const size = 16;
+
               const corners = [
                 {
-                  x: pixelPoints[1].x + edge0.x * 0.2,
-                  y: pixelPoints[1].y + edge0.y * 0.2,
+                  x: pixelPoints[1].x + edge0.x * size,
+                  y: pixelPoints[1].y + edge0.y * size,
                 },
                 {
-                  x: pixelPoints[1].x + (edge0.x + edge1.x) * 0.2,
-                  y: pixelPoints[1].y + (edge0.y + edge1.y) * 0.2,
+                  x: pixelPoints[1].x + (edge0.x + edge1.x) * size,
+                  y: pixelPoints[1].y + (edge0.y + edge1.y) * size,
                 },
                 {
-                  x: pixelPoints[1].x + edge1.x * 0.2,
-                  y: pixelPoints[1].y + edge1.y * 0.2,
+                  x: pixelPoints[1].x + edge1.x * size,
+                  y: pixelPoints[1].y + edge1.y * size,
                 },
               ];
 
