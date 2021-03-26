@@ -93,7 +93,7 @@ class GLDrawContext extends TypedValue {
     if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
       const error = this.gl.getShaderInfoLog(shader);
       this.gl.deleteShader(shader);
-      throw new Error(`Failed to compile shader: ${error}`);
+      throw new Error(`Failed to compile shader:\n${error}`);
     }
 
     this.gl.attachShader(this.program, shader);
@@ -122,7 +122,7 @@ class GLDrawContext extends TypedValue {
     if (!this.gl.getProgramParameter(this.program, this.gl.LINK_STATUS)) {
       const error = this.gl.getProgramInfoLog(this.program);
       this.gl.deleteProgram(this.program);
-      throw new Error(`Shader link failed: ${error}`);
+      throw new Error(`Shader link failed:\n${error}`);
     }
 
     this.gl.bindAttribLocation(this.program, 0, "position");
@@ -254,6 +254,10 @@ export const shader = {
           const context = evaluate("#gl:context").as(GLDrawContext);
           container.appendChild(context.canvas);
 
+          const errors = document.createElement("pre");
+          errors.className = "errors";
+          container.appendChild(errors);
+
           const scope = currentEvaluationContext().as(Scope);
           const pixelSizeOverride = new ScopeOverride(scope, "#pixel_size");
           const resizeObserver = new ResizeObserver((entries: any) => {
@@ -271,7 +275,17 @@ export const shader = {
           // cache DOM element and GL context
           return () => {
             const code = evaluate("code").as(StringValue);
-            context.loadProgram(vertexShaderCode, code.value);
+
+            let compileError: string | null = null;
+            try {
+              context.loadProgram(vertexShaderCode, code.value);
+              errors.innerHTML = "";
+              errors.style.opacity = "0";
+            } catch (error) {
+              errors.innerHTML = error.message.replace("\n", "<br />");
+              errors.style.opacity = "1";
+              return result;
+            }
 
             const uniformScope = evaluate("uniforms").as(Scope);
 
