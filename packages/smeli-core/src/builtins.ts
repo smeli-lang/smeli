@@ -87,12 +87,70 @@ const cos = nativeBinding("cos", [
   },
 ]);
 
+const dot = nativeBinding("dot", [
+  {
+    argumentTypes: [NumberValue, NumberValue],
+    returnType: NumberValue,
+    call: (lhs: NumberValue, rhs: NumberValue): NumberValue => {
+      const result = lhs.value * rhs.value;
+      return new NumberValue(result);
+    },
+  },
+  {
+    argumentTypes: [Vec2, Vec2],
+    returnType: NumberValue,
+    call: (lhs: Vec2, rhs: Vec2): NumberValue => {
+      const result = lhs.x * rhs.x + lhs.y * rhs.y;
+      return new NumberValue(result);
+    },
+  },
+  {
+    argumentTypes: [Vec3, Vec3],
+    returnType: NumberValue,
+    call: (lhs: Vec3, rhs: Vec3): NumberValue => {
+      const result = lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
+      return new NumberValue(result);
+    },
+  },
+]);
+
 const floor = nativeBinding("floor", [
   {
     argumentTypes: [NumberValue],
     returnType: NumberValue,
     call: (x: NumberValue): NumberValue => {
       const result = Math.floor(x.value);
+      return new NumberValue(result);
+    },
+  },
+]);
+
+const fract = nativeBinding("fract", [
+  {
+    argumentTypes: [NumberValue],
+    returnType: NumberValue,
+    call: (x: NumberValue): NumberValue => {
+      // apply a double modulo to match GLSL behavior for negative input values
+      const result = ((x.value % 1) + 1) % 1;
+      return new NumberValue(result);
+    },
+  },
+]);
+
+const length = nativeBinding("length", [
+  {
+    argumentTypes: [Vec2],
+    returnType: NumberValue,
+    call: (v: Vec2): NumberValue => {
+      const result = Math.sqrt(v.x * v.x + v.y * v.y);
+      return new NumberValue(result);
+    },
+  },
+  {
+    argumentTypes: [Vec3],
+    returnType: NumberValue,
+    call: (v: Vec3): NumberValue => {
+      const result = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
       return new NumberValue(result);
     },
   },
@@ -128,6 +186,25 @@ const mod = nativeBinding("mod", [
       // apply a double modulo to match GLSL behavior for negative input values
       const result = ((lhs.value % rhs.value) + rhs.value) % rhs.value;
       return new NumberValue(result);
+    },
+  },
+]);
+
+const normalize = nativeBinding("normalize", [
+  {
+    argumentTypes: [Vec2],
+    returnType: Vec2,
+    call: (v: Vec2): Vec2 => {
+      const rcpLength = 1.0 / Math.sqrt(v.x * v.x + v.y * v.y);
+      return new Vec2(v.x * rcpLength, v.y * rcpLength);
+    },
+  },
+  {
+    argumentTypes: [Vec3],
+    returnType: Vec3,
+    call: (v: Vec3): Vec3 => {
+      const rcpLength = 1.0 / Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+      return new Vec3(v.x * rcpLength, v.y * rcpLength, v.z * rcpLength);
     },
   },
 ]);
@@ -230,10 +307,14 @@ export const builtins: Binding[] = [
   animate,
   ceil,
   cos,
+  dot,
   floor,
+  fract,
+  length,
   min,
   max,
   mod,
+  normalize,
   outline,
   sin,
   smoothstep,
