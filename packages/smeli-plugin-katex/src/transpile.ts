@@ -73,6 +73,33 @@ texOperators.set(AddTrait, "+");
 texOperators.set(SubTrait, "-");
 texOperators.set(MulTrait, "\\times");
 
+type FunctionRenderer = (name: string, args: string[]) => string;
+
+const texFunctions = new Map<string, FunctionRenderer>();
+
+texFunctions.set(
+  "abs",
+  (name: string, args: string[]) => `\\left| ${args.join(", ")} \\right|`
+);
+
+texFunctions.set(
+  "ceil",
+  (name: string, args: string[]) =>
+    `\\left\\lceil ${args.join(", ")} \\right\\rceil`
+);
+
+texFunctions.set(
+  "floor",
+  (name: string, args: string[]) =>
+    `\\left\\lfloor ${args.join(", ")} \\right\\rfloor`
+);
+
+texFunctions.set(
+  "length",
+  (name: string, args: string[]) =>
+    `\\left\\Vert ${args.join(", ")} \\right\\Vert`
+);
+
 const visitor: Visitor<string> = new Map();
 
 visitor.set(Literal, (literal: Literal) => {
@@ -113,6 +140,12 @@ visitor.set(FunctionCall, (functionCall: FunctionCall) => {
   const args = functionCall.args.map((expression: Expression) =>
     traverse(expression, visitor)
   );
+
+  const renderer = texFunctions.get(name);
+  if (renderer) {
+    return renderer(name, args);
+  }
+
   return name + "(" + args.join(", ") + ")";
 });
 
