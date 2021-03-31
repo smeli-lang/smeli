@@ -9,9 +9,21 @@ import {
   ScopeExpression,
   FunctionCall,
   LambdaExpression,
+  ConditionalExpression,
 } from "./ast";
 import { BoolValue, NumberValue, StringValue } from "./types";
-import { AddTrait, SubTrait, MulTrait, DivTrait } from "./traits";
+import {
+  AddTrait,
+  CmpLtTrait,
+  SubTrait,
+  MulTrait,
+  DivTrait,
+  CmpGtTrait,
+  CmpLeTrait,
+  CmpGeTrait,
+  EquTrait,
+  CmpNeTrait,
+} from "./traits";
 
 // grammar
 // program ::= block EOF
@@ -68,8 +80,8 @@ export class ParserState {
     return this.n === this.str.length;
   }
 
-  peek() {
-    return this.eof() ? "" : this.str[this.n];
+  peek(lookahead: number = 1) {
+    return this.str.substr(this.n, lookahead);
   }
 
   next() {
@@ -189,6 +201,47 @@ export function parseBoolLiteral(state: ParserState) {
   return null;
 }
 
+export function parseConditional(state: ParserState) {
+  if (!state.match("if")) {
+    return null;
+  }
+
+  parseWhitespace(state);
+  const conditionExpression = parseExpression(state);
+  if (!conditionExpression) {
+    state.reportError("Invalid expression");
+    return null;
+  }
+
+  parseWhitespace(state);
+  if (!state.match("then")) {
+    state.reportError("Expected 'then' here");
+    return null;
+  }
+
+  parseWhitespace(state);
+  const trueCase = parseExpression(state);
+  if (!trueCase) {
+    state.reportError("Invalid expression");
+    return null;
+  }
+
+  parseWhitespace(state);
+  if (!state.match("else")) {
+    state.reportError("Expected 'else' here");
+    return null;
+  }
+
+  parseWhitespace(state);
+  const falseCase = parseExpression(state);
+  if (!falseCase) {
+    state.reportError("Invalid expression");
+    return null;
+  }
+
+  return new ConditionalExpression(conditionExpression, trueCase, falseCase);
+}
+
 export function parseIdentifier(state: ParserState) {
   const names: string[] = [];
 
@@ -289,6 +342,11 @@ export function parseAtom(state: ParserState) {
     return boolValue;
   }
 
+  const conditional = parseConditional(state);
+  if (conditional) {
+    return conditional;
+  }
+
   const identifier = parseIdentifier(state);
   if (identifier) {
     parseWhitespace(state);
@@ -304,7 +362,9 @@ export function parseAtom(state: ParserState) {
       //case ",":
 
       case "=": // first character of the arrow "=>"
-        return parseLambdaExpression(state, identifier);
+        return state.peek(2) == "=>"
+          ? parseLambdaExpression(state, identifier)
+          : identifier;
       default:
         return identifier;
     }
@@ -337,7 +397,54 @@ export function parseAtom(state: ParserState) {
 }
 
 export function parseFactor(state: ParserState) {
-  return parseAtom(state);
+  let expr: Expression | null = parseAtom(state);
+  if (!expr) {
+    return null;
+  }
+  parseWhitespace(state);
+  while (
+    state.peek() == "=" ||
+    state.peek() == "<" ||
+    state.peek() == ">" ||
+    state.peek() == "!"
+  ) {
+    let operator = state.peek();
+    state.next();
+
+    if (state.peek() == "=") {
+      operator += "=";
+      state.next();
+    }
+
+    parseWhitespace(state);
+    if (state.eof()) {
+      state.reportError("Unexpected end of file");
+      return null;
+    }
+
+    const atom = parseAtom(state);
+    if (!atom) {
+      return null;
+    }
+
+    if (operator == "=") {
+      expr = new BinaryOperator(EquTrait, expr, atom);
+    } else if (operator == "<") {
+      expr = new BinaryOperator(CmpLtTrait, expr, atom);
+    } else if (operator == ">") {
+      expr = new BinaryOperator(CmpGtTrait, expr, atom);
+    } else if (operator == "<=") {
+      expr = new BinaryOperator(CmpLeTrait, expr, atom);
+    } else if (operator == ">=") {
+      expr = new BinaryOperator(CmpGeTrait, expr, atom);
+    } else if (operator == "!=") {
+      expr = new BinaryOperator(CmpNeTrait, expr, atom);
+    }
+
+    parseWhitespace(state);
+  }
+
+  return expr;
 }
 
 export function parseTerm(state: ParserState) {

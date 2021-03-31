@@ -68,6 +68,22 @@ export class BinaryOperator implements Expression {
   }
 }
 
+export class ConditionalExpression implements Expression {
+  condition: Expression;
+  trueCase: Expression;
+  falseCase: Expression;
+
+  constructor(
+    condition: Expression,
+    trueCase: Expression,
+    falseCase: Expression
+  ) {
+    this.condition = condition;
+    this.trueCase = trueCase;
+    this.falseCase = falseCase;
+  }
+}
+
 export interface Statement {
   line: number;
   startOffset: number;

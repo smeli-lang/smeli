@@ -10,6 +10,7 @@ import {
   parseComment,
   parseStatement,
   parseStatementList,
+  parseConditional,
 } from "./parser";
 import { BoolValue, NumberValue, StringValue } from "./types";
 
@@ -401,6 +402,25 @@ test("parseIdentifier: stops at comma", () => {
 });
 
 /**
+ * Conditional
+ */
+test("parseConditional: basic", () => {
+  const state = new ParserState("if true then 1 else 2");
+  const expr = parseConditional(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(21);
+});
+
+test("parseConditional: more complex expressions", () => {
+  const state = new ParserState(
+    "if test(something) then { result: 10 } else 4 + 5"
+  );
+  const expr = parseConditional(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(49);
+});
+
+/**
  * Expression
  */
 
@@ -467,6 +487,29 @@ test("parseExpression: function call with more nested expressions", () => {
   const expr = parseExpression(state);
   expect(expr).not.toBeNull();
   expect(state.n).toBe(52);
+});
+
+test("parseExpression: complex conditional", () => {
+  const state = new ParserState(
+    "12 + if addmore(data) then 2 * 8 else compute(data)"
+  );
+  const expr = parseExpression(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(51);
+});
+
+test("parseExpression: conditional operator", () => {
+  const state = new ParserState("if a <= b then 10 else 12");
+  const expr = parseExpression(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(25);
+});
+
+test("parseExpression: equality operator", () => {
+  const state = new ParserState("if a = b then 10 else 12");
+  const expr = parseExpression(state);
+  expect(expr).not.toBeNull();
+  expect(state.n).toBe(24);
 });
 
 /**

@@ -3,6 +3,7 @@ import {
   BinaryOperator,
   BindingDefinition,
   Comment,
+  ConditionalExpression,
   Expression,
   FunctionCall,
   Identifier,
@@ -13,7 +14,13 @@ import {
   traverse,
   Visitor,
 } from "./ast";
-import { Lambda, NativeFunction, StringValue, TypedValue } from "./types";
+import {
+  BoolValue,
+  Lambda,
+  NativeFunction,
+  StringValue,
+  TypedValue,
+} from "./types";
 import { IndexTrait } from "./traits";
 import { currentEvaluationContext, evaluate } from "./cache";
 
@@ -168,6 +175,25 @@ expressionVisitor.set(BinaryOperator, (operator: BinaryOperator) => {
     }
   );
 });
+
+expressionVisitor.set(
+  ConditionalExpression,
+  (conditional: ConditionalExpression) => {
+    const conditionEvaluator = compileExpression(conditional.condition);
+    const trueEvaluator = compileExpression(conditional.trueCase);
+    const falseEvaluator = compileExpression(conditional.falseCase);
+
+    return annotate(
+      () => {
+        const condition = evaluate(conditionEvaluator).as(BoolValue);
+        return condition.value ? trueEvaluator : falseEvaluator;
+      },
+      {
+        sourceExpression: conditional,
+      }
+    );
+  }
+);
 
 export function compileExpression(expression: Expression): Evaluator {
   return traverse(expression, expressionVisitor);
