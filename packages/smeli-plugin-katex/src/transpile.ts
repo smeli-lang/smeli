@@ -89,6 +89,16 @@ texFunctions.set(
 );
 
 texFunctions.set(
+  "dot",
+  (name: string, args: string[]) => `${args[0]} \\cdot ${args[1]}`
+);
+
+texFunctions.set(
+  "exp",
+  (name: string, args: string[]) => `exp^{${args.join(", ")}}`
+);
+
+texFunctions.set(
   "floor",
   (name: string, args: string[]) =>
     `\\left\\lfloor ${args.join(", ")} \\right\\rfloor`
