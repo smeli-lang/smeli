@@ -51,31 +51,35 @@ export const grid = {
             context.lineWidth = 1;
 
             // horizontal lines
-            for (let y of quantize(
-              viewport.bounds[1],
-              viewport.bounds[3],
-              step.y
-            )) {
-              const pixelY = viewport.toPixels(0, y).y;
+            if (step.x != 0) {
+              for (let y of quantize(
+                viewport.bounds[1],
+                viewport.bounds[3],
+                step.y
+              )) {
+                const pixelY = viewport.toPixels(0, y).y;
 
-              context.beginPath();
-              context.moveTo(0, pixelY);
-              context.lineTo(canvas.width, pixelY);
-              context.stroke();
+                context.beginPath();
+                context.moveTo(0, pixelY);
+                context.lineTo(canvas.width, pixelY);
+                context.stroke();
+              }
             }
 
             // vertical lines
-            for (let x of quantize(
-              viewport.bounds[0],
-              viewport.bounds[2],
-              step.x
-            )) {
-              const pixelX = viewport.toPixels(x, 0).x;
+            if (step.y != 0) {
+              for (let x of quantize(
+                viewport.bounds[0],
+                viewport.bounds[2],
+                step.x
+              )) {
+                const pixelX = viewport.toPixels(x, 0).x;
 
-              context.beginPath();
-              context.moveTo(pixelX, 0);
-              context.lineTo(pixelX, canvas.height);
-              context.stroke();
+                context.beginPath();
+                context.moveTo(pixelX, 0);
+                context.lineTo(pixelX, canvas.height);
+                context.stroke();
+              }
             }
 
             if (axis.value) {
@@ -84,15 +88,19 @@ export const grid = {
               context.strokeStyle = color.toCssColor(0.6);
               context.lineWidth = 2;
 
-              context.beginPath();
-              context.moveTo(0, origin.y);
-              context.lineTo(canvas.width, origin.y);
-              context.stroke();
+              if (step.x != 0) {
+                context.beginPath();
+                context.moveTo(0, origin.y);
+                context.lineTo(canvas.width, origin.y);
+                context.stroke();
+              }
 
-              context.beginPath();
-              context.moveTo(origin.x, 0);
-              context.lineTo(origin.x, canvas.height);
-              context.stroke();
+              if (step.y != 0) {
+                context.beginPath();
+                context.moveTo(origin.x, 0);
+                context.lineTo(origin.x, canvas.height);
+                context.stroke();
+              }
 
               context.strokeStyle = color.toCssColor(0.6);
               context.fillStyle = color.toCssColor(0.38);
