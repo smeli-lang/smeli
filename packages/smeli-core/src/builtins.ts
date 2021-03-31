@@ -114,6 +114,25 @@ const dot = nativeBinding("dot", [
   },
 ]);
 
+const exp = nativeBinding("exp", [
+  {
+    argumentTypes: [NumberValue],
+    returnType: NumberValue,
+    call: (v: NumberValue): NumberValue => new NumberValue(Math.exp(v.value)),
+  },
+  {
+    argumentTypes: [Vec2],
+    returnType: Vec2,
+    call: (v: Vec2): Vec2 => new Vec2(Math.exp(v.x), Math.exp(v.y)),
+  },
+  {
+    argumentTypes: [Vec3],
+    returnType: Vec3,
+    call: (v: Vec3): Vec3 =>
+      new Vec3(Math.exp(v.x), Math.exp(v.y), Math.exp(v.z)),
+  },
+]);
+
 const floor = nativeBinding("floor", [
   {
     argumentTypes: [NumberValue],
@@ -308,6 +327,7 @@ export const builtins: Binding[] = [
   ceil,
   cos,
   dot,
+  exp,
   floor,
   fract,
   length,
