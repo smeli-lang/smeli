@@ -67,11 +67,11 @@
       "patterns": [
         {
           "name": "keyword.control.smeli",
-          "match": "\\b(if|while|for|return)\\b"
+          "match": "\\b(if|then|else)\\b"
         },
         {
           "name": "keyword.operator.smeli",
-          "match": "\\b(\\+|-|\\.)\\b"
+          "match": "\\b(\\+|-|\\*|\\/\\.)\\b"
         }
       ]
     },
