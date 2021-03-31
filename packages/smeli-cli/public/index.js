@@ -40,6 +40,14 @@ window.onload = () => {
   // run to the first marker
   engine.next();
 
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.body.requestFullscreen();
+    }
+  };
+
   document.addEventListener("keydown", (event) => {
     // note: slide clickers typically send page up/down events
     switch (event.code) {
@@ -58,11 +66,7 @@ window.onload = () => {
         break;
 
       case "KeyF":
-        if (document.fullscreenElement) {
-          document.exitFullscreen();
-        } else {
-          content.requestFullscreen();
-        }
+        toggleFullscreen();
         break;
 
       case "Escape":
@@ -83,7 +87,7 @@ window.onload = () => {
 
   document
     .querySelector("#fullscreen")
-    .addEventListener("click", () => content.requestFullscreen());
+    .addEventListener("click", toggleFullscreen);
 
   // debug connection for the vs code extension
   window.addEventListener("message", (event) => {
