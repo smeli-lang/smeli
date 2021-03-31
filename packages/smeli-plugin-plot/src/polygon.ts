@@ -25,7 +25,7 @@ export const polygon = {
       },
       {
         name: "point2",
-        evaluate: () => new Vec2(-0.2, -0.9),
+        evaluate: () => new NumberValue(0),
       },
       {
         name: "point3",
