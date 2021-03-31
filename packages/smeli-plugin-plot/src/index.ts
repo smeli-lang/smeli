@@ -2,6 +2,7 @@ import { angle } from "./angle";
 import { circle } from "./circle";
 import { functionItem } from "./function";
 import { grid } from "./grid";
+import { label } from "./label";
 import { point } from "./point";
 import { polygon } from "./polygon";
 import { vector } from "./vector";
@@ -17,6 +18,7 @@ export const loadPlugin = ({}: PlotPluginOptions = {}) => ({
     circle,
     functionItem,
     grid,
+    label,
     point,
     polygon,
     vector,
