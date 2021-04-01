@@ -110,6 +110,11 @@ texFunctions.set(
     `\\left\\Vert ${args.join(", ")} \\right\\Vert`
 );
 
+texFunctions.set(
+  "pow",
+  (name: string, args: string[]) => `{${args[0]}}^{${args[1]}}`
+);
+
 const visitor: Visitor<string> = new Map();
 
 visitor.set(Literal, (literal: Literal) => {

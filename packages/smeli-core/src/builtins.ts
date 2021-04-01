@@ -228,6 +228,31 @@ const normalize = nativeBinding("normalize", [
   },
 ]);
 
+const pow = nativeBinding("pow", [
+  {
+    argumentTypes: [NumberValue, NumberValue],
+    returnType: NumberValue,
+    call: (v1: NumberValue, v2: NumberValue): NumberValue =>
+      new NumberValue(Math.pow(v1.value, v2.value)),
+  },
+  {
+    argumentTypes: [Vec2, Vec2],
+    returnType: Vec2,
+    call: (v1: Vec2, v2: Vec2): Vec2 =>
+      new Vec2(Math.pow(v1.x, v2.x), Math.pow(v1.y, v2.y)),
+  },
+  {
+    argumentTypes: [Vec3, Vec3],
+    returnType: Vec3,
+    call: (v1: Vec3, v2: Vec3): Vec3 =>
+      new Vec3(
+        Math.pow(v1.x, v2.x),
+        Math.pow(v1.y, v2.y),
+        Math.pow(v1.z, v2.z)
+      ),
+  },
+]);
+
 const str = nativeBinding("str", [
   {
     argumentTypes: [AnyType],
@@ -336,6 +361,7 @@ export const builtins: Binding[] = [
   mod,
   normalize,
   outline,
+  pow,
   sin,
   smoothstep,
   step,
