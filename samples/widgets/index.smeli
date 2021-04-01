@@ -1,11 +1,19 @@
 @plugin("@smeli/plugin-ui")
 
-# dark_toggle = ui.toggle {
+# dark_toggle: ui.toggle {
 #   label: "Dark Mode"
 # }
 
+dark_toggle: ui.slider {
+  label: "darkness"
+  min: 0
+  max: 1
+  step: 1
+  value: 0
+}
+
 ui: ui {
-  theme: default_themes.dark
+  theme: if dark_toggle.value != 0 then default_themes.dark else default_themes.light
 }
 
 slider_template: ui.slider {
@@ -20,18 +28,19 @@ ui: ui {
       direction: "column"
       color: "background"
       elevation: 2
-      item0: ui.textbox {
+      item0: dark_toggle
+      item1: ui.textbox {
         text: "Welcome to the widgets demo!
         
         Multiline text works kinda by accident, you know, like the parser is not finished :D"
       }
-      item1: ui.surface {
+      item2: ui.surface {
         item0: slider_template {}
         item1: slider_template {}
         item2: slider_template {}
         item3: slider_template {}
       }
-      item2: ui.surface {
+      item3: ui.surface {
         direction: "column"
         flex: 2
         item0: slider_template {}
