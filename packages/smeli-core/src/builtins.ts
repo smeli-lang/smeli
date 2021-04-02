@@ -175,6 +175,25 @@ const length = nativeBinding("length", [
   },
 ]);
 
+const log = nativeBinding("log", [
+  {
+    argumentTypes: [NumberValue],
+    returnType: NumberValue,
+    call: (v: NumberValue): NumberValue => new NumberValue(Math.log(v.value)),
+  },
+  {
+    argumentTypes: [Vec2],
+    returnType: Vec2,
+    call: (v: Vec2): Vec2 => new Vec2(Math.log(v.x), Math.log(v.y)),
+  },
+  {
+    argumentTypes: [Vec3],
+    returnType: Vec3,
+    call: (v: Vec3): Vec3 =>
+      new Vec3(Math.log(v.x), Math.log(v.y), Math.log(v.z)),
+  },
+]);
+
 const min = nativeBinding("min", [
   {
     argumentTypes: [NumberValue, NumberValue],
@@ -356,6 +375,7 @@ export const builtins: Binding[] = [
   floor,
   fract,
   length,
+  log,
   min,
   max,
   mod,
