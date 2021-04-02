@@ -95,7 +95,7 @@ texFunctions.set(
 
 texFunctions.set(
   "exp",
-  (name: string, args: string[]) => `exp^{${args.join(", ")}}`
+  (name: string, args: string[]) => `e^{${args.join(", ")}}`
 );
 
 texFunctions.set(
