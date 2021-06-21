@@ -363,6 +363,16 @@ const vec3 = nativeBinding("vec3", [
     call: (x: NumberValue, y: NumberValue, z: NumberValue) =>
       new Vec3(x.value, y.value, z.value),
   },
+  {
+    argumentTypes: [NumberValue, Vec2],
+    returnType: Vec3,
+    call: (x: NumberValue, y: Vec2) => new Vec3(x.value, y.x, y.y),
+  },
+  {
+    argumentTypes: [Vec2, NumberValue],
+    returnType: Vec3,
+    call: (x: Vec2, y: NumberValue) => new Vec3(x.x, x.y, y.value),
+  },
 ]);
 
 export const builtins: Binding[] = [
