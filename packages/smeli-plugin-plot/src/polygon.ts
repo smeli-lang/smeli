@@ -40,6 +40,46 @@ export const polygon = {
         evaluate: () => new NumberValue(0),
       },
       {
+        name: "point6",
+        evaluate: () => new Vec2(-1.0, 0.3),
+      },
+      {
+        name: "point7",
+        evaluate: () => new Vec2(0.4, 0.2),
+      },
+      {
+        name: "point8",
+        evaluate: () => new NumberValue(0),
+      },
+      {
+        name: "point9",
+        evaluate: () => new NumberValue(0),
+      },
+      {
+        name: "point10",
+        evaluate: () => new NumberValue(0),
+      },
+      {
+        name: "point11",
+        evaluate: () => new NumberValue(0),
+      },
+      {
+        name: "point12",
+        evaluate: () => new NumberValue(0),
+      },
+      {
+        name: "point13",
+        evaluate: () => new NumberValue(0),
+      },
+      {
+        name: "point14",
+        evaluate: () => new NumberValue(0),
+      },
+      {
+        name: "point15",
+        evaluate: () => new NumberValue(0),
+      },
+      {
         name: "color",
         evaluate: () => evaluateTheme().colors.primary,
       },
@@ -51,7 +91,7 @@ export const polygon = {
         name: "#plot:item",
         evaluate: () => {
           const points: Vec2[] = [];
-          for (let i = 0; i < 6; i++) {
+          for (let i = 0; i < 16; i++) {
             const point = evaluate("point" + i);
             if (point.is(Vec2)) {
               points.push(point);
