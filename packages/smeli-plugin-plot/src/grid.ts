@@ -4,17 +4,24 @@ import { evaluateTheme } from "@smeli/plugin-ui";
 
 import { PlotItem } from "./types";
 
-function* quantize(min: number, max: number, step: number) {
+function* quantize(
+  min: number,
+  max: number,
+  step: number,
+  subdivisions: number
+): Generator<[number, boolean]> {
   step = Math.abs(step);
 
-  if (step === 0) {
+  if (step === 0 || subdivisions === 0) {
     return;
   }
 
-  const start = Math.ceil(min / step) * step;
-  const end = Math.floor(max / step) * step;
-  for (let value = start; value <= end; value += step) {
-    yield value;
+  step /= subdivisions;
+
+  const start = Math.ceil(min / step);
+  const end = Math.floor(max / step);
+  for (let i = start; i <= end; i++) {
+    yield [i * step, i % subdivisions != 0];
   }
 }
 
@@ -35,8 +42,8 @@ export const grid = {
         evaluate: () => new BoolValue(true),
       },
       {
-        name: "axis_step",
-        evaluate: () => new Vec2(1, 1),
+        name: "subdivisions",
+        evaluate: () => new Vec2(5, 5),
       },
       {
         name: "#plot:item",
@@ -44,20 +51,25 @@ export const grid = {
           const color = evaluate("color").as(Vec3);
           const step = evaluate("step").as(Vec2);
           const axis = evaluate("axis").as(BoolValue);
-          const axis_step = evaluate("axis_step").as(Vec2);
+          const subdivisions = evaluate("subdivisions").as(Vec2);
 
           return new PlotItem(({ canvas, context, viewport }) => {
-            context.strokeStyle = color.toCssColor(0.38);
+            const stepColor = color.toCssColor(0.38);
+            const substepColor = color.toCssColor(0.14);
+
             context.lineWidth = 1;
 
             // horizontal lines
             if (step.x != 0) {
-              for (let y of quantize(
+              for (let [y, isSubstep] of quantize(
                 viewport.bounds[1],
                 viewport.bounds[3],
-                step.y
+                step.y,
+                subdivisions.y
               )) {
                 const pixelY = viewport.toPixels(0, y).y;
+
+                context.strokeStyle = isSubstep ? substepColor : stepColor;
 
                 context.beginPath();
                 context.moveTo(0, pixelY);
@@ -68,12 +80,15 @@ export const grid = {
 
             // vertical lines
             if (step.y != 0) {
-              for (let x of quantize(
+              for (let [x, isSubstep] of quantize(
                 viewport.bounds[0],
                 viewport.bounds[2],
-                step.x
+                step.x,
+                subdivisions.x
               )) {
                 const pixelX = viewport.toPixels(x, 0).x;
+
+                context.strokeStyle = isSubstep ? substepColor : stepColor;
 
                 context.beginPath();
                 context.moveTo(pixelX, 0);
@@ -85,8 +100,8 @@ export const grid = {
             if (axis.value) {
               const origin = viewport.toPixels(0, 0);
 
-              context.strokeStyle = color.toCssColor(0.6);
-              context.lineWidth = 2;
+              context.strokeStyle = color.toCssColor(0.87);
+              context.fillStyle = color.toCssColor(0.87);
 
               if (step.x != 0) {
                 context.beginPath();
@@ -102,46 +117,51 @@ export const grid = {
                 context.stroke();
               }
 
-              context.strokeStyle = color.toCssColor(0.6);
-              context.fillStyle = color.toCssColor(0.38);
-              context.lineWidth = 2;
-
               const oldFont = context.font;
-              context.font = "0.9em verdana";
+              context.font = "italic 0.6em math";
+
+              context.textAlign = "center";
+              context.textBaseline = "top";
 
               // X markers
-              for (let x of quantize(
+              for (let [x, _] of quantize(
                 viewport.bounds[0],
                 viewport.bounds[2],
-                axis_step.x
+                step.x,
+                1
               )) {
                 const pixelX = viewport.toPixels(x, 0).x;
+                const zeroOffset = x == 0 ? -8 : 0;
 
-                context.beginPath();
-                context.moveTo(pixelX, origin.y - 4);
-                context.lineTo(pixelX, origin.y + 4);
-                context.stroke();
-
-                context.fillText(x.toString(), pixelX + 8, origin.y - 8);
+                context.fillText(
+                  x.toString(),
+                  pixelX + zeroOffset,
+                  origin.y + 2
+                );
               }
 
+              context.textAlign = "right";
+              context.textBaseline = "middle";
+
               // Y markers
-              for (let y of quantize(
+              for (let [y, _] of quantize(
                 viewport.bounds[1],
                 viewport.bounds[3],
-                axis_step.y
+                step.y,
+                1
               )) {
+                if (y == 0) {
+                  continue;
+                }
+
                 const pixelY = viewport.toPixels(0, y).y;
 
-                context.beginPath();
-                context.moveTo(origin.x - 4, pixelY);
-                context.lineTo(origin.x + 4, pixelY);
-                context.stroke();
-
-                context.fillText(y.toString(), origin.x + 8, pixelY - 8);
+                context.fillText(y.toString(), origin.x - 2, pixelY);
               }
 
               context.font = oldFont;
+              context.textAlign = "start";
+              context.textBaseline = "alphabetic";
             }
           });
         },
