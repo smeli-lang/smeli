@@ -74,6 +74,8 @@ export const vector = {
             const arrowRight = rotateScale(direction, -arrowAngle, arrowLength);
 
             context.fillStyle = color.toCssColor(1.0);
+            context.lineCap = "round";
+            context.lineJoin = "round";
 
             // starting point
             context.beginPath();
