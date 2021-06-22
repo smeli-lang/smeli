@@ -41,11 +41,11 @@ export const polygon = {
       },
       {
         name: "point6",
-        evaluate: () => new Vec2(-1.0, 0.3),
+        evaluate: () => new NumberValue(0),
       },
       {
         name: "point7",
-        evaluate: () => new Vec2(0.4, 0.2),
+        evaluate: () => new NumberValue(0),
       },
       {
         name: "point8",
