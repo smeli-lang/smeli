@@ -70,6 +70,8 @@ export const angle = {
             const startAngle = Math.atan2(edge0.y, edge0.x);
             const endAngle = Math.atan2(edge1.y, edge1.x);
 
+            const size = 24;
+
             context.strokeStyle = color.toCssColor(0.83);
             context.fillStyle = color.toCssColor(0.38);
             context.lineWidth = 2;
@@ -83,8 +85,6 @@ export const angle = {
 
               normalize(edge0);
               normalize(edge1);
-
-              const size = 16;
 
               const corners = [
                 {
@@ -114,7 +114,7 @@ export const angle = {
               context.arc(
                 pixelPoints[1].x,
                 pixelPoints[1].y,
-                32,
+                size,
                 startAngle,
                 endAngle
               );
@@ -146,8 +146,8 @@ export const angle = {
                   0.5;
 
               const textPosition = {
-                x: pixelPoints[1].x + Math.cos(midAngle) * 64,
-                y: pixelPoints[1].y + Math.sin(midAngle) * 64,
+                x: pixelPoints[1].x + Math.cos(midAngle) * size * 2,
+                y: pixelPoints[1].y + Math.sin(midAngle) * size * 2,
               };
 
               context.textAlign = "center";
