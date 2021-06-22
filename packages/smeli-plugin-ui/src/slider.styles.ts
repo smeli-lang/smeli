@@ -10,7 +10,7 @@ export const sliderStyles = (theme: Theme) => ({
     display: "block",
     "box-sizing": "border-box",
     margin: 0,
-    padding: "2px",
+    padding: "1px",
     width: "100%",
     height: "32px",
     "min-height": "32px",
@@ -28,7 +28,7 @@ export const sliderStyles = (theme: Theme) => ({
 
     "&.override": {
       background: theme.colors.on_background.toCssColor(0.1),
-      border: "2px solid " + theme.colors.secondary.toCssColor(1),
+      border: "1px solid " + theme.colors.secondary.toCssColor(1),
       padding: 0,
     },
 
@@ -45,18 +45,16 @@ export const sliderStyles = (theme: Theme) => ({
       "-webkit-appearance": "none",
 
       background: theme.colors.secondary.toCssColor(),
-      "box-shadow": "0px 2px 2px #0004",
       "box-sizing": "border-box",
       width: "32px",
       height: "32px",
-      "margin-top": "-15px",
+      margin: "-16px 0px 0px 0px",
       "border-radius": "16px",
       border: "none",
     },
 
     "&::-moz-range-thumb": {
       background: theme.colors.secondary.toCssColor(),
-      "box-shadow": "0px 0px 2px #0004",
       "box-sizing": "border-box",
       width: "32px",
       height: "32px",
@@ -64,19 +62,29 @@ export const sliderStyles = (theme: Theme) => ({
       border: "none",
     },
 
+    // thumb hover
+    "&::-webkit-slider-thumb::hover": {
+      opacity: 0.87,
+    },
+
+    "&::-moz-range-thumb::hover": {
+      opacity: 0.87,
+    },
+
     // track
     "&::-webkit-slider-runnable-track": {
       background: theme.colors.on_background.toCssColor(0.6),
-      height: "2px",
-      "box-shadow": "0px 2px 2px #0002",
+      height: "1px",
+      "box-shadow": "0px 2px 2px " + theme.colors.on_background.toCssColor(0.1),
       "border-radius": "2px",
     },
 
     "&::-moz-range-track": {
       background: theme.colors.on_background.toCssColor(0.6),
-      height: "2px",
-      "box-shadow": "0px 2px 2px #0002",
+      height: "1px",
+      "box-shadow": "0px 2px 2px " + theme.colors.on_background.toCssColor(0.1),
       "border-radius": "2px",
+      margin: "0px 16px",
     },
   },
 
