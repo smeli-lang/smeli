@@ -36,11 +36,8 @@ export const label = {
           return new PlotItem(({ canvas, context, viewport }) => {
             const pixelPosition = viewport.toPixels(position.x, position.y);
 
-            const boldPrefix = "bold ";
-
             context.textAlign = "center";
             context.textBaseline = "middle";
-            context.font = boldPrefix + context.font;
 
             context.fillStyle = color.toCssColor(0.83);
             context.fillText(text.value, pixelPosition.x, pixelPosition.y);
@@ -48,7 +45,6 @@ export const label = {
             // restore defaults
             context.textAlign = "start";
             context.textBaseline = "alphabetic";
-            context.font = context.font.substr(boldPrefix.length);
           });
         },
       },

@@ -137,7 +137,7 @@ export const view = {
               ) as CanvasRenderingContext2D;
 
               // initial context setup
-              context.font = "1.2em verdana";
+              context.font = "italic bold 1.0em math";
 
               // clear everything
               context.clearRect(0, 0, pixelSize.x, pixelSize.y);

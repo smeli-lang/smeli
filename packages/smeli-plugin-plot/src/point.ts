@@ -65,12 +65,16 @@ export const point = {
             }
 
             if (label.value != "") {
+              context.textAlign = "end";
+
               context.fillStyle = color.toCssColor(0.83);
               context.fillText(
                 label.value,
-                pixelPosition.x + 16,
-                pixelPosition.y - 16
+                pixelPosition.x - 4,
+                pixelPosition.y - 4
               );
+
+              context.textAlign = "start";
             }
           });
         },
