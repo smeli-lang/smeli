@@ -43,8 +43,9 @@ img {
 nav {
   flex: 0;
   /*background: #8b492e;*/
-  background-color: rgb(19, 3, 3);
+  /*background-color: rgb(19, 3, 3);*/
   /*background-color: rgb(8, 4, 3);*/
+  background-image: linear-gradient(90deg, rgb(8, 4, 3), rgb(19, 3, 3));
   font-weight: bold;
 
   display: flex;
