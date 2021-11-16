@@ -5,7 +5,7 @@
 # }
 
 dark_toggle: ui.slider {
-  label: "darkness"
+  label: "Dark Mode"
   min: 0
   max: 1
   step: 1
@@ -32,7 +32,7 @@ ui: ui {
       item1: ui.textbox {
         text: "Welcome to the widgets demo!
         
-        Multiline text works kinda by accident, you know, like the parser is not finished :D"
+        Multiline text kinda works, but in a fairly hacky way for now ;)"
       }
       item2: ui.surface {
         item0: slider_template {}
