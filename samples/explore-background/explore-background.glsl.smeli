@@ -1,0 +1,93 @@
+precision highp float;
+
+@inline("classicnoise3D.glsl")
+
+uniform float time;
+uniform vec2 resolution;
+
+varying vec2 uv;
+
+vec2 rotate(vec2 pos, float angle)
+{
+  float c = cos(angle);
+  float s = sin(angle);
+  return mat2(c, s, -s, c) * pos;
+}
+
+float vmax(vec2 v)
+{
+  return max(v.x, v.y);
+}
+
+float fbm(vec2 pos)
+{
+  float value = 0.0;
+
+  float scale = 0.01;
+  float weight = 0.5;
+  for (int i = 0; i < 8; i++)
+  {
+    value += cnoise(vec3(pos * scale, time * 0.24 * weight)) * weight;
+    scale *= 1.7;
+    weight *= 0.7;
+  }
+
+  return value;
+}
+
+float box(vec2 uv, vec2 size)
+{
+  vec2 offset = abs(uv) - size;
+  return length(max(offset, 0.0)) + vmax(min(offset, 0.0));
+}
+
+float arrow(vec2 uv)
+{
+  uv.y -= 0.2;
+
+  float body = box(uv, vec2(0.2, 0.03));
+
+  uv.x += 0.2;
+
+  body = min(body, length(uv) - 0.03);
+
+  vec2 uv2 = rotate(uv, 0.7);
+  uv2.x -= 0.12;
+
+  body = min(body, box(uv2, vec2(0.12, 0.03)));
+
+  uv2 = rotate(uv, -0.7);
+  uv2.x -= 0.12;
+
+  body = min(body, box(uv2, vec2(0.12, 0.03)));
+
+  return body;
+}
+
+void main()
+{
+  float noise = fbm(gl_FragCoord.xy);
+  noise = noise * 0.5 + 0.5;
+
+  float threshold = smoothstep(noise + 0.2, noise - 0.2, gl_FragCoord.x / 256.0);
+
+  float arr = arrow(uv);
+  float arrowBorder = 0.01;
+  //arr += (noise - 0.5) * smoothstep(arrowBorder, -arrowBorder, arr) * smoothstep(-arrowBorder, arrowBorder, arr) * 10.8;
+  //arr = smoothstep(0.01, -0.01, arr);
+
+  arr = smoothstep(noise * 0.1, -noise * 0.1, arr);
+
+  threshold = max(threshold, arr);
+
+  threshold = pow(threshold, 4.0);
+
+  float fade = smoothstep(0.2, 0.4, noise) * 0.4 + 0.2;
+
+  vec3 color = vec3(8.0, 4.0, 3.0) / 255.0;
+  vec3 background = mix(vec3(0.9, 0.87, 0.8), vec3(1.0), uv.y - fade);
+
+  color = mix(background, color, threshold);
+
+  gl_FragColor = vec4(color, 1.0);
+}

@@ -1,0 +1,7 @@
+@plugin("@smeli/plugin-ui")
+
+ui: ui {
+  page: ui.shader {
+    code: "@inline("explore-background.glsl")"
+  }
+}
