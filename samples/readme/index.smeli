@@ -1,5 +1,6 @@
 @plugin("@smeli/plugin-ui")
 @plugin("@smeli/plugin-plot")
+@plugin("@smeli/plugin-katex")
 
 # Switch to dark theme
 ui: ui {
@@ -7,45 +8,72 @@ ui: ui {
 }
 
 # Let's start with a simple sine expression
-x: 42
+x: -0.4
 f: x => sin(1 - x)
 
-## Add a slider to tweak the x value
+formula_panel: katex.formula {
+  code: katex.transpile(&f)
+}
+
+ui: ui {
+  page: ui.stack {
+    item0: formula_panel
+    item1: ui.outline
+  }
+}
+
+#> Add a plot view
+f_plot: plot.view {
+  viewport: viewport {
+    size: vec2(4, 6)
+  }
+  item0: plot.grid {}
+  item1: plot.function {
+    function: f
+  }
+  item2: plot.point {
+    position: vec2(x, f(x))
+    label: "(x, f(x))"
+    color: ui.theme.colors.secondary * 1.2
+    guides: true
+  }
+}
+
+ui: ui {
+  page: ui.surface {
+    direction: "column"
+    item0: ui.stack {
+      item0: ui.surface {
+        direction: "column"
+        elevation: -2
+        item0: f_plot
+      }
+      item1: ui.outline
+    }
+    item1: ui.surface {
+      flex: 0
+      item0: formula_panel
+    }
+  }
+}
+
+##> Add a slider to tweak the x value
 x_slider: ui.slider {
   min: -1
   max: 1
   step: 0.01
-  value: 0.4
+  value: x
 }
 x: x_slider.value
 
-## Display the slider and a plot
 ui: ui {
-  page: ui.surface {
-    item0: ui.outline
-    item1: ui.surface {
-      direction: "column"
-      elevation: -2
-      item0: plot.view {
-        viewport: viewport {
-          size: vec2(4, 6)
-        }
-        item0: plot.grid {}
-        item1: plot.function {
-          function: f
-        }
-        item2: plot.point {
-          position: vec2(x, f(x))
-          label: "(x, f(x))"
-        }
-      }
-      item1: ui.surface {
-        flex: 0
-        item0: x_slider
-      }
+  page: page {
+    item2: ui.surface {
+      flex: 0
+      item0: x_slider
     }
   }
 }
 
 #> Now let's show another expression
-f: x => x * x
+f: x => pow(x, 3)

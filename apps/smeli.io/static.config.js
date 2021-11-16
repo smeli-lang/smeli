@@ -35,6 +35,11 @@ export default {
         description: "Graph toolkit",
       },
       {
+        name: "readme",
+        title: "README",
+        description: "Example from project README",
+      },
+      {
         name: "shaders",
         title: "Shaders",
         description: "GLSL shaders embedding",
