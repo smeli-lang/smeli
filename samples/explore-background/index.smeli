@@ -1,7 +1,13 @@
 @plugin("@smeli/plugin-ui")
 
 ui: ui {
+  theme: theme {
+    background_opacity: 0
+  }
   page: ui.shader {
     code: "@inline("explore-background.glsl")"
+    uniforms: {
+      alpha: animate(0, 1, 8)
+    }
   }
 }

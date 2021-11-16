@@ -5,6 +5,8 @@ precision highp float;
 uniform float time;
 uniform vec2 resolution;
 
+uniform float alpha;
+
 varying vec2 uv;
 
 vec2 rotate(vec2 pos, float angle)
@@ -69,7 +71,8 @@ void main()
   float noise = fbm(gl_FragCoord.xy);
   noise = noise * 0.5 + 0.5;
 
-  float threshold = smoothstep(noise + 0.2, noise - 0.2, gl_FragCoord.x / 256.0);
+  float xoffset = smoothstep(0.0, 1.0, alpha) * 256.0;
+  float threshold = smoothstep(noise + 0.2, noise - 0.2, gl_FragCoord.x / xoffset);
 
   float arr = arrow(uv);
   float arrowBorder = 0.01;
@@ -89,5 +92,5 @@ void main()
 
   color = mix(background, color, threshold);
 
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = vec4(color, alpha * alpha + threshold * step(gl_FragCoord.x, 300.0));
 }

@@ -1,3 +1,24 @@
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.8);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-text {
+  from {
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+  to {
+  }
+}
+
 .sample-list {
   background-color: rgb(8, 4, 3);
   color: #fff;
@@ -93,16 +114,21 @@
 .explore h1 {
   opacity: 0.83;
   font-size: 4em;
+  animation: fade-in-text ease-out 2s backwards;
 }
 
 .explore h2 {
   opacity: 0.83;
+  animation: fade-in-text ease-out 2s backwards;
+  animation-delay: 1.5s;
 }
 
 .explore p {
   opacity: 0.6;
   font-weight: bold;
   font-size: 1.8em;
+  animation: fade-in-text ease-out 2s backwards;
+  animation-delay: 0.5s;
 }
 
 .explore ul {
@@ -120,7 +146,7 @@
 
 .explore a {
   display: block;
-  background-color: #fff;
+  background-color: rgb(8, 4, 3);
   width: 256px;
   height: 256px;
 
@@ -130,11 +156,24 @@
   position: relative;
 
   transition: transform 0.2s, box-shadow 0.2s;
+  animation: fade-in ease-out 2s backwards;
 }
 
 .explore a:hover {
   transform: translateY(-4px);
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+.explore li:nth-child(1) a {
+  animation-delay: 2s;
+}
+
+.explore li:nth-child(2) a {
+  animation-delay: 2.5s;
+}
+
+.explore li:nth-child(3) a {
+  animation-delay: 3s;
 }
 
 .explore a h2 {
