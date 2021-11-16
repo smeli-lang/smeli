@@ -1,4 +1,4 @@
-import { useLocation } from "@reach/router";
+/*import { useLocation } from "@reach/router";
 import React from "react";
 
 export default ({}: { path?: string }) => {
@@ -14,3 +14,4 @@ export default ({}: { path?: string }) => {
     </div>
   );
 };
+*/
