@@ -1,0 +1,168 @@
+.sample-list {
+  background-color: rgb(8, 4, 3);
+  color: #fff;
+}
+
+.sample-list ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.sample-list li {
+  margin: 0;
+  padding: 0;
+}
+
+.sample-list a {
+  display: block;
+  margin: 0;
+  padding: 8px 16px;
+  color: #fff;
+}
+
+.sample-list a:hover {
+  background-color: #222;
+}
+
+.sample-list a.selected {
+  background-color: #111;
+}
+
+.sample-list h2 {
+  margin: 16px 16px;
+  padding: 0;
+  font-size: 1.2em;
+  opacity: 0.83;
+  text-align: center;
+}
+
+.sample-list hr {
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.47);
+  margin: 0 64px;
+}
+
+.sample-list h3 {
+  margin: 8px 0px;
+  padding: 0;
+  font-size: 1.1em;
+  color: #fff;
+  opacity: 0.83;
+}
+
+.sample-list p {
+  margin: 0;
+  padding: 0;
+  font-size: 0.9em;
+  opacity: 0.6;
+}
+
+.explore {
+  /*background-image: linear-gradient(rgb(255, 255, 255), rgb(243, 196, 174));*/
+  color: #000;
+
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+
+  text-align: center;
+
+  position: relative;
+
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.explore .background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  z-index: -1;
+}
+
+.explore .spacer {
+  height: 64px;
+}
+
+.explore h1 {
+  opacity: 0.83;
+  font-size: 4em;
+}
+
+.explore h2 {
+  opacity: 0.83;
+}
+
+.explore p {
+  opacity: 0.6;
+  font-weight: bold;
+  font-size: 1.8em;
+}
+
+.explore ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.explore li {
+  margin: 0px 32px;
+  padding: 0;
+}
+
+.explore a {
+  display: block;
+  background-color: #fff;
+  width: 256px;
+  height: 256px;
+
+  box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+
+  position: relative;
+
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.explore a:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+.explore a h2 {
+  margin: 0;
+  padding: 128px 0 12px 0;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.83);
+  font-size: 1.2em;
+  font-weight: bold;
+
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background-image: linear-gradient(rgba(0, 0, 0, 0), rgb(0, 0, 0));
+  border-radius: 0 0 8px 8px;
+
+  transition: color 0.2s;
+}
+
+.explore a:hover h2 {
+  color: rgba(255, 255, 255, 1);
+}
+
+.explore a img {
+  border-radius: 8px;
+  transition: filter 0.2s;
+}
+
+.explore a:hover img {
+  filter: brightness(1.6) contrast(0.9);
+}

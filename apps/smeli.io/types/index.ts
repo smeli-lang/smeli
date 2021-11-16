@@ -1,5 +1,6 @@
-export interface Post {
-  body: string
-  id: number
-  title: string
+export interface Sample {
+  name: string;
+  title: string;
+  description: string;
+  code: string;
 }

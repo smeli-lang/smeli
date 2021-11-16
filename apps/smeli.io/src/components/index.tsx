@@ -1,0 +1,1 @@
+export { SmeliView } from "./SmeliView";

@@ -17,7 +17,6 @@
     "@smeli/plugin-plot": "0.0.1",
     "@smeli/plugin-ui": "0.0.1",
     "@reach/router": "^1.2.1",
-    "axios": "^0.19.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0"
   },

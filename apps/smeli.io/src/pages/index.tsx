@@ -1,18 +1,14 @@
-import React from 'react'
+import React from "react";
+import { Link } from "@reach/router";
 
 export default () => (
-  <div style={{ textAlign: 'center' }}>
-    <h1>
-      Welcome to React-Static <br /> + TypeScript
-    </h1>
+  <div style={{ textAlign: "center" }}>
     <p>
-      Learn{' '}
-      <a href="https://github.com/sw-yx/react-typescript-cheatsheet">
-        React + TypeScript
-      </a>
+      <img src="/images/logo.svg" alt="Smeli" />
     </p>
     <p>
-      <a href="https://twitter.com/swyx">Report issues with this template</a>
+      Checkout the <Link to="/samples">Samples</Link> or{" "}
+      <a href="https://github.com/smeli-lang/smeli">GitHub Project</a>
     </p>
   </div>
-)
+);
