@@ -15,15 +15,24 @@ export default () => {
     useRouteData();
 
   return (
-    <div style={{ display: "flex", flexDirection: "row", flex: 1 }}>
+    <div className={"sample-page" + (currentSample ? "" : " display-menu")}>
       <div className="sample-list">
-        <h2>Samples</h2>
+        <h2>
+          {currentSample ? (
+            <>
+              <Link to="/samples">Samples</Link>
+              {` > ${currentSample.title}`}
+            </>
+          ) : (
+            "All Samples"
+          )}
+        </h2>
         <hr />
         <ul>
           {samples.map((sample) => (
             <li key={sample.name}>
               <Link
-                to={`/samples/${sample.name}/`}
+                to={`/samples/${sample.name}`}
                 className={
                   currentSample && sample.name === currentSample.name
                     ? "selected"
@@ -45,8 +54,8 @@ export default () => {
             <SmeliView code={background.code} />
           </div>
           <div>
-            <h1>Explore</h1>
-            <p>Use the menu on your left to browse samples.</p>
+            <h1>Explore Samples</h1>
+            <p>Use the left panel to browse samples.</p>
           </div>
           <div className="spacer" />
           <div>
