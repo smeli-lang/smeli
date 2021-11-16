@@ -3,7 +3,9 @@ import { Theme } from "./theme";
 export const containerStyles = (theme: Theme) => ({
   "--fluid-ratio": "calc((100vw - 300px) / 700)",
 
-  "background-color": theme.colors.background.toCssColor(),
+  "background-color": theme.colors.background.toCssColor(
+    theme.background_opacity.value
+  ),
   color: theme.colors.on_background.toCssColor(),
   "font-family": "verdana",
   "font-size": "clamp(16px, calc(16px + 8 * var(--fluid-ratio)), 24px)",

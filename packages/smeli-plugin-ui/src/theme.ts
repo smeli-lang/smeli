@@ -1,5 +1,6 @@
 import {
   BoolValue,
+  NumberValue,
   currentEvaluationContext,
   evaluate,
   Scope,
@@ -8,6 +9,7 @@ import {
 
 export type Theme = {
   is_dark: BoolValue;
+  background_opacity: NumberValue;
 
   colors: {
     background: Vec3;
@@ -24,6 +26,7 @@ export const themeCode = `
   default_themes: {
     light: {
       is_dark: false
+      background_opacity: 1
 
       colors: {
         background: color_from_hex("#ffffff")
@@ -38,6 +41,7 @@ export const themeCode = `
 
     dark: {
       is_dark: true
+      background_opacity: 1
 
       colors: {
         background: color_from_hex("#121212")
@@ -62,6 +66,7 @@ export function evaluateTheme(): Theme {
     .as(Scope)
     .evaluateNested({
       is_dark: BoolValue,
+      background_opacity: NumberValue,
 
       colors: {
         background: Vec3,
