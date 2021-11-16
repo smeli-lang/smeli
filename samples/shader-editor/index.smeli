@@ -13,6 +13,7 @@ ui: ui {
       code: item0.code
       uniforms: {
         primary: ui.theme.colors.primary
+        secondary: ui.theme.colors.secondary
       }
     }
   }
