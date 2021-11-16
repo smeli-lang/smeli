@@ -281,7 +281,7 @@ export const shader = {
               context.loadProgram(vertexShaderCode, code.value);
               errors.innerHTML = "";
               errors.style.opacity = "0";
-            } catch (error) {
+            } catch (error: any) {
               errors.innerHTML = error.message.replace("\n", "<br />");
               errors.style.opacity = "1";
               return result;

@@ -39,7 +39,7 @@ export const formula = {
             const katexRoot = element.querySelector(".katex") as HTMLElement;
             katexRoot.classList.add("important");
             katexRoot.style.fontSize = size.value + "em";
-          } catch (error) {
+          } catch (error: any) {
             element.innerHTML = "<p>" + error.message + "</p>";
             element.classList.add("normal");
           }

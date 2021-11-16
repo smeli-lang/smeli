@@ -157,7 +157,7 @@ export class CacheEntry {
             this.value = result;
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         // clear out any owned values
         const disposables = stage.disposables;
         for (const value of disposables.reverse()) {
@@ -352,7 +352,7 @@ export class Cache {
           expressionOnly,
           name
         );
-      } catch (error) {
+      } catch (error: any) {
         const debugName = name || "[anonymous evaluator]";
 
         // append debug info for this call

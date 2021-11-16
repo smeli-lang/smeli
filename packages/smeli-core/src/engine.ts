@@ -137,7 +137,7 @@ export class Engine {
       // evaluate all the side effects
       // (things referenced from the cache root will not be garbage collected)
       evaluateRoot(this.rootEvaluator, this.globalScope);
-    } catch (error) {
+    } catch (error: any) {
       let message = error.message + "\n";
       if (error.smeliStack) {
         message += error.smeliStack
