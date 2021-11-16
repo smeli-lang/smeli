@@ -39,7 +39,7 @@ Each line is a step in your reasoning process, and because reasoning is an itera
 Let's look at a more comprehensive example:
 
 ![Code sample](assets/readme-sample.png)
-([full version](https://github.com/smeli-lang/smeli/tree/master/samples/readme))
+([live version](https://smeli.io/samples/readme)) ([source](https://github.com/smeli-lang/smeli/blob/master/samples/readme/index.smeli))
 
 You may have noticed the special _marker comment_, starting with `#>`. This can be used to control execution flow.
 
