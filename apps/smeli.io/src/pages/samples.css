@@ -23,20 +23,27 @@
   display: flex;
   flex-direction: row;
   flex: 1;
+  overflow: hidden;
 }
 
 .sample-list {
   background-color: rgb(8, 4, 3);
   color: #fff;
+
+  display: flex;
+  flex-direction: column;
 }
 
 .sample-list ul {
+  display: block;
   margin: 0;
   padding: 0;
   list-style-type: none;
+  overflow-y: auto;
 }
 
 .sample-list li {
+  display: block;
   margin: 0;
   padding: 0;
 }
@@ -189,7 +196,7 @@
 
 .explore a h2 {
   margin: 0;
-  padding: 128px 0 12px 0;
+  padding: 100px 0 12px 0;
   text-align: center;
   color: rgba(255, 255, 255, 0.83);
   font-size: 1.2em;
@@ -217,7 +224,59 @@
   filter: brightness(1.6) contrast(0.9);
 }
 
-@media (orientation: portrait) {
+@media (min-width: 768px) {
+  .content {
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 1280px) and (min-width: 768px) {
+  .sample-page {
+    --explore-scale: clamp(
+      min(calc((100vw - 768px) / 512), calc((100vh - 400px) / 400)),
+      0px,
+      1px
+    );
+  }
+
+  .sample-list,
+  .sample-list {
+    font-size: calc(12px + 4 * var(--explore-scale));
+  }
+
+  .sample-list li a {
+    --padding-basis: calc(4px + 4 * var(--explore-scale));
+    padding: calc(var(--padding-basis)) calc(var(--padding-basis) * 2);
+  }
+
+  .explore {
+    padding-left: 64px;
+  }
+
+  .explore h1 {
+    font-size: calc(48px + 16 * var(--explore-scale));
+  }
+
+  .explore .spacer {
+    height: calc(64 * var(--explore-scale));
+  }
+
+  .explore p {
+    font-size: calc(20px + 8.8 * var(--explore-scale));
+  }
+
+  .explore li {
+    margin: 0px calc(8px + 24 * var(--explore-scale));
+  }
+
+  .explore a {
+    --img-size: calc(128px + 128 * var(--explore-scale));
+    width: calc(var(--img-size));
+    height: calc(var(--img-size));
+  }
+}
+
+@media (max-width: 768px) {
   .sample-page {
     flex-direction: column;
   }
@@ -246,12 +305,21 @@
     margin: 16px 8px;
   }
 
+  .explore {
+    padding-left: 0;
+  }
+
   .explore ul {
     flex-direction: column;
   }
 
   .explore li {
     margin: 16px 0px;
+  }
+
+  .explore a {
+    width: 256px;
+    height: 256px;
   }
 
   .explore h2 {
@@ -267,5 +335,18 @@
 
   .explore li:nth-child(3) a {
     animation-delay: 2.5s;
+  }
+}
+
+@media (max-height: 600px) {
+  .explore p,
+  .explore .spacer,
+  .highlights > h2 {
+    display: none;
+  }
+
+  .explore h1 {
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
   }
 }

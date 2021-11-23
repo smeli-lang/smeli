@@ -92,5 +92,5 @@ void main()
 
   color = mix(background, color, threshold);
 
-  gl_FragColor = vec4(color, alpha * alpha + threshold * step(gl_FragCoord.x, 300.0));
+  gl_FragColor = vec4(color, alpha * alpha + threshold * step(gl_FragCoord.x, 200.0));
 }

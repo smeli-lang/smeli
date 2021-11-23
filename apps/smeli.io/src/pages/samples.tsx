@@ -58,9 +58,9 @@ export default () => {
             <p>Use the left panel to browse samples.</p>
           </div>
           <div className="spacer" />
-          <div>
+          <div className="highlights">
             <h2>Highlights</h2>
-            <ul className="highlights">
+            <ul>
               <li>
                 <Link to="/samples/shaders">
                   <img src="/images/shaders.jpg" />
